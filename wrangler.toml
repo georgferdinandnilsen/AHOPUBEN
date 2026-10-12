@@ -1,0 +1,22 @@
+name = "aho-puben"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# Appen (public/) serveres av samme Worker som API-et: én deploy, samme opprinnelse.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Lager KV-navnerom med: npx wrangler kv namespace create KV  → lim inn id under.
+[[kv_namespaces]]
+binding = "KV"
+id = "SETT_INN_KV_ID"
+
+# Kjører hver hele time. Worker-en regner selv ut Oslo-tid.
+[triggers]
+crons = ["0 * * * *"]
+
+[vars]
+VAPID_SUBJECT = "https://github.com/georgferdinandnilsen/AHOPUBEN"
+# Hemmeligheter settes med: npx wrangler secret put NAVN
+#   NOTION_TOKEN, NOTION_DB_ID, NOTION_SUGGEST_DB_ID, DEEPL_KEY, VAPID_PUBLIC, VAPID_PRIVATE
