@@ -23,9 +23,14 @@ npm run dev
 
 1. **Notion-integrasjon.** Gå til notion.so/profile/integrations, lag en intern integrasjon, kopier token.
    Åpne databasen «Arrangementer» i Notion → `…` → Connections → legg til integrasjonen. Gjør det samme med forslag-databasen.
-   Database-id er de 32 tegnene i URL-en. Arrangementer: `306fc4bc274d803fbcaac5b17542df12`.
-   Appen finner feltene på type, ikke navn: tittel, dato, select (Type), tekst (Beskrivelse), filer (Bilde), tall (Pub-nr). Legg til et filfelt «Bilde» og et tekstfelt «Beskrivelse» hvis de mangler.
-2. **DeepL.** Gratis API-nøkkel på deepl.com/pro-api (500 000 tegn per måned). Nøkler som slutter på `:fx` er gratis-nøkler.
+   Database-id er de 32 tegnene i URL-en: `306fc4bc274d803fbcaac5b17542df12`. Databasen har to datakilder, og appen velger dem selv:
+   - **Arrangementer** (datakilden med datofeltet «Når»). Et arrangement vises i appen hvis det har en dato i «Når» fra i dag og utover, som visningen «Kommende».
+     - **Type:** feltet «Type arrangement» (Aktivitet, DJ og så videre). Typen «Rolig Pub» regnes som vanlig pub uten program.
+     - **Bilde:** feltet «Bilde til APP». Uten bilde brukes et generisk bilde med logoen.
+     - **Info:** feltet «Info til APP». Er feltene tomme, leses bildet og teksten fra selve siden i stedet.
+   - **Forslag** fra appen opprettes i samme datakilde som arrangementene: forslaget som tittel (feltet «Kommende»), «Bestemt» satt til Nei, uten dato og uten type, og «fortell mer» og navn som tekst inne på siden. De vises dermed i visningen «Ideer» og ikke i appen, siden appen krever dato i «Når». Datakilden «New data source» (Name, beskrivelse, nummer, potensiell dato?) brukes ikke av appen.
+   Notion-integrasjonen må være koblet til siden som inneholder databasen (Connections), ellers svarer Notion 404.
+2. **DeepL.** Velg planen Developer (gratis) på deepl.com/pro-api. Den gir en engangskreditt på 1 million tegn, som holder i flere tiår til arrangementstekster. Appen finner selv riktig API-adresse for nøkkelen.
 3. **VAPID-nøkler** for push:
    ```bash
    npm run vapid
@@ -49,6 +54,23 @@ npm run dev
    npm run deploy
    ```
    Adressen blir `https://aho-puben.<konto>.workers.dev`. Eget domene kan legges til i Cloudflare-panelet.
+
+## Medlemsdelen (bartendere)
+
+Nederst i varselmenyen logger medlemmer inn med telefonnummer. Nummeret sjekkes mot MEDLEMMER i Notion, og medlemskapet må ikke være utløpt (feltet «How long do you want to be a member?»). Innloggede får en pille nederst på forsiden som åpner arket:
+
+- **Vakter:** egne vakter fra VAKTPLAN (Åpnevakt 19-22, Stengevakt 22-01), med ansvarlig styremedlem og kolleger med ring-knapp. «Legg alle vakter i kalender» er et kalenderabonnement som følger Notion. Varsel om vakt kl 19 dagen før og én time før.
+- **Manualer:** barnesidene under overskriften HOW-TO på infosiden, vist i appen og oppdatert innen ti minutter.
+- **Meldinger:** meldinger fra styret. Siste melding vises øverst i Vakter-fanen i 48 timer. Under aktiv vakt vises «Obs for kvelden» i stedet.
+
+**Styret:** nummer i STYREMEDLEMMER gir «Send melding» i varselmenyen. Første gang velger man en firesifret styrekode. Meldingen går som push til innloggede medlemmer med varsler på, og ligger i appen for alle innloggede. Loggen viser hvem som sendte hva og hvor mange som har sett.
+
+**Glemt styrekode:** trykk «Nullstill kode» i appen. Lederen åpner KV-lageret i Cloudflare og leser nøkkelen `reset:<styre-id>`, som inneholder en midlertidig kode. Styremedlemmet skriver den inn sammen med en ny kode.
+KV-lageret: https://dash.cloudflare.com/77c55d6b057cc69a033738170492d88b/workers/kv/namespaces/0bfeddb59d4e4152984b31df88491a13
+
+Styremedlemmers navn hentes fra Person-feltet i Styremedlemmer. Det krever at integrasjonen har rettigheten «Read user information without email» (notion.so/profile/integrations → integrasjonen → Capabilities). Uten den vises rollen som navn.
+
+Datakilde-id-ene for medlemsdelen står i `wrangler.toml` under `[vars]`. Integrasjonen må være koblet til MEDLEMMER, STYREMEDLEMMER, VAKTPLAN og infosiden.
 
 ## På iPhone
 

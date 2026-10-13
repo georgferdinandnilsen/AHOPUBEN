@@ -119,3 +119,96 @@ Kode ligger i prosjektmappen. Én Cloudflare Worker serverer appen og API-et (Wo
 Gjenstår for Georg/styret: Notion-integrasjon og deling av databasene, DeepL-nøkkel, VAPID-nøkler, KV-id, deploy. Se README.md.
 
 Mappenavnet «AHO PUBEN APP » har et mellomrom på slutten. `npm --prefix` fjerner det. Kjør kommandoer fra inne i mappen, eller gi mappen nytt navn uten mellomrom.
+
+## Deployet (12.10.2026, kveld)
+
+Live på https://aho-puben.georgferdinandnilsen.workers.dev (Cloudflare-konto georgferdinandnilsen@gmail.com, Worker «aho-puben»). Kjører i eksempelmodus til Notion-token er lagt inn.
+
+Gjort: KV-lager opprettet (id i wrangler.toml), VAPID-nøkler generert og lagret som hemmeligheter (VAPID_PUBLIC, VAPID_PRIVATE), NOTION_DB_ID satt. Cron hver time er aktiv.
+
+Gjenstår: NOTION_TOKEN (Notion-integrasjon, begge databaser delt med den), DEEPL_KEY, NOTION_SUGGEST_DB_ID (id til databasen bak forslagsskjemaet, helst privat), feltene Bilde og Beskrivelse i Arrangementer. Så test på iPhone: Hjem-skjerm, varsler på, send testvarsel.
+
+GitHub Pages på repoet viser bare README og kan skrus av.
+
+## Notion i drift (13.10.2026)
+
+- Datakilder i databasen 306fc4bc…: «ARRANGEMENTER» (felt: Kommende = tittel, Når, Type arrangement, Info til APP, Bilde til APP, Svar, Bestemt, Det skjer!, Innsendt fra app) og en ubrukt datakilde «New data source» (Name, beskrivelse, nummer, potensiell dato?). Visningene Ønsker, Ideer og Ønsker skjema ligger på ARRANGEMENTER; Ideer filtrerer på Bestemt: Nei.
+- Regel for hva som vises i appen: har dato i «Når» fra i dag og utover (som visningen «Kommende»). Rolig Pub-rader er vanlig pub.
+- Forslag fra appen havner i datakilden ARRANGEMENTER (samme som arrangementene): tittel, Bestemt = Nei, ingen dato. Styret lager selv en visning som filtrerer på forslag. Notion API-versjon 2025-09-03 (kreves for flere datakilder).
+- DeepL Developer-nøkkel er lagt inn. Engelsk oversettelse fungerer.
+- Ikke brukt ennå: «Bestemt», «Det skjer!», «Svar», pub-nummer (kobling), «Ansvarlig», «Vakt».
+
+## Justeringer etter første test på iPhone (14.10.2026)
+
+- **Varselvalg** (erstatter de fire forrige): «Samme dag» (3 timer før start, kl 16 når puben åpner 19, eller 3 timer før klokkeslettet i «Når» hvis det er satt), «Dagen før kl 12» og «Mandag kl 12» (starten av arrangementets uke). Standard: Samme dag og Dagen før. Gamle lagrede valg oversettes automatisk. Faller to varsler på samme tidspunkt, sendes det ett.
+- «Neste varsel»-boksen er fjernet. «Kom ikke testvarselet?» ligger rett under testknappen. Forklaringen under Dag og natt er «Solnedgangen i Oslo bytter tema for deg.»
+- **Forslag:** etter innsending går appen rett tilbake til forsiden og viser «Takk!» som forsvinner av seg selv.
+- **Kommende-listen:** pilen er byttet med «+» som legger arrangementet i kalenderen (.ics). Gjelder også vanlige pub-torsdager.
+- **Hvit topplinje i Safari:** temaet settes nå før første tegning og html-bakgrunnen følger temaet, ellers farger Safari statuslinjen hvit mens siden lastes.
+- Ikke oppdatert i Figma-utkastene.
+
+## Medlemsside «Mine vakter» (ønsket 14.10.2026, ikke bygget)
+
+- For bartenderne: innlogging med telefonnummer, liste over egne kommende vakter, «legg alle vakter i kalender», varsel kl 19 dagen før og 1 time før vakt.
+- Notion: VAKTPLAN (306fc4bc274d80629bb9e4bf753fc7d8) har én rad per pubkveld med Dato, PUB NR, Arrangement, Ansvarlig styremedlem, «Åpnevakt (medlemsliste)» (19-21) og «Stengevakt (medlemsliste)» (21-01). MEDLEMMER (306fc4bc274d80b385edd3b81e8f35a0) har Full name, School, Course, Phone, E-mail.
+- Tre alternativer for plassering ligger i Figma, seksjonen «Mine vakter: 3 alternativer» (node 508:2): flytende pille med ark, fane i sidemenyen, stripe øverst med egen side.
+- Åpent: valg av alternativ, og hvor sterk innloggingen skal være. Medlemslisten ligger åpent på ahopub.notion.site med navn, telefon og e-post. Da er telefonnummer alene ikke en hemmelighet. Appen bruker integrasjonen og trenger ikke at noe er offentlig.
+- Integrasjonen må kobles til både MEDLEMMER og VAKTPLAN før dette kan bygges.
+
+## Småendringer 14.10.2026
+
+- Logo + «ARRANGEMENTER» i topplinjen laster siden på nytt.
+- Appen heter nå AHO PUBEN (manifest og Hjem-skjerm-tittel). Varselets tittel er selve beskjeden («Halloween i kveld»), teksten under er klokkeslett og første setning. iOS legger selv til «from <appnavn>».
+- Topplinjen: «ARRANGEMENTER» er byttet med knappen «BLI MEDLEM» (engelsk: JOIN), som åpner innmeldingsskjemaet i Notion (JOIN_URL i index.html). Logoen alene laster siden på nytt. Skjemaet må være delt offentlig for at knappen skal virke.
+
+## Medlemsdelen: bekreftet intensjon (14.10.2026, intervju)
+
+- **Utfall:** «Bartendermodus» i appen, pluss en kanal fra styret til medlemmene.
+- **Bruker:** Medlemmene i baren, styret som sender beskjeder, lederen som håndterer glemte koder.
+- **Hvorfor nå:** Infosiden i Notion er tungvint på mobil, og styret mangler én kanal til alle medlemmer.
+- **Suksess:** En bartender finner neste vakt og låserutinen på under ti sekunder. Styret ser hvor mange som har sett en beskjed.
+- **Rammer:** Samme Worker, ingen nye tjenester. Integrasjonen kobles til MEDLEMMER (306fc4bc274d80b385edd3b81e8f35a0), STYREMEDLEMMER (306fc4bc274d80df82ddea8c853c4b65), VAKTPLAN (306fc4bc274d80629bb9e4bf753fc7d8) og infosiden (306fc4bc274d800493aaf22d1526a320). Telefonnumre forlater aldri Worker-en. Medlemslisten tas av nett.
+- **Utenfor scope:** Vaktbytte i appen, hele vaktplanen for alle, SMS, e-post, redigering av Notion fra appen.
+
+Funksjoner:
+1. Innlogging med telefonnummer mot MEDLEMMER. Aktiv = medlemsdatoen («How long do you want to be a member?») ikke passert. Forblir innlogget, med «Logg ut».
+2. Mine vakter fra VAKTPLAN: Åpnevakt 19-22 og Stengevakt 22-01 (kolonnene «Åpnevakt (medlemsliste)» og «Stengevakt (medlemsliste)»), med arrangement, kolleger, ansvarlig styremedlem og «Noe å være obs på for kvelden».
+3. Alle vakter i kalender (én .ics), pluss «+» per vakt.
+4. Varsel om vakt kl 19 dagen før og én time før (kl 18 / kl 21). Egen bryter.
+5. Manualene (ti how-to-sider), engelsk del og «Siste nytt» fra infosiden, hentet via API og vist i appen, oppdatert innen ti minutter.
+6. Styremelding: styremedlem (nummer i STYREMEDLEMMER) setter egen firesifret kode ved første innlogging. Mottakere: alle aktive medlemmer, eller de med kommende/pågående vakt. Push + melding øverst på medlemssiden. Avsender ser «X av Y har sett» (sett = åpnet i appen). Glemt kode: nullstill, lederen henter ny midlertidig kode i Cloudflare.
+7. Plassering: flytende pille med ark (Figma alt 1), bare for innloggede. Andre ser «Bartender? Logg inn» nederst.
+
+Neste: tre forslag til selve medlemsmenyen i Figma før koding.
+
+## Medlemsdelen: valgt design (14.10.2026)
+
+Figma: seksjonen «Medlemsdel: valgt» (node 518:2). De to andre forslagssettene er flyttet til arkiv lengst til høyre på siden, ikke slettet.
+
+- Innlogging ligger nederst i varselmenyen (telefonnummer, «Logg inn»). Innlogget viser navn, «Logg ut», og for styremedlemmer «Send melding».
+- Pillen på forsiden vises bare etter innlogging. Den viser neste vakt og åpner arket.
+- Arket har faner: Vakter (siste styremelding øverst, neste vakt, kommende vakter, «Legg alle vakter i kalender», varsel om vakt, Logg ut), Manualer (ti how-to fra Notion + engelsk), Meldinger (alle styremeldinger, nyeste øverst; åpning teller som «sett»).
+- Kalender: «Legg alle vakter i kalender» er et kalenderabonnement (webcal) som følger Notion. Ingen duplikater, og endringer i vaktplanen slår inn i kalenderen. Derfor ingen «+» per vakt.
+- «Send melding» og styrekode som godkjent.
+- Figma-utkastene viser fortsatt «ARRANGEMENTER» i topplinjen; appen har «BLI MEDLEM».
+- Når medlemsdelen er bygget: Georg skal ha lenke til stedet i Cloudflare der nullstilte styrekoder ligger.
+
+### Tillegg 14.10.2026 (Figma-rammer 9, 10, 11 i «Medlemsdel: valgt»)
+
+- **Vaktdetalj.** Trykk på en vakt åpner detaljer: ansvarlig styremedlem, dem du jobber med, og stengevakten samme kveld (for overlevering). Hver person har en ring-knapp (tel:-lenke). Appen gir bare ut numre til personer på samme pubkveld og til ansvarlig styremedlem, aldri hele medlemslisten.
+- **Obs for kvelden trumfer styremelding.** Aktiv vakt = fra én time før start til vakten er over. Da vises «Obs for kvelden» øverst i Vakter-fanen i stedet for styremeldingen, og vakten merkes «Pågående vakt».
+- **48-timers regel.** En styremelding vises øverst i Vakter-fanen i 48 timer etter sending. Etter det finnes den bare i Meldinger-fanen.
+- **Meldingslogg for styret.** «Se logg» under «Send melding». Viser tidspunkt, avsender, mottakergruppe, tekst og «sett». Kan ikke slettes fra appen. Lagres i KV sammen med meldingene.
+- **Sprett på obs.** Hver gang arket («min side») åpnes og det finnes en obs-melding for kvelden, spretter obs-kortet i 1-2 sekunder og ligger så stille: fjær med sprett, demping ca. 0,6, to svingninger. Spiller én gang per åpning. Med prefers-reduced-motion: ett kort blink i stedet.
+- Designet for medlemsdelen er godkjent av Georg 14.10.2026. Bygging kan starte når integrasjonen er koblet til MEDLEMMER, STYREMEDLEMMER, VAKTPLAN og infosiden.
+
+## Medlemsdelen: bygget (14.10.2026)
+
+- `src/members.js`: tolking av MEDLEMMER, Styremedlemmer og VAKTPLAN, mine vakter med kontaktinfo bare for samme kveld, mottakere for styremelding, manualer fra HOW-TO, Notion-blokker til HTML, kalenderabonnement. Testet i `test/members.test.mjs`.
+- `src/memberRoutes.js`: innlogging (økt 180 dager i KV), hjem, manual (bare manualer og sider lenket fra dem), kalender (.ics med token i URL), sett-markering, styrekode (SHA-256 med pepper), nullstilling (nøkkel `reset:<styre-id>` i KV), sending med mottakergruppe, push til innloggede abonnenter, logg. Vaktvarsler i cron (`shiftTick`).
+- Push-abonnementet kobles til medlemmet når man logger inn (memberToken i subscribe). Logg ut kobler fra.
+- Innloggede medlemmer: `/api/member/*`. Styre: `/api/board/*`. Datakilde-id-er i `wrangler.toml`.
+- Eksempelmodus uten Notion-nøkkel: telefon 90000000 = Ferdinand Nilsen (styre), 90000001 = Kari Nordmann.
+- Testet lokalt: innlogging, pille, ark med tre faner, vaktdetalj med ring-knapper, manual, meldinger og sett-telling, styrekode, feil kode, sending til alle og kommende vakt, logg, kalenderfil, 401/403/404-grensene.
+- Ikke testet: ekte medlemsnummer mot Notion (Georg tester), push på telefon, kalenderabonnement på iPhone.
+- 14.10.2026: Innlogging med landskode-velger (kodene som finnes i medlemslisten, +47 først). Numre tolkes uavhengig av mellomrom, bindestrek, parentes, «00» og innledende null etter landskode. Styremedlemmers navn hentes fra Notion-brukeren (krever «Les brukerinformasjon uten e-postadresser» på integrasjonen, slått på 14.10). Infotekst fra Notion vises i hero-feltet. Ekstra bunnplass når pillen vises. Kodefelt viser prikker. Teaser-knappen arver tekstfarge (synlig i lys modus).

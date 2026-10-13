@@ -3,21 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AHO Pub Arrangementer</title>
+<title>AHO PUBEN</title>
 <meta name="description" content="Hva skjer på AHO Puben. Neste arrangement, kalender og varsler.">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="icon" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="AHO Pub">
+<meta name="apple-mobile-web-app-title" content="AHO PUBEN">
 <meta name="theme-color" content="#000000">
+<script>
+// Tema settes før første tegning, ellers farger Safari topplinjen hvit og beholder den.
+function sunTimes(date, lat = 59.91, lng = 10.75) { // SunCalc-formelen, kun opp/ned
+  const rad = Math.PI / 180, J1970 = 2440588, J2000 = 2451545, J0 = 0.0009, e = rad * 23.4397;
+  const d = date.valueOf() / 864e5 - 0.5 + J1970 - J2000, lw = rad * -lng, phi = rad * lat;
+  const n = Math.round(d - J0 - lw / (2 * Math.PI)), ds = J0 + lw / (2 * Math.PI) + n;
+  const M = rad * (357.5291 + 0.98560028 * ds), L = M + rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M)) + rad * 102.9372 + Math.PI;
+  const dec = Math.asin(Math.sin(e) * Math.sin(L)), Jnoon = J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+  const w = Math.acos((Math.sin(-0.833 * rad) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec)));
+  const Jset = J2000 + J0 + (w + lw) / (2 * Math.PI) + n + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+  const fromJ = j => new Date((j + 0.5 - J1970) * 864e5);
+  return { rise: fromJ(Jnoon - (Jset - Jnoon)), set: fromJ(Jset) };
+}
+function applyTheme() {
+  var th = null; try { th = JSON.parse(localStorage.getItem('theme')); } catch (e) {}
+  th = th || 'dark';
+  if (th === 'auto') { var now = new Date(), s = sunTimes(now); th = now < s.rise || now > s.set ? 'dark' : 'light'; }
+  document.documentElement.dataset.theme = th;
+  var m = document.querySelector('meta[name=theme-color]'); if (m) m.content = th === 'dark' ? '#000000' : '#ffffff';
+}
+applyTheme();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#fff;--fg:#000;--muted:#6b6b6b;--line:#e6e6e6;--chip:#cfcfcf;--blue:#0000ff;--blue-soft:#0000ff;--btn-bg:#000;--btn-fg:#fff;--credit:#c4c4c4;--panel:#fff;--scrim:rgba(0,0,0,.3);--grad:255,255,255;--chrome:rgba(255,255,255,.55);--past:#b0b0b0;--outside:#d0d0d0;--field:#cfcfcf;--ph:#8a8a8a}
 [data-theme=dark]{--bg:#000;--fg:#fff;--muted:#8a8a8a;--line:#2a2a2a;--chip:#555;--blue-soft:#6b6bff;--btn-bg:#fff;--btn-fg:#000;--credit:#3a3a3a;--panel:#0d0d0d;--scrim:rgba(0,0,0,.6);--grad:0,0,0;--chrome:rgba(0,0,0,.35);--past:#555;--outside:#333;--field:#555;--ph:#7a7a7a}
+html{background:var(--bg);color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--fg);font:16px/1.45 "Space Grotesk",system-ui,sans-serif;transition:background .3s,color .3s;overscroll-behavior-y:none}
@@ -31,7 +55,9 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 .brand{display:flex;align-items:center;gap:10px}
 .brand img{width:36px;height:36px;border-radius:0}
 [data-theme=dark] .brand img{filter:invert(1)}
-.brand span{font-family:"Archivo Black";font-size:13px;letter-spacing:.02em}
+.brand button{display:flex}
+.join{background:var(--btn-bg);color:var(--btn-fg);font-family:"Archivo Black";font-size:11px;letter-spacing:.04em;padding:8px 11px;text-decoration:none;white-space:nowrap}
+.join:active{transform:scale(.97)}
 .tools{display:flex;align-items:center;gap:14px}
 .lang{display:flex;gap:2px;padding:3px;border:1px solid var(--chip);border-radius:999px}
 .lang button{padding:5px 10px;border-radius:999px;font-weight:700;font-size:12px;letter-spacing:.04em}
@@ -44,16 +70,21 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(var(--grad),.05) 0%,rgba(var(--grad),.12) 50%,rgba(var(--grad),.97) 100%)}
 .hero.noimg::after{display:none}
+.hero.noimg{display:flex;flex-direction:column;padding-top:calc(env(safe-area-inset-top) + 68px)}
+.hero.noimg .genwrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:12px 0}
+.hero.noimg .gen{position:static;height:min(190px,100%);width:auto;aspect-ratio:1;object-fit:contain;transform:rotate(-4deg)}
+.hero.noimg .tx{position:static;padding:0 20px 28px}
 .hero .tx{position:absolute;left:20px;right:20px;bottom:28px;z-index:1;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
 .hero.noimg .tx{color:#fff}
 .chip{display:inline-block;padding:6px 10px;background:var(--blue);color:#fff;font-weight:700;font-size:11px;letter-spacing:.1em}
 .hero.noimg .chip{background:#000}
 .hero h1{font-size:clamp(40px,12vw,50px);line-height:.88;letter-spacing:-.02em;text-transform:uppercase}
 .hero .meta{font-weight:500;font-size:14px;letter-spacing:.04em;opacity:.8;text-transform:uppercase}
-.teaser{margin-top:6px;padding:9px 12px;border:1.5px solid rgba(255,255,255,.7);color:#fff;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;text-align:left}
+.hero .info{font-size:15px;line-height:1.4;max-width:353px;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.teaser{margin-top:6px;padding:9px 12px;border:1.5px solid currentColor;color:inherit;opacity:.9;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;text-align:left}
 /* content */
 .content{padding:24px 20px;display:flex;flex-direction:column;gap:28px}
-.desc{color:var(--fg);opacity:.85}
+.desc{color:var(--fg);opacity:.85;white-space:pre-line}
 .row{display:flex;gap:10px}
 .btn{display:flex;justify-content:center;align-items:center;padding:14px 18px;font-weight:700;font-size:13px;letter-spacing:.06em;text-decoration:none;color:inherit}
 .btn.primary{flex:1;background:var(--btn-bg);color:var(--btn-fg)}
@@ -83,12 +114,14 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 .selcard.empty{border-color:var(--line);color:var(--muted);font-size:14px}
 /* list */
 .list h2{font-size:16px;text-transform:uppercase}
-.item{display:flex;gap:16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.item{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);width:100%}
+.item .sel{flex:1;display:flex;gap:16px;align-items:center;padding:16px 0;text-align:left;min-width:0}
 .item .d{width:62px;flex:none;font-weight:700;font-size:12px;letter-spacing:.02em;color:var(--blue-soft);text-transform:uppercase}
 .item .t{flex:1}
 .item .t b{display:block;font-family:"Archivo Black";font-weight:400;font-size:15px;text-transform:uppercase}
 .item .t span{font-size:12px;color:var(--muted)}
-.item .a{color:var(--muted);font-weight:700}
+.item .plus{flex:none;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--chip);color:var(--fg);font-weight:700;font-size:22px;line-height:1;text-decoration:none}
+.item .plus:active{transform:scale(.94)}
 .cta{display:block;width:100%;text-align:left;background:var(--blue);color:#fff;padding:20px}
 .cta b{display:block;font-family:"Archivo Black";font-weight:400;font-size:20px}
 .cta span{font-weight:500;font-size:14px;opacity:.85}
@@ -116,10 +149,6 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 .chips button.on{background:var(--blue);border-color:var(--blue);color:#fff}
 .chips.half button{flex:1}
 .opt{font-weight:500;font-size:14px}
-.next{border:1.5px solid var(--blue);padding:12px 14px;display:flex;flex-direction:column;gap:3px}
-.next .k{font-weight:500;font-size:10px;letter-spacing:.08em;color:var(--blue-soft)}
-.next b{font-family:"Archivo Black";font-weight:400;font-size:15px}
-.next span{font-size:12px;color:var(--muted)}
 .test{border:1px solid var(--chip);padding:11px;font-weight:700;font-size:12px;letter-spacing:.06em;text-align:center}
 .hint{font-size:12px;color:var(--muted)}
 .info{border:1px solid var(--line);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
@@ -144,14 +173,85 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 .send{background:var(--blue);color:#fff;padding:18px;font-family:"Archivo Black";font-size:14px;letter-spacing:.04em;width:100%}
 .send[disabled]{opacity:.5}
 .note{font-size:12px;color:var(--muted)}
-.ok{border:1.5px solid var(--blue);padding:20px;font-family:"Archivo Black";font-size:18px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translate(-50%,16px);background:var(--blue);color:#fff;font-family:"Archivo Black";font-size:16px;padding:14px 26px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:20}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ---- medlem ---- */
+.phone{display:flex;align-items:center;gap:10px;border:1px solid var(--field);padding:0 14px}
+.phone select{font:inherit;font-weight:500;font-size:15px;color:inherit;background:none;border:0;padding:13px 0;-webkit-appearance:none;appearance:none;cursor:pointer}
+.phone select option{color:#000}
+.phone i{width:1px;height:18px;background:var(--field)}
+.phone input{flex:1;font:inherit;font-size:16px;color:inherit;background:none;border:0;padding:13px 0;min-width:0}
+.phone input:focus{outline:none}
+.pbtn{background:var(--blue);color:#fff;padding:13px;font-family:"Archivo Black";font-size:13px;letter-spacing:.04em;width:100%;text-align:center}
+.pbtn[disabled]{opacity:.5}
+.err{color:var(--blue-soft)}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--blue);width:100%;text-align:left}
+.mrow b{display:block;font-weight:700;font-size:14px}.mrow small{display:block;font-size:12px;color:var(--muted)}.mrow span{color:var(--blue-soft);font-weight:700;font-size:20px}
+.linkbtn{font-weight:500;font-size:13px;color:var(--blue-soft);text-align:left}
+body.member .content{padding-bottom:120px}
+.pill{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 14px);transform:translate(-50%,0);z-index:6;display:flex;align-items:center;gap:12px;padding:9px 18px 9px 9px;border-radius:999px;background:rgba(26,26,26,.72);color:#fff;border:1px solid rgba(255,255,255,.14);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);box-shadow:0 8px 28px rgba(0,0,0,.5);max-width:calc(100% - 40px);transition:transform .32s cubic-bezier(.32,.72,0,1),opacity .3s}
+.pill.hide{transform:translate(-50%,120px);opacity:0;pointer-events:none}
+.pill .av{width:38px;height:38px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-family:"Archivo Black";font-size:16px;flex:none}
+.pill .pt{text-align:left;min-width:0}.pill .pt b{display:block;font-family:"Archivo Black";font-weight:400;font-size:12px;letter-spacing:.02em}.pill .pt small{display:block;font-size:12px;color:#c8c8c8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill .arr{font-weight:700}
+.sscrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:12;opacity:0;pointer-events:none;transition:opacity .3s}
+.sscrim.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;max-height:92dvh;transform:translate(-50%,100%);background:var(--panel);border-radius:28px 28px 0 0;z-index:13;transition:transform .34s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;touch-action:pan-y}
+.sheet.open{transform:translate(-50%,0)}
+.sheet.drag{transition:none}
+.grip{flex:none;padding:10px 0 4px;display:flex;justify-content:center}.grip i{width:36px;height:5px;border-radius:3px;background:#555}
+.sbody{overflow-y:auto;overscroll-behavior:contain;padding:0 20px calc(env(safe-area-inset-bottom) + 30px);display:flex;flex-direction:column;gap:14px}
+.shead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.shead .back{font-weight:700;font-size:20px}
+.shead h2{font-size:22px;text-transform:uppercase;line-height:1}.shead h2.long{font-size:17px;line-height:1.1}.shead small{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.shead .x{font-size:24px;color:var(--muted);line-height:1}
+.stabs{display:flex;gap:6px}
+.stabs button{flex:1;padding:8px 0;border:1.5px solid var(--chip);font-weight:700;font-size:10px;letter-spacing:.04em}
+.stabs button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.tcard{background:var(--blue);color:#fff;padding:12px 14px;display:flex;flex-direction:column;gap:5px;text-align:left;width:100%}
+.tcard .k{font-weight:700;font-size:10px;letter-spacing:.08em;opacity:.8}.tcard p{font-weight:500;font-size:13px;line-height:1.35}
+@keyframes bounce{0%,100%{transform:translateY(0)}18%{transform:translateY(-12px)}36%{transform:translateY(0)}52%{transform:translateY(-7px)}68%{transform:translateY(0)}82%{transform:translateY(-3px)}}
+.tcard.bounce{animation:bounce 1.6s cubic-bezier(.36,.07,.19,.97) .2s 1}
+@media (prefers-reduced-motion:reduce){.tcard.bounce{animation:blink .6s 1}@keyframes blink{50%{opacity:.4}}}
+.scard{border:1.5px solid var(--blue);padding:14px;display:flex;flex-direction:column;gap:5px;width:100%;text-align:left}
+.scard .chip{align-self:flex-start}.scard .chip.now{background:var(--fg);color:var(--bg)}
+.scard h3{font-size:22px;text-transform:uppercase}.scard .t{font-weight:500;font-size:15px}.scard p{font-size:13px;color:var(--muted)}
+.srow{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.srow .d{width:60px;flex:none;font-weight:700;font-size:12px;letter-spacing:.02em;color:var(--blue-soft);text-transform:uppercase}
+.srow .t{flex:1;min-width:0}.srow .t b{display:block;font-family:"Archivo Black";font-weight:400;font-size:14px;text-transform:uppercase}.srow .t span{font-size:12px;color:var(--muted)}
+.srow .a{color:var(--muted);font-weight:700;font-size:18px}
+.wbtn{display:block;background:var(--btn-bg);color:var(--btn-fg);padding:13px;text-align:center;font-weight:700;font-size:12px;letter-spacing:.06em;text-decoration:none}
+.lbl2{font-weight:700;font-size:10px;letter-spacing:.08em;color:var(--muted)}
+.prow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.prow b{display:block;font-weight:500;font-size:15px}.prow small{display:block;font-size:12px;color:var(--muted)}
+.call{width:36px;height:36px;flex:none;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--blue)}
+.call svg{width:18px;height:18px;fill:var(--blue-soft)}
+.call.off{opacity:.3;pointer-events:none}
+.mrowm{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);width:100%;text-align:left;font-weight:500;font-size:13px}
+.mrowm span{color:var(--muted);font-weight:700;font-size:18px}
+.mgap{height:8px}
+.msg{display:flex;flex-direction:column;gap:4px;padding:12px 0;border-bottom:1px solid var(--line)}
+.msg .k{font-weight:700;font-size:10px;letter-spacing:.08em;color:var(--blue-soft)}.msg p{font-size:13px;line-height:1.35}.msg small{font-size:11px;color:var(--muted)}
+.manual{font-size:15px;line-height:1.5}
+.manual h2,.manual h3,.manual h4{font-family:"Archivo Black";font-weight:400;text-transform:none;margin:18px 0 6px}.manual h2{font-size:20px}.manual h3{font-size:17px}.manual h4{font-size:15px}
+.manual p{margin:0 0 10px}.manual ul,.manual ol{margin:0 0 10px;padding-left:22px}.manual li{margin:4px 0}.manual li.done{text-decoration:line-through;color:var(--muted)}
+.manual .callout{border:1.5px solid var(--blue);padding:10px 12px;margin:0 0 10px}.manual blockquote{border-left:3px solid var(--chip);padding-left:12px;color:var(--muted);margin:0 0 10px}
+.manual hr{border:0;border-top:1px solid var(--line);margin:14px 0}.manual img{max-width:100%;height:auto;display:block;margin:8px 0}
+.manual pre{background:var(--line);padding:10px;overflow-x:auto;font-size:13px}.manual code{background:var(--line);padding:1px 4px}.manual a{color:var(--blue-soft)}.manual details{margin:0 0 10px}.manual summary{font-weight:700;cursor:pointer}.manual .muted{color:var(--muted)}
+.codein{display:flex;gap:10px}
+.codein input{flex:1;font:inherit;font-family:"Archivo Black";font-size:28px;text-align:center;color:inherit;background:none;border:1.5px solid var(--field);padding:14px 0;letter-spacing:.3em;min-width:0}
+.codein input:focus{outline:none;border-color:var(--blue)}
+.ta{font:inherit;font-size:15px;color:inherit;background:none;border:1px solid var(--field);padding:14px;min-height:110px;width:100%;resize:vertical}
+.ta:focus{outline:none;border-color:var(--blue)}
+.ghost{border:1px solid var(--chip);padding:12px;text-align:center;font-weight:700;font-size:12px;letter-spacing:.06em;width:100%}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div id="home" class="view on">
     <header class="chrome">
-      <div class="brand"><img src="/icon-192.png" alt="AHO Pub"><span>ARRANGEMENTER</span></div>
+      <div class="brand"><button id="brand" aria-label="Last inn på nytt"><img src="/icon-192.png" alt="AHO PUBEN"></button><a class="join" id="join" target="_blank" rel="noopener"></a></div>
       <div class="tools">
         <div class="lang"><button data-lang="no">NO</button><button data-lang="en">EN</button></div>
         <button class="bell" id="bell" aria-label="Varsler"><svg viewBox="0 0 24 24"><path d="M12 2a6 6 0 0 0-6 6v4.5L4 16v1h16v-1l-2-3.5V8a6 6 0 0 0-6-6zm0 20a2.5 2.5 0 0 0 2.5-2h-5A2.5 2.5 0 0 0 12 22z"/></svg></button>
@@ -180,6 +280,10 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
     </form>
   </div>
 
+  <button class="pill hide" id="pill"><span class="av" id="pillAv">A</span><span class="pt"><b id="pillT"></b><small id="pillNext"></small></span><span class="arr">↑</span></button>
+  <div class="sscrim" id="sscrim"></div>
+  <section class="sheet" id="sheet" aria-label="Medlem"><div class="grip"><i></i></div><div class="sbody" id="sbody"></div></section>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="scrim" id="scrim"></div>
   <aside class="panel" id="panel" aria-label="Varsler og utseende">
     <div class="ph"><h2 id="pTitle"></h2><button id="close" aria-label="Lukk">×</button></div>
@@ -188,15 +292,26 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
     <div class="lbl" id="pHow"></div>
     <div class="chips" id="chips"></div>
     <div class="between"><span class="opt" id="pPlain"></span><button class="sw sm" id="swPlain" role="switch"></button></div>
-    <div class="next"><span class="k" id="pNextK"></span><b id="pNext1"></b><span id="pNext2"></span></div>
     <button class="test" id="test"></button>
+    <div class="info"><b id="pNoTest"></b><p id="pNoTestBody"></p></div>
     <div class="hr"></div>
     <div class="lbl" id="pLook"></div>
     <div class="chips half" id="themeRow"><button data-th="light"></button><button data-th="dark"></button></div>
     <div class="chips" id="themeRow2"><button data-th="auto" style="flex:1"></button></div>
     <p class="hint" id="pDayHint"></p>
     <div class="hr"></div>
-    <div class="info"><b id="pNoTest"></b><p id="pNoTestBody"></p></div>
+    <div class="lbl" id="pMember"></div>
+    <div id="memberOut" style="display:flex;flex-direction:column;gap:12px">
+      <p class="hint" id="pMemberHint"></p>
+      <div class="phone"><select id="cc" aria-label="Landskode"><option value="47">+47</option></select><i></i><input id="phone" type="tel" inputmode="tel" autocomplete="tel-national" placeholder="900 00 000"></div>
+      <button class="pbtn" id="loginBtn"></button>
+      <p class="hint err" id="loginErr" hidden></p>
+    </div>
+    <div id="memberIn" hidden style="display:flex;flex-direction:column;gap:12px">
+      <div><b id="memberName" style="font-weight:700;font-size:14px;display:block"></b><small class="hint" id="memberSub"></small></div>
+      <button class="mrow" id="sendLink" hidden><div><b id="sendLinkT"></b><small id="sendLinkS"></small></div><span>›</span></button>
+      <button class="linkbtn" id="logoutBtn"></button>
+    </div>
     <p class="hint" id="pAuto"></p>
     <p class="credit" id="pCredit"></p>
   </aside>
@@ -204,17 +319,19 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 
 <script>
 const API = location.port === '8000' ? 'http://localhost:8787' : ''; // ponytail: python-server-forhåndsvisning peker på wrangler dev; i prod er alt samme opprinnelse
-const CHIPS = [[0,16],[1,12],[2,12],[7,12]];
+const JOIN_URL = 'https://ahopub.notion.site/306fc4bc274d8006adabe92827c1c11a'; // innmeldingsskjemaet i Notion, må være delt offentlig
+const KEYS = ['same','day','mon']; // samme dag (3 t før start), dagen før kl 12, mandag kl 12
+const norm = a => { const old = { '0,16':'same', '1,12':'day' }; const o = [...new Set((Array.isArray(a) ? a : []).map(x => Array.isArray(x) ? old[x.join()] : x).filter(x => KEYS.includes(x)))]; return o.length ? o : ['same','day']; };
 const T = {
-  no:{nextEvent:'NESTE ARRANGEMENT',tonight:'I KVELD',thisThu:'DENNE TORSDAGEN',next:'NESTE',upcoming:'KOMMENDE',plain:'Rolig pub',noProgram:'Ingen program',open:'kl 19-01',closed:'Ingen arrangement denne dagen',addCal:'LEGG I KALENDER',share:'DEL',idea:'HAR DU EN IDÉ?',ideaSub:'Send forslag til styret →',
-    notif:'VARSLER',notifOn:'Varsler på',notifSub:'Du får beskjed før hvert arrangement',how:'Hvor tidlig vil du ha beskjed?',chips:['Samme dag kl 16','Dagen før kl 12','To dager før kl 12','En uke før'],alsoPlain:'Også når det bare er vanlig pub',nextK:'NESTE VARSEL',none:'Ingen planlagt',nextOff:'Slå på varsler for å få beskjed',test:'SEND TESTVARSEL NÅ',testSent:'SENDT. KOM DET?',testFail:'VIRKET IKKE. SE UNDER.',
-    look:'Utseende',light:'Lys',dark:'Mørk',auto:'Dag og natt',dayHint:'Dag og natt: solnedgangen i Oslo bytter tema for deg.',noTest:'Kom ikke testvarselet?',noTestBody:'Appen må ligge på Hjem-skjerm: trykk Del, så «Legg til på Hjem-skjerm». Prøv testvarselet etterpå.',auto2:'Lagres automatisk',credit:'Laget av Georg Ferdinand Nilsen',
-    sTitle:'FORSLAG',sHead:'HVA VIL DU HA PÅ PUBEN?',sSub:'Styret leser alt. Navn er valgfritt.',fIdea:'Idé',fIdeaPh:'F.eks. karaoke, vinsmaking, DJ-battle',fMore:'Fortell mer',fMorePh:'Hva, hvorfor, hvem bør komme?',fName:'Navn (valgfritt)',fNamePh:'Så styret kan takke deg',send:'SEND FORSLAG',sending:'SENDER…',sNote:'Lander rett i styrets Notion. Du ser det ikke etterpå, men det gjør styret.',sent:'Sendt. Takk!',sErr:'Noe gikk galt. Prøv igjen.',
+  no:{nextEvent:'NESTE ARRANGEMENT',join:'BLI MEDLEM',member:'Medlem',memberHint:'Bartender? Logg inn med telefonnummeret ditt, så får du vaktene og manualene dine på forsiden.',login:'LOGG INN',loggingIn:'LOGGER INN…',logout:'Logg ut',loggedAs:'Innlogget som',boardRole:'Styremedlem',memberUntil:'Medlem til',sendT:'Send melding',sendS:'Til alle medlemmer eller dem på vakt',errNotMember:'Fant ikke nummeret i medlemslisten.',errExpired:'Medlemskapet har gått ut. Forny for å logge inn.',errPhone:'Skriv et gyldig telefonnummer.',errNet:'Fikk ikke kontakt. Prøv igjen.',myShifts:'MINE VAKTER',pillNone:'Ingen vakter satt opp',pillNext:'Neste: ',hi:'HEI, ',nShifts:' kommende vakter',oneShift:'1 kommende vakt',noShifts:'Ingen kommende vakter',tabs:['VAKTER','MANUALER','MELDINGER'],fromBoard:'FRA STYRET, ',obsK:'OBS FOR KVELDEN',nextShift:'NESTE VAKT',nowShift:'PÅGÅENDE VAKT',roleOpen:'Åpnevakt',roleClose:'Stengevakt',roleResp:'Ansvarlig',noProgramS:'Rolig pub',withS:'Med ',respS:'Ansvarlig: ',tapDetail:'Trykk for detaljer og ring.',allCal:'LEGG ALLE VAKTER I KALENDER',calHint:'Abonnement: oppdateres av seg selv, ingen duplikater.',shiftAlert:'Varsel om vakt',shiftAlertS:'Kl 19 dagen før og 1 time før',responsible:'ANSVARLIG STYREMEDLEM',workWith:'DU JOBBER MED',otherTeam:'SAMME KVELD, ',alone:'Ingen andre satt opp ennå.',manualsS:'Fra Notion, alltid oppdatert',loading:'Henter…',messagesS:'Fra styret',noMsgs:'Ingen meldinger ennå.',seenBy:' har sett',chooseCode:'VELG STYREKODE',chooseCodeS:'Nummeret ditt står i styrelisten. Velg en firesifret kode som du bruker for å sende meldinger.',saveCode:'LAGRE KODE',resetCode:'Nullstill kode',resetS:'Lederen henter den midlertidige koden i Cloudflare og gir deg den. Skriv den inn sammen med en ny kode.',tempCode:'Midlertidig kode',newCode:'Ny kode',to:'Til',toAll:'Alle aktive medlemmer',toUp:'Kommende vakt',toAct:'Pågående vakt',msg:'Melding',code:'Styrekode',sendTo:'SEND TIL ',sending:'SENDER…',sentTo:'Sendt til ',pushed:', push til ',seeLog:'SE LOGG',logT:'MELDINGSLOGG',logS:'Alle meldinger sendt fra appen. Kan ikke slettes.',wrongCode:'Feil kode.',tonight:'I KVELD',thisThu:'DENNE TORSDAGEN',next:'NESTE',upcoming:'KOMMENDE',plain:'Rolig pub',noProgram:'Ingen program',open:'kl 19-01',closed:'Ingen arrangement denne dagen',addCal:'LEGG I KALENDER',share:'DEL',idea:'HAR DU EN IDÉ?',ideaSub:'Send forslag til styret →',
+    notif:'VARSLER',notifOn:'Varsler på',notifSub:'Du får beskjed før hvert arrangement',how:'Hvor tidlig vil du ha beskjed?',chips:['Samme dag','Dagen før kl 12','Mandag kl 12'],alsoPlain:'Også når det bare er vanlig pub',test:'SEND TESTVARSEL NÅ',testSent:'SENDT. KOM DET?',testFail:'VIRKET IKKE. SE UNDER.',
+    look:'Utseende',light:'Lys',dark:'Mørk',auto:'Dag og natt',dayHint:'Solnedgangen i Oslo bytter tema for deg.',noTest:'Kom ikke testvarselet?',noTestBody:'Appen må ligge på Hjem-skjerm: trykk Del, så «Legg til på Hjem-skjerm». Prøv testvarselet etterpå.',auto2:'Lagres automatisk',credit:'Laget av Georg Ferdinand Nilsen',
+    sTitle:'FORSLAG',sHead:'HVA VIL DU HA PÅ PUBEN?',sSub:'Styret leser alt. Navn er valgfritt.',fIdea:'Idé',fIdeaPh:'F.eks. karaoke, vinsmaking, DJ-battle',fMore:'Fortell mer',fMorePh:'Hva, hvorfor, hvem bør komme?',fName:'Navn (valgfritt)',fNamePh:'Så styret kan takke deg',send:'SEND FORSLAG',sending:'SENDER…',sNote:'Lander rett i styrets Notion.',sent:'Takk!',sErr:'Noe gikk galt. Prøv igjen.',
     wd:['MA','TI','ON','TO','FR','LØ','SØ'],pub:'pub',and:'og',locale:'nb-NO'},
-  en:{nextEvent:'NEXT EVENT',tonight:'TONIGHT',thisThu:'THIS THURSDAY',next:'NEXT',upcoming:'UPCOMING',plain:'Quiet pub',noProgram:'No programme',open:'7pm-1am',closed:'No event this day',addCal:'ADD TO CALENDAR',share:'SHARE',idea:'GOT AN IDEA?',ideaSub:'Send a suggestion to the board →',
-    notif:'ALERTS',notifOn:'Alerts on',notifSub:'You get a heads-up before every event',how:'How early do you want to know?',chips:['Same day 4pm','Day before 12pm','Two days before 12pm','A week before'],alsoPlain:'Also on plain pub nights',nextK:'NEXT ALERT',none:'None planned',nextOff:'Turn on alerts to get notified',test:'SEND TEST ALERT NOW',testSent:'SENT. DID IT ARRIVE?',testFail:'DID NOT WORK. SEE BELOW.',
-    look:'Appearance',light:'Light',dark:'Dark',auto:'Day & night',dayHint:'Day & night: sunset in Oslo switches the theme for you.',noTest:'No test alert?',noTestBody:'The app must be on your Home Screen: tap Share, then "Add to Home Screen". Then try the test alert again.',auto2:'Saved automatically',credit:'Made by Georg Ferdinand Nilsen',
-    sTitle:'SUGGEST',sHead:'WHAT DO YOU WANT AT THE PUB?',sSub:'The board reads everything. Name is optional.',fIdea:'Idea',fIdeaPh:'E.g. karaoke, wine tasting, DJ battle',fMore:'Tell us more',fMorePh:'What, why, who should come?',fName:'Name (optional)',fNamePh:'So the board can thank you',send:'SEND SUGGESTION',sending:'SENDING…',sNote:'Goes straight into the board\'s Notion. You won\'t see it afterwards, but the board will.',sent:'Sent. Thanks!',sErr:'Something went wrong. Try again.',
+  en:{nextEvent:'NEXT EVENT',join:'JOIN',member:'Member',memberHint:'Bartender? Log in with your phone number to get your shifts and manuals on the front page.',login:'LOG IN',loggingIn:'LOGGING IN…',logout:'Log out',loggedAs:'Logged in as',boardRole:'Board member',memberUntil:'Member until',sendT:'Send message',sendS:'To all members or those on shift',errNotMember:'Number not found in the member list.',errExpired:'Membership has expired. Renew to log in.',errPhone:'Enter a valid phone number.',errNet:'No connection. Try again.',myShifts:'MY SHIFTS',pillNone:'No shifts scheduled',pillNext:'Next: ',hi:'HI, ',nShifts:' upcoming shifts',oneShift:'1 upcoming shift',noShifts:'No upcoming shifts',tabs:['SHIFTS','MANUALS','MESSAGES'],fromBoard:'FROM THE BOARD, ',obsK:'TONIGHT, NOTE',nextShift:'NEXT SHIFT',nowShift:'SHIFT IN PROGRESS',roleOpen:'Opening shift',roleClose:'Closing shift',roleResp:'In charge',noProgramS:'Quiet pub',withS:'With ',respS:'In charge: ',tapDetail:'Tap for details and to call.',allCal:'ADD ALL SHIFTS TO CALENDAR',calHint:'Subscription: updates itself, no duplicates.',shiftAlert:'Shift alerts',shiftAlertS:'7pm the day before and 1 hour before',responsible:'BOARD MEMBER IN CHARGE',workWith:'YOU WORK WITH',otherTeam:'SAME NIGHT, ',alone:'Nobody else scheduled yet.',manualsS:'From Notion, always up to date',loading:'Loading…',messagesS:'From the board',noMsgs:'No messages yet.',seenBy:' have seen',chooseCode:'CHOOSE BOARD CODE',chooseCodeS:'Your number is on the board list. Choose a four-digit code you use to send messages.',saveCode:'SAVE CODE',resetCode:'Reset code',resetS:'The chair fetches the temporary code in Cloudflare and gives it to you. Enter it together with a new code.',tempCode:'Temporary code',newCode:'New code',to:'To',toAll:'All active members',toUp:'Upcoming shift',toAct:'Shift in progress',msg:'Message',code:'Board code',sendTo:'SEND TO ',sending:'SENDING…',sentTo:'Sent to ',pushed:', pushed to ',seeLog:'SEE LOG',logT:'MESSAGE LOG',logS:'All messages sent from the app. Cannot be deleted.',wrongCode:'Wrong code.',tonight:'TONIGHT',thisThu:'THIS THURSDAY',next:'NEXT',upcoming:'UPCOMING',plain:'Quiet pub',noProgram:'No programme',open:'7pm-1am',closed:'No event this day',addCal:'ADD TO CALENDAR',share:'SHARE',idea:'GOT AN IDEA?',ideaSub:'Send a suggestion to the board →',
+    notif:'ALERTS',notifOn:'Alerts on',notifSub:'You get a heads-up before every event',how:'How early do you want to know?',chips:['Same day','Day before, 12pm','Monday, 12pm'],alsoPlain:'Also on plain pub nights',test:'SEND TEST ALERT NOW',testSent:'SENT. DID IT ARRIVE?',testFail:'DID NOT WORK. SEE BELOW.',
+    look:'Appearance',light:'Light',dark:'Dark',auto:'Day & night',dayHint:'Sunset in Oslo switches the theme for you.',noTest:'No test alert?',noTestBody:'The app must be on your Home Screen: tap Share, then "Add to Home Screen". Then try the test alert again.',auto2:'Saved automatically',credit:'Made by Georg Ferdinand Nilsen',
+    sTitle:'SUGGEST',sHead:'WHAT DO YOU WANT AT THE PUB?',sSub:'The board reads everything. Name is optional.',fIdea:'Idea',fIdeaPh:'E.g. karaoke, wine tasting, DJ battle',fMore:'Tell us more',fMorePh:'What, why, who should come?',fName:'Name (optional)',fNamePh:'So the board can thank you',send:'SEND SUGGESTION',sending:'SENDING…',sNote:'Goes straight into the board\'s Notion.',sent:'Thanks!',sErr:'Something went wrong. Try again.',
     wd:['MO','TU','WE','TH','FR','SA','SU'],pub:'pub',and:'and',locale:'en-GB'}
 };
 const SAMPLE = [
@@ -224,7 +341,7 @@ const SAMPLE = [
 ];
 const $ = s => document.querySelector(s);
 const ls = (k, v) => v === undefined ? JSON.parse(localStorage.getItem(k) || 'null') : localStorage.setItem(k, JSON.stringify(v));
-const S = { lang: ls('lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') ? 'no' : 'en'), theme: ls('theme') || 'dark', prefs: ls('prefs') || { on:false, offsets:[[0,16],[1,12]], plain:true }, events: [], ym: null, sel: null, vapid: null };
+const S = { lang: ls('lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') ? 'no' : 'en'), theme: ls('theme') || 'dark', prefs: (p => ({ ...p, offsets: norm(p.offsets) }))(ls('prefs') || { on:false, plain:true }), events: [], ym: null, sel: null, vapid: null, member: ls('member') || null, home: null, tab: 'vakter', view: null };
 const t = k => T[S.lang][k];
 const pad = n => String(n).padStart(2, '0');
 const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -239,7 +356,7 @@ const typ = e => (S.lang === 'en' && e.typeEn) || e.type || '';
 // Arrangementer + torsdager uten program = det folk blar i
 function items(weeks = 16) {
   const byDate = Object.fromEntries(S.events.map(e => [e.date, e]));
-  const out = S.events.filter(e => parse(e.date) >= today()).map(e => ({ ...e, plain:false }));
+  const out = S.events.filter(e => parse(e.date) >= today()).map(e => ({ plain:false, ...e }));
   const d = today(); const end = new Date(d); end.setDate(end.getDate() + weeks * 7);
   for (; d <= end; d.setDate(d.getDate() + 1)) if (d.getDay() === 4 && !byDate[iso(d)]) out.push({ id:'p'+iso(d), date: iso(d), plain:true });
   return out.sort((a, b) => a.date.localeCompare(b.date));
@@ -249,14 +366,14 @@ const sub = e => e.plain ? `${t('noProgram')}, ${t('open')}` : `${typ(e)}${e.pub
 
 function renderHero() {
   const all = items(); const e = all[0]; const h = $('#hero');
-  if (!e) { h.className = 'hero noimg'; h.innerHTML = `<div class="tx"><h1>AHO PUB</h1></div>`; return; }
+  if (!e) { h.className = 'hero noimg'; h.innerHTML = `<div class="genwrap"><img class="gen" src="/icon-512.png" alt=""></div><div class="tx"><h1>AHO PUB</h1></div>`; return; }
   const d = parse(e.date); const diff = (d - today()) / 864e5;
   const chip = diff === 0 ? t('tonight') : (d.getDay() === 4 && diff < 7 ? t('thisThu') : t('next'));
   const n = e.plain ? all.find(x => !x.plain) : null;
   const teaser = n ? `<button class="teaser" data-d="${n.date}">${t('nextEvent')}: ${title(n)}, ${fmt(n.date, { day:'numeric', month:'short' })} →</button>` : '';
   h.className = 'hero' + (e.image ? '' : ' noimg');
-  h.innerHTML = `${e.image ? `<img src="${e.image}" alt="">` : ''}<div class="tx"><span class="chip">${chip}</span><h1>${label(e)}</h1><div class="meta">${fmt(d, { weekday:'long', day:'numeric', month:'long' })}, ${t('open')}</div>${teaser}</div>`;
-  $('#desc').textContent = e.plain ? '' : desc(e);
+  h.innerHTML = `${e.image ? `<img src="${e.image}" alt="">` : '<div class="genwrap"><img class="gen" src="/icon-512.png" alt=""></div>'}<div class="tx"><span class="chip">${chip}</span><h1>${label(e)}</h1><div class="meta">${fmt(d, { weekday:'long', day:'numeric', month:'long' })}, ${t('open')}</div>${desc(e) ? `<p class="info">${desc(e)}</p>` : ''}${teaser}</div>`;
+  $('#desc').textContent = ''; $('#desc').hidden = true; // infoen står i hero-feltet
   $('#actions').innerHTML = e.plain ? '' : `<a class="btn primary" href="${API}/api/ics/${e.id}">${t('addCal')}</a>${navigator.share ? `<button class="btn ghost" id="share">${t('share')}</button>` : ''}`;
   $('#share')?.addEventListener('click', () => navigator.share({ title: label(e), text: `${label(e)}, ${fmt(d, { weekday:'long', day:'numeric', month:'long' })} ${t('open')}`, url: location.origin }).catch(() => {}));
 }
@@ -272,7 +389,7 @@ function renderCal() {
     if (i >= 34 && (i + 1) % 7 === 0 && new Date(y, m, 1 - start + i + 1).getMonth() !== m) break;
   }
   const e = S.events.find(x => x.date === S.sel); const sd = S.sel ? parse(S.sel) : null;
-  const card = !S.sel ? '' : e ? `<div class="selcard">${e.image ? `<img src="${e.image}" alt="">` : '<div class="ph"></div>'}<div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${title(e)}</h3><p>${sub(e)}</p></div></div>`
+  const card = !S.sel ? '' : e ? `<div class="selcard">${e.image ? `<img src="${e.image}" alt="">` : '<div class="ph"></div>'}<div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${label(e)}</h3><p>${sub(e)}</p></div></div>`
     : sd.getDay() === 4 && S.sel >= tod ? `<div class="selcard"><div class="ph"></div><div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${t('plain')}</h3><p>${t('noProgram')}</p></div></div>`
     : `<div class="selcard empty">${t('closed')}</div>`;
   $('#cal').innerHTML = `<div class="cal-head"><h2>${fmt(first, { month:'long', year:'numeric' })}</h2><div class="cal-nav"><button data-nav="-1" aria-label="Forrige">←</button><button data-nav="1" aria-label="Neste" style="color:var(--fg)">→</button></div></div><div class="grid">${t('wd').map((w, i) => `<div class="wd${i === 3 ? ' thu' : ''}">${w}</div>`).join('')}${cells}</div>${card}`;
@@ -280,51 +397,25 @@ function renderCal() {
 
 function renderList() {
   const all = items().slice(1, 6);
-  $('#list').innerHTML = `<h2>${t('upcoming')}</h2>` + all.map(e => `<button class="item" data-d="${e.date}"><span class="d">${fmt(e.date, { day:'numeric', month:'short' })}</span><span class="t"><b>${label(e)}</b><span>${sub(e)}</span></span><span class="a">→</span></button>`).join('');
+  $('#list').innerHTML = `<h2>${t('upcoming')}</h2>` + all.map(e => `<div class="item"><button class="sel" data-d="${e.date}"><span class="d">${fmt(e.date, { day:'numeric', month:'short' })}</span><span class="t"><b>${label(e)}</b><span>${sub(e)}</span></span></button><a class="plus" href="${API}/api/ics/${e.id}" aria-label="${t('addCal')}">+</a></div>`).join('');
   $('#cta').innerHTML = `<b>${t('idea')}</b><span>${t('ideaSub')}</span>`;
 }
 
-function nextNotification() {
-  if (!S.prefs.on) return [t('nextOff'), ''];
-  const now = new Date(); let best = null;
-  for (const e of items(60)) { if (e.plain && !S.prefs.plain) continue;
-    for (const [days, hour] of S.prefs.offsets) { const d = parse(e.date); d.setDate(d.getDate() - days); d.setHours(hour, 0, 0, 0); if (d > now && (!best || d < best.d)) best = { d, e }; } }
-  if (!best) return [t('none'), ''];
-  return [cap(fmt(best.d, { weekday:'long', day:'numeric', month:'short' })) + ` kl ${pad(best.d.getHours())}`, `${label(best.e)}, ${fmt(best.e.date, { weekday:'long', day:'numeric', month:'short' })}`];
-}
-
 function renderPanel() {
-  const ids = { pTitle:'notif', pOn:'notifOn', pOnSub:'notifSub', pHow:'how', pPlain:'alsoPlain', pNextK:'nextK', test:'test', pLook:'look', pDayHint:'dayHint', pNoTest:'noTest', pNoTestBody:'noTestBody', pAuto:'auto2', pCredit:'credit', sTitle:'sTitle', sHead:'sHead', sSub:'sSub', fIdea:'fIdea', fMore:'fMore', fName:'fName', send:'send', sNote:'sNote' };
+  const ids = { join:'join', pMember:'member', pMemberHint:'memberHint', loginBtn:'login', logoutBtn:'logout', sendLinkT:'sendT', sendLinkS:'sendS', pillT:'myShifts', pTitle:'notif', pOn:'notifOn', pOnSub:'notifSub', pHow:'how', pPlain:'alsoPlain', test:'test', pLook:'look', pDayHint:'dayHint', pNoTest:'noTest', pNoTestBody:'noTestBody', pAuto:'auto2', pCredit:'credit', sTitle:'sTitle', sHead:'sHead', sSub:'sSub', fIdea:'fIdea', fMore:'fMore', fName:'fName', send:'send', sNote:'sNote' };
   for (const [id, k] of Object.entries(ids)) $('#' + id).textContent = t(k);
   $('#idea').placeholder = t('fIdeaPh'); $('#more').placeholder = t('fMorePh'); $('#name').placeholder = t('fNamePh');
   $('#swOn').classList.toggle('on', S.prefs.on); $('#swPlain').classList.toggle('on', S.prefs.plain);
-  $('#chips').innerHTML = CHIPS.map((c, i) => `<button data-i="${i}" class="${S.prefs.offsets.some(o => o[0] === c[0]) ? 'on' : ''}">${t('chips')[i]}</button>`).join('');
+  $('#chips').innerHTML = KEYS.map((k, i) => `<button data-k="${k}" class="${S.prefs.offsets.includes(k) ? 'on' : ''}">${t('chips')[i]}</button>`).join('');
   for (const b of document.querySelectorAll('[data-th]')) { b.textContent = t(b.dataset.th); b.classList.toggle('on', S.theme === b.dataset.th); }
   for (const b of document.querySelectorAll('[data-lang]')) b.classList.toggle('on', b.dataset.lang === S.lang);
   $('#bell').classList.toggle('on', S.prefs.on);
-  const [a, b] = nextNotification(); $('#pNext1').textContent = a; $('#pNext2').textContent = b;
+  renderMemberPanel();
 }
 
 function renderAll() { document.documentElement.lang = S.lang === 'no' ? 'nb' : 'en'; renderHero(); renderCal(); renderList(); renderPanel(); }
 
 // ---- tema ----
-function sunTimes(date, lat = 59.91, lng = 10.75) { // SunCalc-formelen, kun opp/ned
-  const rad = Math.PI / 180, J1970 = 2440588, J2000 = 2451545, J0 = 0.0009, e = rad * 23.4397;
-  const d = date.valueOf() / 864e5 - 0.5 + J1970 - J2000, lw = rad * -lng, phi = rad * lat;
-  const n = Math.round(d - J0 - lw / (2 * Math.PI)), ds = J0 + lw / (2 * Math.PI) + n;
-  const M = rad * (357.5291 + 0.98560028 * ds), L = M + rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M)) + rad * 102.9372 + Math.PI;
-  const dec = Math.asin(Math.sin(e) * Math.sin(L)), Jnoon = J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
-  const w = Math.acos((Math.sin(-0.833 * rad) - Math.sin(phi) * Math.sin(dec)) / (Math.cos(phi) * Math.cos(dec)));
-  const Jset = J2000 + J0 + (w + lw) / (2 * Math.PI) + n + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
-  const fromJ = j => new Date((j + 0.5 - J1970) * 864e5);
-  return { rise: fromJ(Jnoon - (Jset - Jnoon)), set: fromJ(Jset) };
-}
-function applyTheme() {
-  let th = S.theme;
-  if (th === 'auto') { const now = new Date(), s = sunTimes(now); th = now < s.rise || now > s.set ? 'dark' : 'light'; }
-  document.documentElement.dataset.theme = th;
-  document.querySelector('meta[name=theme-color]').content = th === 'dark' ? '#000000' : '#ffffff';
-}
 setInterval(applyTheme, 60e3);
 
 // ---- push ----
@@ -332,7 +423,7 @@ const b64 = s => { const b = atob((s + '='.repeat((4 - s.length % 4) % 4)).repla
 async function sw() { return navigator.serviceWorker.register('/sw.js'); }
 async function savePrefs() { ls('prefs', S.prefs); renderPanel(); if (!S.prefs.on) return;
   const reg = await sw(); const s = await reg.pushManager.getSubscription(); if (!s) return;
-  await fetch(API + '/api/subscribe', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ subscription: s.toJSON(), prefs: { offsets: S.prefs.offsets, plain: S.prefs.plain, lang: S.lang } }) }).catch(() => {}); }
+  await fetch(API + '/api/subscribe', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ subscription: s.toJSON(), prefs: { offsets: S.prefs.offsets, plain: S.prefs.plain, shift: S.prefs.shift !== false, lang: S.lang, memberToken: S.member?.token || '' } }) }).catch(() => {}); }
 async function toggleOn() {
   if (S.prefs.on) { S.prefs.on = false; const reg = await sw(); const s = await reg.pushManager.getSubscription();
     if (s) { fetch(API + '/api/subscribe', { method:'DELETE', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ endpoint: s.endpoint }) }).catch(() => {}); await s.unsubscribe(); }
@@ -362,11 +453,13 @@ panel.addEventListener('pointerup', e => { if (!drag) return; const close = drag
 panel.addEventListener('pointercancel', () => { panel.classList.remove('drag'); panel.style.transform = ''; drag = null; });
 
 // ---- hendelser ----
+$('#brand').onclick = () => location.reload(); // logoen henter alt på nytt
+$('#join').href = JOIN_URL;
 $('#bell').onclick = () => openPanel(true);
 $('#close').onclick = scrim.onclick = () => openPanel(false);
 $('#swOn').onclick = toggleOn;
 $('#swPlain').onclick = () => { S.prefs.plain = !S.prefs.plain; savePrefs(); };
-$('#chips').onclick = e => { const b = e.target.closest('button'); if (!b) return; const c = CHIPS[b.dataset.i]; const i = S.prefs.offsets.findIndex(o => o[0] === c[0]); if (i >= 0) { if (S.prefs.offsets.length > 1) S.prefs.offsets.splice(i, 1); } else S.prefs.offsets.push(c); savePrefs(); };
+$('#chips').onclick = e => { const b = e.target.closest('button'); if (!b) return; const o = S.prefs.offsets, i = o.indexOf(b.dataset.k); if (i >= 0) { if (o.length > 1) o.splice(i, 1); } else o.push(b.dataset.k); savePrefs(); };
 $('#test').onclick = testPush;
 document.querySelectorAll('[data-th]').forEach(b => b.onclick = () => { S.theme = b.dataset.th; ls('theme', S.theme); applyTheme(); renderPanel(); });
 document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { S.lang = b.dataset.lang; ls('lang', S.lang); renderAll(); savePrefs(); });
@@ -375,23 +468,143 @@ $('#cal').addEventListener('click', e => { const b = e.target.closest('button');
   else if (b.dataset.d) { S.sel = b.dataset.d; renderCal(); } });
 let sx = null; $('#cal').addEventListener('pointerdown', e => sx = e.clientX); $('#cal').addEventListener('pointerup', e => { if (sx !== null && Math.abs(e.clientX - sx) > 60) $('#cal').querySelector(`[data-nav="${e.clientX < sx ? 1 : -1}"]`).click(); sx = null; });
 function selectDate(k) { const d = parse(k); S.sel = k; S.ym = { y: d.getFullYear(), m: d.getMonth() }; renderCal(); $('#cal').scrollIntoView({ behavior:'smooth', block:'start' }); }
-$('#list').addEventListener('click', e => { const b = e.target.closest('.item'); if (b) selectDate(b.dataset.d); });
+$('#list').addEventListener('click', e => { const b = e.target.closest('.sel'); if (b) selectDate(b.dataset.d); });
 $('#hero').addEventListener('click', e => { const b = e.target.closest('.teaser'); if (b) selectDate(b.dataset.d); });
 $('#cta').onclick = () => { location.hash = 'forslag'; };
 $('#back').onclick = () => { history.length > 1 ? history.back() : (location.hash = ''); };
-function route() { const f = location.hash === '#forslag'; $('#forslag').classList.toggle('on', f); $('#home').classList.toggle('on', !f); if (f) window.scrollTo(0, 0); }
+function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2800); }
+function route() { if (location.hash === '#medlem') { history.replaceState(null, '', location.pathname); if (S.member) openSheet(true, null); return; } const f = location.hash === '#forslag'; $('#forslag').classList.toggle('on', f); $('#home').classList.toggle('on', !f); if (f) window.scrollTo(0, 0); }
 addEventListener('hashchange', route);
 $('#form').onsubmit = async e => { e.preventDefault(); const b = $('#send'); b.disabled = true; b.textContent = t('sending');
   const fd = Object.fromEntries(new FormData(e.target));
   const r = await fetch(API + '/api/suggest', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify(fd) }).catch(() => null);
-  if (r && r.ok) { e.target.innerHTML = `<div class="ok">${t('sent')}</div>`; } else { b.disabled = false; b.textContent = t('send'); $('#sNote').textContent = t('sErr'); } };
+  if (r && r.ok) { e.target.reset(); b.disabled = false; b.textContent = t('send'); history.replaceState(null, '', location.pathname + location.search); route(); window.scrollTo(0, 0); toast(t('sent')); } else { b.disabled = false; b.textContent = t('send'); $('#sNote').textContent = t('sErr'); } };
+
+
+// ---- medlem ----
+const ICON_CALL = '<svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8z"/></svg>';
+const tel = p => p ? 'tel:' + (p.length === 8 ? '+47' + p : '+' + p) : '';
+const first = n => (n || '').split(' ')[0];
+async function api(path, body) {
+  const r = await fetch(API + path, { method: body ? 'POST' : 'GET', headers: { 'content-type': 'application/json', ...(S.member ? { authorization: 'Bearer ' + S.member.token } : {}) }, body: body && JSON.stringify(body) });
+  if (r.status === 401 && S.member) { setMember(null); }
+  return { ok: r.ok, status: r.status, data: await r.json().catch(() => ({})) };
+}
+function setMember(mem) { S.member = mem; ls('member', mem); S.home = null; S.view = null; renderMemberPanel(); renderPill(); if (!mem) openSheet(false); }
+async function loadCountries() { const r = await api('/api/member/countries').catch(() => null); const codes = r?.ok && r.data.codes?.length ? r.data.codes : ['47']; const sel = $('#cc'); const cur = sel.value; sel.innerHTML = codes.map(c => `<option value="${c}">+${c}</option>`).join(''); if (codes.includes(cur)) sel.value = cur; }
+function renderMemberPanel() {
+  const m = S.member; $('#memberOut').style.display = m ? 'none' : 'flex'; $('#memberIn').hidden = !m; $('#memberIn').style.display = m ? 'flex' : 'none';
+  if (m) { $('#memberName').textContent = t('loggedAs') + ' ' + m.name; $('#memberSub').textContent = m.board ? t('boardRole') : ''; $('#sendLink').hidden = !m.board; }
+}
+function renderPill() {
+  const p = $('#pill'); const m = S.member; p.classList.toggle('hide', !m); document.body.classList.toggle('member', !!m); if (!m) return;
+  $('#pillAv').textContent = (m.name || 'A')[0].toUpperCase();
+  const next = S.home?.shifts?.find(s => s.date >= S.home.today);
+  $('#pillNext').textContent = next ? t('pillNext') + fmt(next.date, { weekday:'short', day:'numeric', month:'short' }) + ', ' + next.time : (S.home ? t('pillNone') : t('loading'));
+}
+async function loadHome() { if (!S.member) return; const r = await api('/api/member/home'); if (r.ok) { S.home = r.data; renderPill(); if ($('#sheet').classList.contains('open')) renderSheet(); } }
+async function login() {
+  const b = $('#loginBtn'), err = $('#loginErr'); err.hidden = true;
+  const raw = $('#phone').value.trim(), cc = $('#cc').value; if (raw.replace(/\D/g, '').length < 6) { err.textContent = t('errPhone'); err.hidden = false; return; }
+  b.disabled = true; b.textContent = t('loggingIn');
+  const r = await api('/api/member/login', { phone: raw.startsWith('+') || raw.startsWith('00') ? raw : '+' + cc + ' ' + raw }).catch(() => ({ ok:false, status:0, data:{} }));
+  b.disabled = false; b.textContent = t('login');
+  if (!r.ok) { err.textContent = r.data.error === 'not_member' ? t('errNotMember') : r.data.error === 'expired' ? t('errExpired') : r.status === 400 ? t('errPhone') : t('errNet'); err.hidden = false; return; }
+  setMember({ token: r.data.token, name: r.data.name, board: r.data.board, hasCode: r.data.hasCode }); $('#phone').value = '';
+  savePrefs(); await loadHome(); toast(t('hi') + first(S.member.name).toUpperCase());
+}
+async function logout() { if (S.member) api('/api/member/logout').catch(() => {}); setMember(null); savePrefs(); }
+// arket
+const sheet = $('#sheet'), sscrim = $('#sscrim');
+function openSheet(o, view) { if (o && !S.member) return; if (view !== undefined) S.view = view; sheet.classList.toggle('open', o); sscrim.classList.toggle('open', o); if (o) { renderSheet(); if (!S.home) loadHome(); } }
+let sdrag = null;
+sheet.addEventListener('pointerdown', e => { if (e.target.closest('button,a,input,textarea,details') || $('#sbody').scrollTop > 0) return; sdrag = { y: e.clientY, t: performance.now(), dy: 0, vy: 0 }; sheet.setPointerCapture(e.pointerId); });
+sheet.addEventListener('pointermove', e => { if (!sdrag) return; const dy = Math.max(0, e.clientY - sdrag.y), now = performance.now(); sdrag.vy = (dy - sdrag.dy) / Math.max(1, now - sdrag.t); sdrag.dy = dy; sdrag.t = now; sheet.classList.add('drag'); sheet.style.transform = `translate(-50%,${dy}px)`; });
+sheet.addEventListener('pointerup', () => { if (!sdrag) return; const close = sdrag.vy > 0.3 || sdrag.dy > sheet.offsetHeight * 0.35; sheet.classList.remove('drag'); sheet.style.transform = ''; sdrag = null; openSheet(!close); });
+sheet.addEventListener('pointercancel', () => { sheet.classList.remove('drag'); sheet.style.transform = ''; sdrag = null; });
+$('#pill').onclick = () => openSheet(true, null);
+sscrim.onclick = () => openSheet(false);
+const isActiveShift = s => { const now = new Date(); if (s.date !== iso(now) && !(s.role === 'close' && s.date === iso(new Date(now - 864e5)) && now.getHours() < 1)) return false; const h = now.getHours() + now.getMinutes() / 60; const st = s.role === 'close' ? 22 : 19, en = s.role === 'open' ? 22 : 25; return (s.date === iso(now) && h >= st - 1 && h < en) || s.date !== iso(now); };
+const roleName = r => t(r === 'open' ? 'roleOpen' : r === 'close' ? 'roleClose' : 'roleResp');
+const shiftSub = s => `${s.event || s.pub || t('noProgramS')}${s.coworkers.length ? '. ' + t('withS') + s.coworkers.map(p => first(p.name)).join(', ') : ''}${s.responsible ? '. ' + t('respS') + first(s.responsible.name) : ''}.`;
+function head(title, sub, back) { return `<div class="shead">${back ? `<button class="back" data-back>←</button>` : ''}<div style="flex:1;min-width:0"><h2 class="${title.length > 18 ? 'long' : ''}">${title}</h2>${sub ? `<small>${sub}</small>` : ''}</div><button class="x" data-close>×</button></div>`; }
+function tabsHtml() { return `<div class="stabs">${['vakter', 'manualer', 'meldinger'].map((k, i) => `<button data-tab="${k}" class="${S.tab === k ? 'on' : ''}">${t('tabs')[i]}</button>`).join('')}</div>`; }
+function renderSheet() {
+  const b = $('#sbody'); const H = S.home; const v = S.view;
+  if (!S.member) { b.innerHTML = ''; return; }
+  if (!H) { b.innerHTML = head(t('hi') + first(S.member.name).toUpperCase(), t('loading')) + tabsHtml(); return; }
+  const up = H.shifts.filter(s => s.date >= H.today || isActiveShift(s));
+  if (v?.type === 'shift') { const s = H.shifts.find(x => x.id === v.id); if (!s) { S.view = null; return renderSheet(); }
+    const person = (p, role) => `<div class="prow"><div><b>${p.name}</b>${role ? `<small>${role}</small>` : ''}</div><a class="call${p.phone ? '' : ' off'}" href="${tel(p.phone)}" aria-label="Ring ${p.name}">${ICON_CALL}</a></div>`;
+    const man = title => H.manuals.find(mm => new RegExp(title, 'i').test(mm.title));
+    b.innerHTML = head(fmt(s.date, { weekday:'short', day:'numeric', month:'short' }).toUpperCase(), `${roleName(s.role)}, kl ${s.time}. ${s.event || s.pub || ''}`, true)
+      + (s.obs ? `<div class="tcard"><span class="k">${t('obsK')}</span><p>${s.obs}</p></div>` : '')
+      + `<div class="lbl2">${t('responsible')}</div>` + (s.responsible ? person(s.responsible, s.responsible.role) : `<p class="hint">${t('alone')}</p>`)
+      + `<div class="lbl2">${t('workWith')}${s.role === 'resp' ? ', ' + roleName('open').toUpperCase() + ' 19-22' : ''}</div>` + (s.coworkers.length ? s.coworkers.map(p => person(p, roleName(s.coRole || s.role) + ' ' + (s.coRole === 'open' ? '19-22' : s.time))).join('') : `<p class="hint">${t('alone')}</p>`)
+      + `<div class="lbl2">${t('otherTeam')}${roleName(s.otherRole).toUpperCase()} ${s.otherRole === 'open' ? '19-22' : '22-01'}</div>` + (s.others.length ? s.others.map(p => person(p)).join('') : `<p class="hint">${t('alone')}</p>`)
+      + `<div style="display:flex;justify-content:space-between;gap:10px">${man('skifte vakt') ? `<button class="linkbtn" data-manual="${man('skifte vakt').id}">Skifte vakt ›</button>` : ''}${man(s.role === 'open' ? 'åpne' : 'låse') ? `<button class="linkbtn" data-manual="${man(s.role === 'open' ? 'åpne' : 'låse').id}">${man(s.role === 'open' ? 'åpne' : 'låse').title} ›</button>` : ''}</div>`;
+    return; }
+  if (v?.type === 'manual') { b.innerHTML = head(v.title || t('tabs')[1], t('manualsS'), true) + `<div class="manual" id="manualBody">${v.html || `<p class="muted">${t('loading')}</p>`}</div>`;
+    if (!v.html) api('/api/member/manual/' + v.id).then(r => { if (S.view?.id === v.id) { S.view = { ...v, title: r.data.title || v.title, html: r.ok ? r.data.html : `<p class="muted">${t('errNet')}</p>` }; renderSheet(); } }); return; }
+  if (v?.type === 'send') return renderSend(b);
+  if (v?.type === 'log') return renderLog(b);
+  if (v?.type === 'code') return renderCode(b);
+  let html = head(t('hi') + first(S.member.name).toUpperCase(), up.length === 0 ? t('noShifts') : up.length === 1 ? t('oneShift') : up.length + t('nShifts')) + tabsHtml();
+  if (S.tab === 'vakter') {
+    const active = up.find(isActiveShift); const latest = H.messages.find(m => Date.now() - m.t < 48 * 3600e3);
+    if (active && active.obs) html += `<div class="tcard bounce"><span class="k">${t('obsK')}</span><p>${active.obs}</p></div>`;
+    else if (latest) html += `<button class="tcard" data-tab="meldinger"><span class="k">${t('fromBoard')}${fmt(new Date(latest.t), { day:'numeric', month:'short' }).toUpperCase()}</span><p>${latest.text}</p></button>`;
+    const nx = active || up[0];
+    if (nx) html += `<button class="scard" data-shift="${nx.id}"><span class="chip${active ? ' now' : ''}">${active ? t('nowShift') : t('nextShift')}</span><h3>${fmt(nx.date, { weekday:'short', day:'numeric', month:'short' })}</h3><span class="t">${roleName(nx.role)}, kl ${nx.time}</span><p>${shiftSub(nx)} ${t('tapDetail')}</p></button>`;
+    html += up.filter(s => s !== nx).map(s => `<button class="srow" data-shift="${s.id}"><span class="d">${fmt(s.date, { day:'numeric', month:'short' })}</span><span class="t"><b>${roleName(s.role)}</b><span>Kl ${s.time}, ${s.event || s.pub || t('noProgramS')}</span></span><span class="a">›</span></button>`).join('');
+    html += `<a class="wbtn" href="webcal://${location.host}/api/member/shifts.ics?t=${S.member.token}">${t('allCal')}</a><p class="hint">${t('calHint')}</p>`;
+    html += `<div class="between"><span><b style="font-weight:700;font-size:14px;display:block">${t('shiftAlert')}</b><small class="hint">${t('shiftAlertS')}</small></span><button class="sw sm${S.prefs.shift !== false ? ' on' : ''}" data-shiftsw role="switch"></button></div>`;
+    html += `<button class="linkbtn" data-logout>${t('logout')}</button>`;
+  } else if (S.tab === 'manualer') {
+    let g = -1; html += `<div>` + H.manuals.map(m => { const gap = m.group !== g && g >= 0 ? '<div class="mgap"></div>' : ''; g = m.group; return gap + `<button class="mrowm" data-manual="${m.id}">${m.title}<span>›</span></button>`; }).join('') + `</div>`;
+  } else {
+    html += `<div>` + (H.messages.length ? H.messages.map(m => `<div class="msg"><span class="k">${t('fromBoard')}${fmt(new Date(m.t), { day:'numeric', month:'short' }).toUpperCase()}</span><p>${m.text}</p>${S.member.board ? `<small>${m.sender}, ${m.seen} av ${m.count}${t('seenBy')}</small>` : ''}</div>`).join('') : `<p class="hint">${t('noMsgs')}</p>`) + `</div>`;
+    const unseen = H.messages.filter(m => !m.seenByMe).map(m => m.id); if (unseen.length) { api('/api/member/seen', { ids: unseen }); H.messages.forEach(m => m.seenByMe = true); }
+  }
+  b.innerHTML = html; b.scrollTop = 0;
+}
+// styret
+const counts = () => S.home?.counts || { all: 0, upcoming: 0, active: 0 };
+function renderCode(b) { const v = S.view; b.innerHTML = head(t('chooseCode'), '', true) + `<p class="hint">${v.reset ? t('resetS') : t('chooseCodeS')}</p>` + (v.reset ? `<div class="lbl2">${t('tempCode')}</div><div class="codein"><input id="tempCode" type="password" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="••••"></div><div class="lbl2">${t('newCode')}</div>` : '') + `<div class="codein"><input id="newCode" type="password" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="••••"></div><button class="pbtn" id="saveCode">${t('saveCode')}</button><p class="hint err" id="codeErr" hidden></p>`;
+  $('#saveCode').onclick = async () => { const code = $('#newCode').value.trim(), temp = $('#tempCode')?.value.trim(); if (!/^\d{4}$/.test(code)) { $('#codeErr').textContent = t('errPhone').replace(/telefonnummer|phone number/, 'kode'); $('#codeErr').hidden = false; return; } const r = await api('/api/board/code', { code, temp }); if (r.ok) { S.member.hasCode = true; ls('member', S.member); S.view = { type:'send' }; renderSheet(); toast('OK'); } else { $('#codeErr').textContent = r.data.error === 'need_temp' ? t('wrongCode') : t('errNet'); $('#codeErr').hidden = false; } }; }
+function renderSend(b) {
+  if (!S.member.hasCode) { S.view = { type:'code' }; return renderCode(b); }
+  const v = S.view; v.to = v.to || 'all'; const c = counts();
+  b.innerHTML = head(t('sendT').toUpperCase(), '', true) + `<div class="lbl2">${t('to')}</div><div class="chips">${[['all', t('toAll'), c.all], ['upcoming', t('toUp'), c.upcoming], ['active', t('toAct'), c.active]].map(([k, l, n]) => `<button data-to="${k}" class="${v.to === k ? 'on' : ''}">${l} (${n})</button>`).join('')}</div>`
+    + `<div class="lbl2">${t('msg')}</div><textarea class="ta" id="msgText" maxlength="300">${v.text || ''}</textarea><div class="lbl2">${t('code')}</div><div class="codein"><input id="sendCode" type="password" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="••••"></div><button class="pbtn" id="sendBtn">${t('sendTo')}${c[v.to]}</button><p class="hint err" id="sendErr" hidden></p><button class="ghost" data-view="log">${t('seeLog')}</button><button class="linkbtn" id="resetBtn">${t('resetCode')}</button>`;
+  b.querySelectorAll('[data-to]').forEach(x => x.onclick = () => { v.to = x.dataset.to; v.text = $('#msgText').value; renderSend(b); });
+  $('#sendBtn').onclick = async () => { const text = $('#msgText').value.trim(), code = $('#sendCode').value.trim(); const err = $('#sendErr'); err.hidden = true; if (!text || !/^\d{4}$/.test(code)) { err.textContent = !text ? t('msg') + '?' : t('wrongCode'); err.hidden = false; return; } $('#sendBtn').disabled = true; $('#sendBtn').textContent = t('sending'); const r = await api('/api/board/send', { text, to: v.to, code }); if (r.ok) { toast(t('sentTo') + r.data.count + t('pushed') + r.data.pushed); v.text = ''; S.home = null; await loadHome(); S.view = { type:'log' }; renderSheet(); } else { $('#sendBtn').disabled = false; $('#sendBtn').textContent = t('sendTo') + c[v.to]; err.textContent = r.data.error === 'wrong_code' ? t('wrongCode') : t('errNet'); err.hidden = false; } };
+  $('#resetBtn').onclick = async () => { const r = await api('/api/board/reset', {}); if (r.ok) { S.view = { type:'code', reset: true }; renderSheet(); } };
+}
+async function renderLog(b) { b.innerHTML = head(t('logT'), t('logS'), true) + `<p class="hint">${t('loading')}</p>`; const r = await api('/api/board/log'); if (S.view?.type !== 'log') return; const toName = { all: t('toAll'), upcoming: t('toUp'), active: t('toAct') };
+  b.innerHTML = head(t('logT'), t('logS'), true) + `<div>` + ((r.data.messages || []).map(m => `<div class="msg"><div style="display:flex;justify-content:space-between"><span class="k">${fmt(new Date(m.t), { day:'numeric', month:'short' }).toUpperCase()} ${pad(new Date(m.t).getHours())}:${pad(new Date(m.t).getMinutes())}</span><small>${m.seen} av ${m.count}${t('seenBy')}</small></div><b style="font-weight:700;font-size:13px">${m.sender} → ${toName[m.to] || m.to} (${m.count})</b><p>${m.text}</p></div>`).join('') || `<p class="hint">${t('noMsgs')}</p>`) + `</div>`; }
+// klikk i arket
+$('#sbody').addEventListener('click', e => {
+  const el = e.target.closest('[data-tab],[data-shift],[data-manual],[data-back],[data-close],[data-logout],[data-shiftsw],[data-view]'); if (!el) return;
+  if (el.dataset.tab) { S.tab = el.dataset.tab; S.view = null; renderSheet(); }
+  else if (el.dataset.shift) { S.view = { type:'shift', id: el.dataset.shift }; renderSheet(); }
+  else if (el.dataset.manual) { const m = S.home?.manuals.find(x => x.id === el.dataset.manual); S.view = { type:'manual', id: el.dataset.manual, title: m?.title || '' }; renderSheet(); }
+  else if (el.dataset.view) { S.view = { type: el.dataset.view }; renderSheet(); }
+  else if (el.hasAttribute('data-back')) { S.view = S.view?.type === 'log' || S.view?.type === 'code' ? { type:'send' } : null; renderSheet(); }
+  else if (el.hasAttribute('data-close')) openSheet(false);
+  else if (el.hasAttribute('data-logout')) logout();
+  else if (el.hasAttribute('data-shiftsw')) { S.prefs.shift = S.prefs.shift === false; savePrefs(); renderSheet(); }
+});
+$('#loginBtn').onclick = login; $('#phone').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+$('#logoutBtn').onclick = logout;
+$('#sendLink').onclick = () => { openPanel(false); openSheet(true, { type:'send' }); };
 
 // ---- start ----
 (async () => {
   applyTheme(); const d = today(); S.ym = { y: d.getFullYear(), m: d.getMonth() };
-  try { const r = await fetch(API + '/api/events'); if (!r.ok) throw 0; S.events = await r.json(); } catch { S.events = SAMPLE; }
+  try { const r = await fetch(API + '/api/events'); if (!r.ok) throw 0; S.events = await r.json(); } catch { S.events = location.hostname === 'localhost' ? SAMPLE : []; }
   S.sel = items()[0]?.date || null; if (S.sel) { const sd = parse(S.sel); S.ym = { y: sd.getFullYear(), m: sd.getMonth() }; }
-  renderAll(); route();
+  renderAll(); route(); renderPill(); if (S.member) loadHome(); else loadCountries();
   if ('serviceWorker' in navigator) { sw().then(async reg => { const s = await reg.pushManager.getSubscription(); if (S.prefs.on && !s) { S.prefs.on = false; ls('prefs', S.prefs); renderPanel(); } }); }
 })();
 </script>
