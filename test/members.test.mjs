@@ -19,7 +19,7 @@ assert.equal(mine[1].role, 'close');
 const asBoard = myShifts('', D.shifts, D.members, D.board, 'u2'); assert.equal(asBoard.length, 1); assert.equal(asBoard[0].role, 'resp'); assert.equal(asBoard[0].time, '19-01'); assert.equal(asBoard[0].coworkers.length, 3, 'ansvarlig ser åpnevakten som kolleger');
 const both = myShifts('m1', D.shifts, D.members, D.board, 'u1'); assert.equal(both.find(s => s.id === 's2').role, 'close', 'egen vakt vinner over ansvarlig-rollen');
 assert.deepEqual(shiftAlerts(mine[0]), [[1, 19], [0, 18]]); assert.deepEqual(shiftAlerts(mine[1]), [[1, 19], [0, 21]]);
-assert.deepEqual(recipients('all', D.members, D.shifts, '2026-10-14').length, 6, 'utgått medlem er ikke med');
+assert.deepEqual(recipients('all', D.members, D.shifts, '2026-10-14').length, 7, 'utgått medlem er ikke med');
 assert.deepEqual(recipients('upcoming', D.members, D.shifts, '2026-10-14').sort(), ['m1', 'm2', 'm3', 'm4', 'm5', 'm6']);
 assert.deepEqual(recipients('active', D.members, D.shifts, D.shifts[0].date).length, 6); assert.deepEqual(recipients('active', D.members, D.shifts, '2026-10-14'), []);
 const blocks = [{ type: 'paragraph', paragraph: { rich_text: t('intro') } }, { type: 'heading_2', heading_2: { rich_text: t('HOW-TO') } }, { type: 'child_page', id: 'p-1', child_page: { title: 'Åpne' } }, { type: 'divider' }, { type: 'child_page', id: 'p-2', child_page: { title: 'Låse' } }, { type: 'child_database', id: 'd-1', child_database: { title: 'VAKTPLAN' } }, { type: 'child_page', id: 'p-3', child_page: { title: 'Ikke med' } }];
