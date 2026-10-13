@@ -1,0 +1,7 @@
+# Kopier til .dev.vars for lokal kjøring (npm run dev). Uten disse kjører Worker-en i eksempelmodus.
+NOTION_TOKEN=
+NOTION_DB_ID=306fc4bc274d803fbcaac5b17542df12
+NOTION_SUGGEST_DB_ID=
+DEEPL_KEY=
+VAPID_PUBLIC=
+VAPID_PRIVATE=

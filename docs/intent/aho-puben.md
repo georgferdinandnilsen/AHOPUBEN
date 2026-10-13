@@ -215,3 +215,7 @@ Figma: seksjonen «Medlemsdel: valgt» (node 518:2). De to andre forslagssettene
 - 14.10.2026: Gjenoppretting av nummer: feilmelding med lenke → e-post → nytt nummer (med landskode) lagres i Notion (PATCH Phone) og logger inn. Risiko: den som kjenner et medlems e-post kan knytte sitt eget nummer til kortet. Dempet med ti forsøk per time, avvisning av numre som finnes fra før, og logglinje i Worker-loggen.
 - 14.10.2026: Hjelpen for feil lagret nummer vises først etter tre mislykkede innlogginger (telles per nettleserøkt), og nullstilles ved vellykket innlogging.
 - 14.10.2026: Rettingen av nummer ligger i en popup (e-post, så nytt nummer). Varselmenyen viser bare spørsmålslinjen og lenken, og bare etter tre mislykkede forsøk.
+
+## Overleveringspakke (14.10.2026)
+
+Mappen `overlevering/` (og zip-filen `AHO-PUBEN-APP-overlevering.zip` i prosjektmappen) inneholder OVERLEVERING.md/.html/.pdf, SJEKKLISTE.md, AI-PROMPT.md, oversiktsdiagram, skjermbilder av appen, Figma-eksporter og en kopi av koden. Skrevet for et styre uten utviklererfaring: to veier for overføring (gi tilgang, eller sette opp alt på nytt), driftsregler i Notion, feilsøking, kostnader.

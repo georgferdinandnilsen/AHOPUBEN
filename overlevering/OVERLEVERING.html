@@ -1,0 +1,297 @@
+<!doctype html><html lang="nb"><head><meta charset="utf-8"><title>AHO Puben-appen: overlevering</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:-apple-system,Helvetica,Arial,sans-serif;max-width:860px;margin:40px auto;padding:0 24px;line-height:1.55;color:#111}
+h1{font-size:30px;line-height:1.1}h2{font-size:22px;margin-top:40px;border-top:2px solid #000;padding-top:16px}h3{font-size:17px;margin-top:26px}
+code{background:#f1f1f1;padding:1px 5px;border-radius:3px;font-size:14px}pre{background:#111;color:#fff;padding:14px 16px;border-radius:6px;overflow-x:auto;font-size:14px}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:14px}th,td{border:1px solid #ccc;padding:7px 9px;vertical-align:top;text-align:left}th{background:#f1f1f1}
+img{max-width:100%}.shots img{width:48%;max-width:300px;margin:6px 1% 6px 0;vertical-align:top;border:1px solid #ddd}
+a{color:#0000ff}hr{border:0;border-top:1px solid #ddd;margin:30px 0}li{margin:4px 0}
+@media print{body{margin:0;max-width:none}h2{break-before:page}h2:first-of-type{break-before:auto}pre{white-space:pre-wrap}.shots img{width:30%}}</style></head><body><h1>AHO Puben-appen: overlevering til styret</h1>
+<p>
+Skrevet 14. oktober 2026 av Georg Ferdinand Nilsen (med hjelp av Claude). Denne pakken inneholder alt som trengs for å forstå, drifte og flytte appen til styrets egne kontoer. Les dette dokumentet først. Det er skrevet for folk som ikke har bygget nettsider før.
+</p>
+<p>
+Adressen til appen i dag: <a href="https://aho-puben.georgferdinandnilsen.workers.dev">https://aho-puben.georgferdinandnilsen.workers.dev</a>
+</p>
+<hr>
+<h2>1. Hva appen er</h2>
+<p>
+AHO Puben-appen er en nettside som folk legger på Hjem-skjermen på telefonen. Den viser hva som skjer på puben, og sender push-varsler før hvert arrangement. Styret trenger aldri å røre koden: alt innhold skrives i Notion, og appen henter det derfra.
+</p>
+<p>
+Den har tre lag:
+</p>
+<ul>
+<li><b>For alle:</b> neste arrangement øverst, en kalender, forslagsskjema til styret, varsler man styrer selv, norsk og engelsk, lyst og mørkt tema.</li>
+<li><b>For medlemmer (bartendere):</b> logg inn med telefonnummer og få egne vakter, kolleger man kan ringe med ett trykk, manualene fra Notion, kalenderabonnement og varsel før vakt.</li>
+<li><b>For styret:</b> send melding til alle medlemmer eller dem på vakt, se hvor mange som har lest, og en logg over alt som er sendt.</li>
+</ul>
+<div class="shots"><img src="skjermbilder/01-forside.jpg" alt="Forsiden"> <img src="skjermbilder/02-kalender-og-kommende.jpg" alt="Kalender og kommende"></div>
+<div class="shots"><img src="skjermbilder/03-varselmeny.jpg" alt="Varselmenyen"> <img src="skjermbilder/04-forslag.jpg" alt="Forslag"></div>
+<div class="shots"><img src="skjermbilder/05-medlem-vakter.jpg" alt="Mine vakter"> <img src="skjermbilder/06-medlem-vaktdetalj.jpg" alt="Vaktdetalj med ring-knapper"></div>
+<div class="shots"><img src="skjermbilder/07-medlem-manualer.jpg" alt="Manualer"> <img src="skjermbilder/08-styre-send-melding.jpg" alt="Send melding, for styret"></div>
+<hr>
+<h2>2. Slik henger det sammen</h2>
+<div class="shots"><img src="oversikt.svg" alt="Oversikt"></div>
+<p>
+Tre deler snakker sammen:
+</p>
+<ol>
+<li><b>Notion</b> er der styret jobber. Databasene Arrangementer, MEDLEMMER, Styremedlemmer og VAKTPLAN, pluss infosiden med manualene. Appen leser dem gjennom en «integrasjon», som er en nøkkel Notion deler ut. Ingen Notion-sider trenger å være publisert på nett.</li>
+<li><b>Cloudflare Worker</b> er hjernen. Et lite program som kjører gratis i skyen. Det serverer selve nettsiden, henter fra Notion hvert 10. minutt, oversetter til engelsk, sender push-varsler hver hele time, håndterer innlogging og lagrer småting (abonnementer, meldinger, styrekoder) i et lager som heter KV. Alle nøkler ligger her, aldri i koden.</li>
+<li><b>Telefonene</b> viser appen. Push-varslene går gjennom Apple og Google sine tjenester, helt automatisk.</li>
+</ol>
+<p>
+I tillegg ligger <b>koden på GitHub</b> som sikkerhetskopi med historikk, og <b>designet i Figma</b>.
+</p>
+<hr>
+<h2>3. Hvem eier hva i dag</h2>
+<table><tr><th>Hva</th><th>Hvor</th><th>Eies av</th><th>Hva det brukes til</th></tr><tr><td>Cloudflare-konto</td><td>dash.cloudflare.com</td><td>Georg (georgferdinandnilsen@gmail.com)</td><td>Kjører Worker-en «aho-puben», lagret KV, alle hemmeligheter</td></tr><tr><td>Adressen</td><td>aho-puben.georgferdinandnilsen.workers.dev</td><td>Følger Cloudflare-kontoen</td><td>Det folk har lagt på Hjem-skjerm</td></tr><tr><td>GitHub-repo</td><td>github.com/georgferdinandnilsen/AHOPUBEN</td><td>Georg</td><td>Koden, med historikk</td></tr><tr><td>Notion-integrasjon «AHO PUBEN APP»</td><td>notion.so/profile/integrations</td><td>Opprettet av Ferdinand i AHO PUB-arbeidsområdet</td><td>Nøkkelen appen bruker mot Notion</td></tr><tr><td>DeepL Developer</td><td>deepl.com</td><td>Georg</td><td>Engelsk oversetting, gratis</td></tr><tr><td>Push-nøkler (VAPID)</td><td>Lagret i Cloudflare</td><td>Laget av Georg</td><td>Gjør at akkurat denne appen får sende push</td></tr><tr><td>Figma-fil «FERDINAND»</td><td>figma.com</td><td>Georg</td><td>Designet, tre utkast og den valgte versjonen</td></tr></table>
+<p>
+<b>Hva skjer når Georg slutter?</b> Alt fortsetter å virke så lenge kontoene hans finnes. Men ingen i styret kan rette feil, bytte nøkler eller endre noe. Derfor må appen flyttes, eller styret må få tilgang. Begge veier står under.
+</p>
+<hr>
+<h2>4. Overføring til styret</h2>
+<p>
+Først ett råd: <b>lag en felles styre-e-post</b> (for eksempel en Gmail som heter noe med ahopuben) og en passordhåndterer styret deler. Opprett alle kontoene under på den e-posten, ikke på en privat. Da overlever de neste styreskifte.
+</p>
+<p>
+Det finnes to veier. Vei B er den rene løsningen og anbefales.
+</p>
+<h3>Vei A: Gi styret tilgang til dagens kontoer (rask, men midlertidig)</h3>
+<p>
+Alt blir liggende på Georgs kontoer, men styret kan styre.
+</p>
+<ol>
+<li><b>Cloudflare:</b> Georg går til dash.cloudflare.com → Manage Account → Members → Invite. Skriv styre-e-posten, velg rollen Super Administrator. Styret godtar invitasjonen i e-posten.</li>
+<li><b>GitHub:</b> Georg går til github.com/georgferdinandnilsen/AHOPUBEN → Settings → Collaborators → Add people. Eller bedre: Settings → Danger Zone → Transfer ownership, til styrets GitHub-konto.</li>
+<li><b>Notion-integrasjonen:</b> Georg går til notion.so/profile/integrations → AHO PUBEN APP → fanen «Eiere av tilkoblinger» → legg til et styremedlem. Da kan styret hente og bytte nøkkelen selv.</li>
+<li><b>DeepL:</b> Styret lager egen gratis Developer-konto på deepl.com/pro-api, henter en API-nøkkel, og legger den inn i Cloudflare (se «Legge inn hemmeligheter» under).</li>
+</ol>
+<p>
+Ulempen: kontoene heter fortsatt Georg. Mister han tilgang, eller sletter kontoen, forsvinner alt.
+</p>
+<h3>Vei B: Sett opp alt på nytt på styrets egne kontoer (anbefalt)</h3>
+<p>
+Det høres mye ut, men det er en kveld med en PC og denne listen. Alt er gratis. Gjør punktene i rekkefølge.
+</p>
+<p>
+<b>Steg 0. Forberedelser</b>
+</p>
+<ul>
+<li>En Mac eller PC. Alt under gjøres i programmet Terminal (Mac) eller PowerShell (Windows).</li>
+<li>Styre-e-posten og passordhåndtereren fra rådet over.</li>
+<li>Hent mappen <code>app</code> fra denne pakken, eller last ned koden fra GitHub (grønn «Code»-knapp → Download ZIP). Legg mappen et sted med en enkel sti, for eksempel <code>Dokumenter/aho-puben</code>. Ikke bruk mellomrom i mappenavnet.</li>
+</ul>
+<p>
+<b>Steg 1. Installer Node.js</b>
+</p>
+<ul>
+<li>Gå til nodejs.org og installer «LTS»-versjonen. Det er programmet som kjører verktøyene.</li>
+<li>Åpne Terminal, gå til mappen og installer avhengighetene:</li>
+</ul>
+<pre>cd Dokumenter/aho-puben
+npm install</pre>
+<p>
+<b>Steg 2. Lag Notion-integrasjonen (nøkkelen mot Notion)</b>
+</p>
+<ul>
+<li>Gå til notion.so/profile/integrations, logget inn som en som er administrator i arbeidsområdet AHO PUB.</li>
+<li>Trykk «Ny forbindelse». Navn: AHO PUBEN APP. Arbeidsområde: AHO PUB. Type: intern.</li>
+<li>Under Capabilities/Funksjoner: huk av Les innhold, Oppdater innhold, Sett inn innhold, og velg «Les brukerinformasjon uten e-postadresser». Uten den siste vises styremedlemmer som rollen sin i stedet for navn.</li>
+<li>Kopier «Internal Integration Secret». Det er nøkkelen. Lim den aldri i en chat eller e-post. Legg den i passordhåndtereren.</li>
+<li>Koble integrasjonen til sidene. Åpne hver av disse i Notion, trykk <code>…</code> øverst til høyre → Tilkoblinger → velg AHO PUBEN APP:</li>
+<li>Arrangementer (siden som inneholder databasen)</li>
+<li>MEDLEMMER</li>
+<li>Styremedlemmer</li>
+<li>VAKTPLAN</li>
+<li>AHO PUB - INFOSIDE MEDLEMMER</li>
+<li>Alternativ: gjør det fra integrasjonens egen side under fanen «Tilgang».</li>
+</ul>
+<p>
+<b>Steg 3. Lag DeepL-nøkkel (engelsk oversetting)</b>
+</p>
+<ul>
+<li>Gå til deepl.com/pro-api og velg planen Developer (gratis, engangskreditt på 1 million tegn, holder i mange år).</li>
+<li>Finn API-nøkkelen under kontoen din. Legg den i passordhåndtereren.</li>
+</ul>
+<p>
+<b>Steg 4. Lag Cloudflare-konto og logg inn fra Terminal</b>
+</p>
+<ul>
+<li>Opprett konto på dash.cloudflare.com med styre-e-posten. Gratisplanen holder.</li>
+<li>I Terminal, i app-mappen:</li>
+</ul>
+<pre>npx wrangler login</pre>
+<ul>
+<li>En nettleser åpner seg. Trykk Allow.</li>
+</ul>
+<p>
+<b>Steg 5. Lag lageret (KV)</b>
+</p>
+<pre>npx wrangler kv namespace create KV</pre>
+<ul>
+<li>Terminalen skriver ut en linje med <code>id = "…"</code>. Åpne filen <code>wrangler.toml</code> i et tekstprogram og bytt ut id-en under <code>[[kv_namespaces]]</code> med den nye.</li>
+</ul>
+<p>
+<b>Steg 6. Lag push-nøkler</b>
+</p>
+<pre>npm run vapid</pre>
+<ul>
+<li>Du får en «Public Key» og en «Private Key». Begge skal inn som hemmeligheter i neste steg. Den private deles aldri.</li>
+</ul>
+<p>
+<b>Steg 7. Legg inn hemmelighetene</b>
+</p>
+<p>
+Hver kommando spør «Enter a secret value». Lim inn verdien og trykk Enter. Verdien vises ikke.
+</p>
+<pre>npx wrangler secret put NOTION_TOKEN
+npx wrangler secret put NOTION_DB_ID
+npx wrangler secret put NOTION_SUGGEST_DB_ID
+npx wrangler secret put DEEPL_KEY
+npx wrangler secret put VAPID_PUBLIC
+npx wrangler secret put VAPID_PRIVATE</pre>
+<table><tr><th>Hemmelighet</th><th>Hva du limer inn</th></tr><tr><td>NOTION_TOKEN</td><td>Nøkkelen fra steg 2</td></tr><tr><td>NOTION_DB_ID</td><td>Id-en til Arrangementer-databasen: <code>306fc4bc274d803fbcaac5b17542df12</code></td></tr><tr><td>NOTION_SUGGEST_DB_ID</td><td>Samme id: <code>306fc4bc274d803fbcaac5b17542df12</code> (forslag lagres i samme database)</td></tr><tr><td>DEEPL_KEY</td><td>Nøkkelen fra steg 3</td></tr><tr><td>VAPID_PUBLIC</td><td>Public key fra steg 6</td></tr><tr><td>VAPID_PRIVATE</td><td>Private key fra steg 6</td></tr></table>
+<p>
+Database-id er de 32 tegnene i lenken til databasen i Notion. Id-ene til medlemsdatabasene står i <code>wrangler.toml</code> under <code>[vars]</code> og trenger ikke endres så lenge dere bruker de samme databasene. Lager dere nye databaser, finner dere datakilde-id slik: åpne databasen → <code>…</code> → Administrer datakilder → <code>…</code> ved kilden → Kopier datakilde-ID.
+</p>
+<p>
+<b>Steg 8. Publiser</b>
+</p>
+<pre>npm run deploy</pre>
+<ul>
+<li>Terminalen skriver ut adressen, for eksempel <code>https://aho-puben.&lt;kontonavn&gt;.workers.dev</code>. Det er den nye appen.</li>
+<li>Åpne adressen på en telefon. Ser du de ekte arrangementene fra Notion, virker Notion-koblingen. Ser du «Halloween, DJ: Dave Van Zon, Julepub» med eksempeltekst, mangler NOTION_TOKEN eller koblingen til sidene.</li>
+</ul>
+<p>
+<b>Steg 9. Test</b>
+</p>
+<ul>
+<li>Trykk bjella, logg inn med ditt eget nummer. Står du i MEDLEMMER eller Styremedlemmer med nummeret, kommer du inn.</li>
+<li>Slå på varsler og trykk «Send testvarsel nå». Kommer det ikke: appen må ligge på Hjem-skjerm.</li>
+<li>Som styremedlem: «Send melding», velg en styrekode, send en testmelding til deg selv.</li>
+</ul>
+<p>
+<b>Steg 10. Bytt over</b>
+</p>
+<ul>
+<li>Send den nye adressen til alle. Alle må legge appen på Hjem-skjerm på nytt og slå på varsler på nytt. Det gamle ikonet kan slettes.</li>
+<li>Styremedlemmer velger styrekode på nytt.</li>
+<li>Når alt virker, tar Georg ned den gamle: i hans mappe kjører han <code>npx wrangler delete</code>. GitHub-repoet overføres eller arkiveres.</li>
+</ul>
+<p>
+<b>Dette blir ikke med over automatisk</b> (det ligger i det gamle KV-lageret): hvem som har varsler på, styrekoder, meldingsloggen og «sett»-tellinger. Det er greit å starte på null.
+</p>
+<p>
+<b>Eget domene (valgfritt):</b> I Cloudflare → Workers &amp; Pages → aho-puben → Settings → Domains &amp; Routes kan dere koble et domene dere eier, for eksempel app.ahopuben.no. Da slipper dere det lange workers.dev-navnet.
+</p>
+<hr>
+<h2>5. Drift i hverdagen: det styret gjør i Notion</h2>
+<p>
+Appen følger disse reglene. Ingen kode trengs.
+</p>
+<p>
+<b>Arrangementer</b>
+</p>
+<ul>
+<li>Et arrangement vises i appen når det har en dato i feltet <b>Når</b> som er i dag eller senere. Ingen dato, ingen visning.</li>
+<li><b>Type arrangement</b> blir etiketten (Aktivitet, DJ og så videre). Typen «Rolig Pub» betyr vanlig pub uten program.</li>
+<li><b>Info til APP</b> er teksten som vises under datoen. Oversettes automatisk til engelsk.</li>
+<li><b>Bilde til APP</b> blir bildet øverst. Uten bilde vises logoen.</li>
+<li>Endringer vises i appen innen ti minutter.</li>
+<li>Torsdager uten rad i Notion vises automatisk som «Rolig pub, kl 19-01».</li>
+</ul>
+<p>
+<b>Forslag fra folk</b>
+</p>
+<ul>
+<li>Forslag fra appen lander som ny rad i Arrangementer med <b>Bestemt</b> satt til Nei, og teksten inne på siden. De vises i visningen Ideer. Sett en dato i Når når et forslag blir et arrangement.</li>
+</ul>
+<p>
+<b>MEDLEMMER</b>
+</p>
+<ul>
+<li>Appen bruker <b>Full name</b>, <b>Phone</b>, <b>E-mail</b> og datoen i <b>How long do you want to be a member?</b>. Er datoen passert, får personen ikke logge inn.</li>
+<li>Telefonnummeret må ha landskode hvis det ikke er norsk, for eksempel +46 70 123 45 67. Mellomrom spiller ingen rolle.</li>
+<li>Får et medlem «Fant ikke nummeret» tre ganger, kan de rette nummeret selv via e-posten sin. Appen skriver da det nye nummeret inn i Phone-feltet.</li>
+</ul>
+<p>
+<b>Styremedlemmer</b>
+</p>
+<ul>
+<li>Nummeret i <b>Telefon</b> gir styrerettigheter i appen. Det må være det samme nummeret personen logger inn med.</li>
+<li><b>Person</b>-feltet må være satt til personens Notion-bruker. Navnet hentes derfra.</li>
+</ul>
+<p>
+<b>VAKTPLAN</b>
+</p>
+<ul>
+<li>Én rad per pubkveld: <b>Dato</b>, <b>Åpnevakt (medlemsliste)</b> (19-22), <b>Stengevakt (medlemsliste)</b> (22-01), <b>Ansvarlig styremedlem</b> og <b>Noe å være obs på for kvelden</b>.</li>
+<li>Medlemmer ser bare sine egne vakter, og telefonnumre bare til dem på samme kveld.</li>
+<li>«Obs for kvelden» vises øverst for dem på vakt fra én time før start, og sendes med i vaktvarselet.</li>
+</ul>
+<p>
+<b>Infosiden (manualer)</b>
+</p>
+<ul>
+<li>Alle undersidene under overskriften <b>HOW-TO</b> vises som manualer i appen, i samme rekkefølge, gruppert av skillelinjene. Alt annet på siden hoppes over. Rett i Notion, så er appen oppdatert innen ti minutter.</li>
+</ul>
+<p>
+<b>Varsler</b>
+</p>
+<ul>
+<li>Arrangementer: hver bruker velger Samme dag (3 timer før start), Dagen før kl 12 og/eller Mandag kl 12. Standard er samme dag og dagen før.</li>
+<li>Vakter: kl 19 dagen før, og én time før start.</li>
+<li>Styremeldinger: med en gang, til innloggede medlemmer som har varsler på.</li>
+</ul>
+<p>
+<b>Styrekoder</b>
+</p>
+<ul>
+<li>Første gang et styremedlem åpner «Send melding», velger de en firesifret kode. Glemmer de koden, trykker de «Nullstill kode». Da legges en midlertidig kode i KV-lageret, som lederen leser i Cloudflare: Workers &amp; Pages → KV → KV → nøkkelen som heter <code>reset:</code> og styremedlemmets id. Lederen gir koden videre, og styremedlemmet velger en ny.</li>
+</ul>
+<hr>
+<h2>6. Når noe ikke virker</h2>
+<table><tr><th>Symptom</th><th>Sannsynlig årsak</th><th>Fiks</th></tr><tr><td>Appen viser Halloween, DJ: Dave Van Zon og Julepub med eksempeltekst</td><td>NOTION_TOKEN mangler eller er feil</td><td><code>npx wrangler secret put NOTION_TOKEN</code> på nytt</td></tr><tr><td>Et arrangement mangler</td><td>Ingen dato i Når, eller datoen er passert</td><td>Sett dato</td></tr><tr><td>Appen viser gamle data</td><td>Cache på ti minutter</td><td>Vent, eller slett nøkkelen <code>events</code> i KV</td></tr><tr><td>Styremedlem vises med rolle i stedet for navn</td><td>Integrasjonen mangler «Les brukerinformasjon uten e-postadresser»</td><td>Slå på i integrasjonens Capabilities. Logg ut og inn</td></tr><tr><td>«Fant ikke nummeret i medlemslisten»</td><td>Nummeret står annerledes i Notion, eller mangler landskode</td><td>Rett i Notion, eller bruk «Rett det med e-posten din» etter tre forsøk</td></tr><tr><td>Push kommer ikke på iPhone</td><td>Appen er åpnet i Safari, ikke fra Hjem-skjerm</td><td>Del → Legg til på Hjem-skjerm → åpne derfra → slå på varsler</td></tr><tr><td>Ingen engelsk tekst</td><td>DEEPL_KEY mangler eller kvoten er brukt opp</td><td>Sjekk nøkkelen på deepl.com</td></tr><tr><td>«Notion 404» i loggen</td><td>En side er ikke koblet til integrasjonen</td><td><code>…</code> → Tilkoblinger på siden</td></tr><tr><td>Alt er borte</td><td>Worker-en er slettet eller Cloudflare-kontoen er stengt</td><td>Sett opp på nytt etter Vei B</td></tr></table>
+<p>
+<b>Se loggen live</b> mens dere feilsøker. I app-mappen:
+</p>
+<pre>npx wrangler tail</pre>
+<p>
+Trykk Ctrl+C for å stoppe.
+</p>
+<p>
+<b>Oppdatere koden</b> etter en endring i <code>public/index.html</code> eller <code>src/</code>:
+</p>
+<pre>npm run deploy</pre>
+<hr>
+<h2>7. Kostnader og grenser</h2>
+<p>
+Alt kjører på gratisnivåene, og en studentpub kommer ikke i nærheten av grensene.
+</p>
+<table><tr><th>Tjeneste</th><th>Gratisgrense</th><th>Hva appen bruker</th></tr><tr><td>Cloudflare Workers</td><td>100 000 forespørsler per dag</td><td>Noen hundre</td></tr><tr><td>Cloudflare KV</td><td>1 000 skrivinger per dag, 100 000 lesinger</td><td>Noen titalls skrivinger, bortsett fra når en styremelding sendes (én per medlem som leser)</td></tr><tr><td>DeepL Developer</td><td>1 million tegn, engangs</td><td>Noen tusen tegn i året</td></tr><tr><td>Notion API</td><td>Ingen kostnad</td><td>Hvert 10. minutt</td></tr></table>
+<hr>
+<h2>8. Filene i pakken</h2>
+<pre>OVERLEVERING.md / .html / .pdf   Dette dokumentet
+SJEKKLISTE.md                    Punktlisten for overføring, til å krysse av
+AI-PROMPT.md                     Tekst dere kan lime inn i ChatGPT, Claude eller lignende for hjelp
+oversikt.svg                     Oversiktsdiagrammet
+skjermbilder/                    Appen slik den ser ut i dag
+design/                          Designet fra Figma: valgt versjon og alternativene som ble vurdert
+app/                             Hele koden, det samme som ligger på GitHub
+  public/index.html              Selve appen, én fil
+  public/sw.js                   Mottar push-varsler på telefonen
+  public/manifest.webmanifest    Navn og ikon på Hjem-skjerm
+  src/index.js                   Worker-en: Notion, DeepL, push, forslag, cron
+  src/members.js, memberRoutes.js, notify.js, notion.js   Medlemsdel, varsellogikk, Notion-tolking
+  test/                          Små tester: node test/members.test.mjs
+  wrangler.toml                  Cloudflare-oppsett og Notion-id-er
+  README.md                      Teknisk oppsett, kortversjon
+  docs/intent/aho-puben.md       Alle beslutninger og designprinsipper, kronologisk</pre>
+<p>
+Figma-filen med designet: <a href="https://www.figma.com/design/OHP7bnByAgK4NZs1s80igy/FERDINAND?node-id=478-2">https://www.figma.com/design/OHP7bnByAgK4NZs1s80igy/FERDINAND?node-id=478-2</a>
+</p>
+<hr>
+<h2>9. Få hjelp av en AI</h2>
+<p>
+Dere trenger ikke kunne dette selv. Åpne <code>AI-PROMPT.md</code>, lim inn teksten i en AI-assistent (ChatGPT, Claude, Gemini) og legg ved filene fra <code>app/</code> hvis den kan lese filer. Så ber dere den ta ett steg om gangen. Regelen er: <b>lim aldri nøkler eller passord inn i chatten.</b> AI-en trenger ikke dem. Den trenger bare å vite hvor de skal.
+</p></body></html>
