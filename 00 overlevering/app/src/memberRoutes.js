@@ -115,16 +115,19 @@ export async function memberRoute(req, url, env, ctx, D) {
   return D.json({ error: 'not found' }, 404);
 }
 
+export function shiftMessage(sh, days, lang) {
+  const en = lang === 'en', R = { open: { label: 'Åpnevakt', labelEn: 'Opening shift', time: '19-22' }, close: { label: 'Stengevakt', labelEn: 'Closing shift', time: '22-01' }, resp: { label: 'Ansvarlig', labelEn: 'In charge', time: '19-01' } }[sh.role];
+  return { title: `${en ? R.labelEn : R.label} ${days ? (en ? 'tomorrow' : 'i morgen') : (en ? 'tonight' : 'i kveld')}, ${R.time}`, body: [sh.event || sh.pub, sh.coworkers.length ? (en ? 'With ' : 'Med ') + sh.coworkers.map(p => p.name.split(' ')[0]).join(', ') : '', sh.obs ? 'Obs: ' + sh.obs : ''].filter(Boolean).join('. '), url: '/#medlem', tag: 'shift' + sh.id + days };
+}
 // Vaktvarsler, kalt fra cron: kl 19 dagen før og én time før start.
 export async function shiftTick(env, D, subs, date, hour) {
   const { members, board, shifts } = await loadAll(env, D.notion, null, date);
-  const { shiftAlerts, ROLE } = await import('./members.js');
+  const { shiftAlerts } = await import('./members.js');
   for (const s of subs) {
     if ((!s.memberId && !s.boardUserId) || s.prefs?.shift === false) continue;
     for (const sh of myShifts(s.memberId, shifts, members, board, s.boardUserId)) for (const [days, h] of shiftAlerts(sh)) {
       if (h !== hour || D.addDays(sh.date, -days) !== date) continue;
-      const en = s.prefs?.lang === 'en', R = ROLE[sh.role];
-      await D.push(env, s.subscription, { title: `${en ? R.labelEn : R.label} ${days ? (en ? 'tomorrow' : 'i morgen') : (en ? 'tonight' : 'i kveld')}, ${R.time}`, body: [sh.event || sh.pub, sh.coworkers.length ? (en ? 'With ' : 'Med ') + sh.coworkers.map(p => p.name.split(' ')[0]).join(', ') : '', sh.obs ? 'Obs: ' + sh.obs : ''].filter(Boolean).join('. '), url: '/#medlem', tag: 'shift' + sh.id + days });
+      await D.push(env, s.subscription, shiftMessage(sh, days, s.prefs?.lang));
     }
   }
 }

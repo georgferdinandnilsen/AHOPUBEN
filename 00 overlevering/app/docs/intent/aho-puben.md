@@ -219,3 +219,4 @@ Figma: seksjonen «Medlemsdel: valgt» (node 518:2). De to andre forslagssettene
 ## Overleveringspakke (14.10.2026)
 
 Mappen `overlevering/` (og zip-filen `AHO-PUBEN-APP-overlevering.zip` i prosjektmappen) inneholder OVERLEVERING.md/.html/.pdf, SJEKKLISTE.md, AI-PROMPT.md, oversiktsdiagram, skjermbilder av appen, Figma-eksporter og en kopi av koden. Skrevet for et styre uten utviklererfaring: to veier for overføring (gi tilgang, eller sette opp alt på nytt), driftsregler i Notion, feilsøking, kostnader.
+- 14.10.2026: CTA på forsiden heter nå «Send forslag til arrangementer». Overleveringspakken (mappen «00 overlevering») peker nå kun på vei B, med steg for å legge appen på app.ahopuben.no via Cloudflare Custom Domains. Alle åtte varseltyper er sendt til Georgs telefon som demo.
