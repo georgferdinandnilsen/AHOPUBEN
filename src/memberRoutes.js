@@ -1,6 +1,11 @@
 // HTTP-delen av medlemsdelen. Innlogging med telefonnummer, mine vakter, manualer, kalender, styremeldinger og styrekode.
 import { normPhone, isActive, myShifts, recipients, loadAll, manualHtml, shiftsIcs, countryCodes } from './members.js';
 
+async function notionPatch(env, notion, pageId, properties) {
+  const r = await fetch('https://api.notion.com/v1/pages/' + pageId, { method: 'PATCH', headers: { authorization: 'Bearer ' + env.NOTION_TOKEN, 'notion-version': '2025-09-03', 'content-type': 'application/json' }, body: JSON.stringify({ properties }) });
+  if (!r.ok) throw new Error('Notion ' + r.status + ': ' + (await r.text()).slice(0, 200));
+  return r.json();
+}
 const rand = () => [...crypto.getRandomValues(new Uint8Array(24))].map(b => b.toString(16).padStart(2, '0')).join('');
 const sha = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map(b => b.toString(16).padStart(2, '0')).join('');
 const codeHash = (env, code, boardId) => sha(`${code}:${boardId}:${env.VAPID_PRIVATE || ''}`); // ponytail: VAPID-nøkkelen som pepper, egen hemmelighet hvis den noen gang roteres
@@ -32,6 +37,29 @@ export async function memberRoute(req, url, env, ctx, D) {
     const t = rand(); const name = me?.name || b.name || b.role;
     await env.KV.put('sess:' + t, JSON.stringify({ memberId: me?.id || '', name, phone: ph, boardId: b?.id || '', boardUserId: b?.userId || '', t: Date.now() }), { expirationTtl: 180 * 86400 });
     return D.json({ token: t, name, board: !!b, hasCode: b ? !!(await env.KV.get('code:' + b.id)) : false });
+  }
+  // Glemt eller feil lagret nummer: finn medlemskortet med e-post, skriv inn nytt nummer, som lagres i Notion.
+  if (p === '/api/member/recover' && m === 'POST') {
+    if (!await rateLimit(env, req, 'recover', 10)) return D.json({ error: 'slow down' }, 429);
+    const email = String(body.email || '').trim().toLowerCase(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return D.json({ error: 'bad_email' }, 400);
+    const { members } = await data(); const me = members.find(x => x.email && x.email === email);
+    if (!me) return D.json({ error: 'not_found' }, 404);
+    if (!isActive(me, today)) return D.json({ error: 'expired', until: me.until }, 403);
+    const t = rand(); await env.KV.put('recover:' + t, me.id, { expirationTtl: 600 });
+    return D.json({ ok: true, token: t });
+  }
+  if (p === '/api/member/recover/phone' && m === 'POST') {
+    const rt = String(body.token || ''); const memberId = /^[0-9a-f]{48}$/.test(rt) ? await env.KV.get('recover:' + rt) : null;
+    if (!memberId) return D.json({ error: 'unauthorized' }, 401);
+    const pretty = String(body.phone || '').trim(); const ph = normPhone(pretty); if (ph.length < 7) return D.json({ error: 'bad_phone' }, 400);
+    const { members, board } = await data(); const me = members.find(x => x.id === memberId); if (!me) return D.json({ error: 'not_found' }, 404);
+    if (members.some(x => x.id !== memberId && x.phone === ph)) return D.json({ error: 'phone_taken' }, 409); // nummeret tilhører et annet medlem
+    if (env.NOTION_TOKEN) { await notionPatch(env, D.notion, me.id, { Phone: { phone_number: pretty } }); await env.KV.delete('cache:members'); }
+    await env.KV.delete('recover:' + rt);
+    console.log('Telefonnummer oppdatert via e-post for medlem', me.id);
+    const b = board.find(x => x.phone === ph); const t = rand();
+    await env.KV.put('sess:' + t, JSON.stringify({ memberId: me.id, name: me.name, phone: ph, boardId: b?.id || '', boardUserId: b?.userId || '', t: Date.now() }), { expirationTtl: 180 * 86400 });
+    return D.json({ token: t, name: me.name, board: !!b, hasCode: b ? !!(await env.KV.get('code:' + b.id)) : false });
   }
   if (!sess) return D.json({ error: 'unauthorized' }, 401);
 

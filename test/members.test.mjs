@@ -5,7 +5,7 @@ assert.equal(normPhone('+47 900 00 000'), '90000000'); assert.equal(normPhone('0
 assert.deepEqual(splitPhone('+45 12 34 56 78'), { cc: '45', national: '12345678' }); assert.deepEqual(splitPhone('90000000'), { cc: '47', national: '90000000' });
 assert.deepEqual(countryCodes([{ cc: '46' }, { cc: '47' }, { cc: '' }, { cc: '46' }, { cc: '45' }]), ['47', '46', '45']);
 const m = memberFrom({ id: 'aa-bb', properties: { 'Full name': { title: t(' Kari ') }, Phone: { phone_number: '+47 900 00 001' }, 'How long do you want to be a member?': { date: { start: '2027-06-30' } } } });
-assert.deepEqual(m, { id: 'aabb', name: 'Kari', phone: '90000001', cc: '47', until: '2027-06-30' });
+assert.deepEqual(m, { id: 'aabb', name: 'Kari', phone: '90000001', cc: '47', email: '', until: '2027-06-30' });
 assert.equal(isActive(m, '2026-10-14'), true); assert.equal(isActive(m, '2027-07-01'), false); assert.equal(isActive({ name: 'x', until: '' }, '2026-10-14'), true, 'uten dato = aktiv');
 assert.deepEqual(boardFrom({ id: 'b-1', properties: { Rolle: { title: t('Leder') }, Telefon: { phone_number: '90000000' }, Person: { people: [{ id: 'u1', name: 'Ferdinand' }] } } }), { id: 'b1', role: 'Leder', phone: '90000000', cc: '47', userId: 'u1', name: 'Ferdinand' });
 const s = shiftFrom({ id: 's-1', properties: { Dato: { date: { start: '2026-10-15' } }, 'PUB NR': { title: t('PUB: 9') }, 'Noe å være obs på for kvelden': { rich_text: t('Ny keg') }, Event: { formula: { type: 'string', string: 'Rolig Pub' } }, Arrangement: { relation: [{ id: 'e-1' }] }, 'Ansvarlig styremedlem': { people: [{ id: 'u2', name: 'Einar' }] }, 'Åpnevakt (medlemsliste)': { relation: [{ id: 'm-1' }, { id: 'm-2' }] }, 'Stengevakt (medlemsliste)': { relation: [{ id: 'm-4' }] } } });
