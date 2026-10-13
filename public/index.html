@@ -517,7 +517,7 @@ function renderPill() {
   $('#pillNext').textContent = next ? t('pillNext') + fmt(next.date, { weekday:'short', day:'numeric', month:'short' }) + ', ' + next.time : (S.home ? t('pillNone') : t('loading'));
 }
 async function loadHome() { if (!S.member) return; const r = await api('/api/member/home'); if (r.ok) { S.home = r.data; renderPill(); if ($('#sheet').classList.contains('open')) renderSheet(); } }
-let recToken = '';
+let recToken = '', failedLogins = Number(sessionStorage.getItem('failedLogins') || 0);
 function recErr(msg) { const e = $('#recErr'); e.textContent = msg; e.hidden = !msg; }
 function resetRecover() { for (const id of ['recover', 'recStep1', 'recStep2']) { const el = $('#' + id); el.hidden = true; el.style.display = 'none'; } $('#recLink').hidden = false; $('#recEmail').value = ''; $('#recPhone').value = ''; recErr(''); recToken = ''; }
 async function login() {
@@ -526,7 +526,8 @@ async function login() {
   b.disabled = true; b.textContent = t('loggingIn');
   const r = await api('/api/member/login', { phone: raw.startsWith('+') || raw.startsWith('00') ? raw : '+' + cc + ' ' + raw }).catch(() => ({ ok:false, status:0, data:{} }));
   b.disabled = false; b.textContent = t('login');
-  if (!r.ok) { err.textContent = r.data.error === 'not_member' ? t('errNotMember') : r.data.error === 'expired' ? t('errExpired') : r.status === 400 ? t('errPhone') : t('errNet'); err.hidden = false; if (r.data.error === 'not_member') { $('#recover').hidden = false; $('#recover').style.display = 'flex'; } return; }
+  if (!r.ok) { err.textContent = r.data.error === 'not_member' ? t('errNotMember') : r.data.error === 'expired' ? t('errExpired') : r.status === 400 ? t('errPhone') : t('errNet'); err.hidden = false; if (r.data.error === 'not_member') { failedLogins++; sessionStorage.setItem('failedLogins', failedLogins); if (failedLogins >= 3) { $('#recover').hidden = false; $('#recover').style.display = 'flex'; } } return; }
+  failedLogins = 0; sessionStorage.removeItem('failedLogins');
   setMember({ token: r.data.token, name: r.data.name, board: r.data.board, hasCode: r.data.hasCode }); $('#phone').value = '';
   savePrefs(); await loadHome(); toast(t('hi') + first(S.member.name).toUpperCase());
 }
@@ -622,7 +623,7 @@ $('#recSave').onclick = async () => { recErr(''); const raw = $('#recPhone').val
   const pretty = raw.startsWith('+') || raw.startsWith('00') ? raw : '+' + cc + ' ' + raw.replace(/\D/g, '').replace(/^0/, '');
   const b = $('#recSave'); b.disabled = true; const r = await api('/api/member/recover/phone', { token: recToken, phone: pretty }).catch(() => ({ ok:false, data:{} })); b.disabled = false;
   if (!r.ok) return recErr(r.data.error === 'phone_taken' ? t('recTaken') : r.data.error === 'bad_phone' ? t('errPhone') : t('errNet'));
-  resetRecover(); $('#loginErr').hidden = true;
+  resetRecover(); $('#loginErr').hidden = true; failedLogins = 0; sessionStorage.removeItem('failedLogins');
   setMember({ token: r.data.token, name: r.data.name, board: r.data.board, hasCode: r.data.hasCode }); savePrefs(); await loadHome(); toast(t('hi') + first(S.member.name).toUpperCase()); };
 $('#loginBtn').onclick = login; $('#phone').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 $('#logoutBtn').onclick = logout;

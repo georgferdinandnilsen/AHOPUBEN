@@ -63,7 +63,7 @@ Nederst i varselmenyen logger medlemmer inn med telefonnummer. Nummeret sjekkes 
 - **Manualer:** barnesidene under overskriften HOW-TO på infosiden, vist i appen og oppdatert innen ti minutter.
 - **Meldinger:** meldinger fra styret. Siste melding vises øverst i Vakter-fanen i 48 timer. Under aktiv vakt vises «Obs for kvelden» i stedet.
 
-**Feil lagret nummer:** får man «Fant ikke nummeret», kan man trykke «Rett det med e-posten din». E-posten slås opp i MEDLEMMER, og det nye nummeret skrives inn i Phone-feltet på medlemskortet og logger en inn. Et nummer som allerede tilhører et annet medlem avvises. Begrenset til ti forsøk i timen per IP.
+**Feil lagret nummer:** etter tre mislykkede forsøk vises «Rett det med e-posten din» under feilmeldingen. E-posten slås opp i MEDLEMMER, og det nye nummeret skrives inn i Phone-feltet på medlemskortet og logger en inn. Et nummer som allerede tilhører et annet medlem avvises. Begrenset til ti forsøk i timen per IP.
 
 **Styret:** nummer i STYREMEDLEMMER gir «Send melding» i varselmenyen. Første gang velger man en firesifret styrekode. Meldingen går som push til innloggede medlemmer med varsler på, og ligger i appen for alle innloggede. Loggen viser hvem som sendte hva og hvor mange som har sett.
 
