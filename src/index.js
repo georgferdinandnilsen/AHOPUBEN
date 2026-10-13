@@ -3,7 +3,7 @@
 import { buildPushPayload } from '@block65/webcrypto-web-push';
 import { fromNotion, pickBody } from './notion.js';
 import { normOffsets, when } from './notify.js';
-import { memberRoute, shiftTick } from './memberRoutes.js';
+import { memberRoute, shiftTick, shiftMessage } from './memberRoutes.js';
 
 const OSLO = 'Europe/Oslo';
 const TYPES = { Aktivitet: 'Activity', DJ: 'DJ', Konsert: 'Concert', Quiz: 'Quiz', Fest: 'Party' };

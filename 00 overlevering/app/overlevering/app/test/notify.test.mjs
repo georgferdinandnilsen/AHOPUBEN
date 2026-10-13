@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import { normOffsets, when } from '../src/notify.js';
+assert.deepEqual(normOffsets([[0, 16], [1, 12]]), ['same', 'day'], 'gamle par oversettes');
+assert.deepEqual(normOffsets([[2, 12], [7, 12]]), ['same', 'day'], 'fjernede valg gir standard');
+assert.deepEqual(normOffsets(['mon', 'mon', 'x']), ['mon'], 'duplikater og ukjent forkastes');
+assert.deepEqual(normOffsets(undefined), ['same', 'day']);
+assert.deepEqual(when({ date: '2026-10-15' }, 'same'), [0, 16], 'torsdag 19 minus 3 timer');
+assert.deepEqual(when({ date: '2026-10-15', time: '20:00' }, 'same'), [0, 17], 'starttid fra Notion');
+assert.deepEqual(when({ date: '2026-10-15', time: '01:00' }, 'same'), [0, 0], 'aldri negativ time');
+assert.deepEqual(when({ date: '2026-10-15' }, 'day'), [1, 12]);
+assert.deepEqual(when({ date: '2026-10-15' }, 'mon'), [3, 12], 'torsdag: mandag er 3 dager før');
+assert.deepEqual(when({ date: '2026-10-12' }, 'mon'), [0, 12], 'mandag: samme dag');
+assert.deepEqual(when({ date: '2026-10-18' }, 'mon'), [6, 12], 'søndag: mandag er 6 dager før');
+console.log('ok: varsellogikk');

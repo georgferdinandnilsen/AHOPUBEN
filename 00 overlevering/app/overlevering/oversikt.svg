@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1200" height="720" fill="#ffffff"/>
+  <text x="40" y="52" font-size="26" font-weight="bold" fill="#000">Slik henger AHO Puben-appen sammen</text>
+  <text x="40" y="80" font-size="14" fill="#555">Styret skriver bare i Notion. Alt annet skjer av seg selv.</text>
+  <!-- Notion -->
+  <rect x="40" y="130" width="300" height="300" rx="6" fill="#f3f3f3" stroke="#000" stroke-width="2"/>
+  <text x="60" y="165" font-size="20" font-weight="bold" fill="#000">NOTION (styrets arbeidsflate)</text>
+  <text x="60" y="200" font-size="14" fill="#000">• Arrangementer: dato, type, info, bilde</text>
+  <text x="60" y="224" font-size="14" fill="#000">• Forslag fra appen lander her (Bestemt: Nei)</text>
+  <text x="60" y="248" font-size="14" fill="#000">• MEDLEMMER: navn, telefon, e-post</text>
+  <text x="60" y="272" font-size="14" fill="#000">• Styremedlemmer: rolle, telefon</text>
+  <text x="60" y="296" font-size="14" fill="#000">• VAKTPLAN: hvem jobber når</text>
+  <text x="60" y="320" font-size="14" fill="#000">• Infosiden: HOW-TO-manualene</text>
+  <text x="60" y="360" font-size="13" fill="#555">Appen leser og skriver via en «integrasjon»</text>
+  <text x="60" y="380" font-size="13" fill="#555">(en API-nøkkel). Ingen sider trenger å være</text>
+  <text x="60" y="400" font-size="13" fill="#555">publisert på nett.</text>
+  <!-- Worker -->
+  <rect x="450" y="130" width="300" height="300" rx="6" fill="#0000ff" stroke="#000" stroke-width="2"/>
+  <text x="470" y="165" font-size="20" font-weight="bold" fill="#fff">CLOUDFLARE WORKER</text>
+  <text x="470" y="190" font-size="13" fill="#dcdcff">«Hjernen». Gratis. Kjører i skyen.</text>
+  <text x="470" y="222" font-size="14" fill="#fff">• Serverer selve appen (nettsiden)</text>
+  <text x="470" y="246" font-size="14" fill="#fff">• Henter fra Notion hvert 10. minutt</text>
+  <text x="470" y="270" font-size="14" fill="#fff">• Oversetter til engelsk (DeepL)</text>
+  <text x="470" y="294" font-size="14" fill="#fff">• Sender push-varsler hver hele time</text>
+  <text x="470" y="318" font-size="14" fill="#fff">• Innlogging for medlemmer og styret</text>
+  <text x="470" y="342" font-size="14" fill="#fff">• Lagrer abonnementer, meldinger,</text>
+  <text x="470" y="362" font-size="14" fill="#fff">   styrekoder og cache i «KV»</text>
+  <text x="470" y="400" font-size="13" fill="#dcdcff">Hemmelighetene (nøklene) ligger her,</text>
+  <text x="470" y="418" font-size="13" fill="#dcdcff">aldri i koden.</text>
+  <!-- Telefon -->
+  <rect x="860" y="130" width="300" height="300" rx="6" fill="#000" stroke="#000" stroke-width="2"/>
+  <text x="880" y="165" font-size="20" font-weight="bold" fill="#fff">TELEFONENE</text>
+  <text x="880" y="190" font-size="13" fill="#bbb">Appen er en nettside lagt på Hjem-skjerm</text>
+  <text x="880" y="222" font-size="14" fill="#fff">• Alle: neste arrangement, kalender,</text>
+  <text x="880" y="242" font-size="14" fill="#fff">   forslag, varsler, norsk/engelsk</text>
+  <text x="880" y="270" font-size="14" fill="#fff">• Medlemmer: mine vakter, ring kolleger,</text>
+  <text x="880" y="290" font-size="14" fill="#fff">   manualer, meldinger fra styret</text>
+  <text x="880" y="318" font-size="14" fill="#fff">• Styret: send melding til alle,</text>
+  <text x="880" y="338" font-size="14" fill="#fff">   logg over sendte meldinger</text>
+  <text x="880" y="380" font-size="13" fill="#bbb">Push-varsler går via Apple og Google</text>
+  <text x="880" y="398" font-size="13" fill="#bbb">sine push-tjenester, automatisk.</text>
+  <!-- piler -->
+  <line x1="340" y1="250" x2="450" y2="250" stroke="#000" stroke-width="3" marker-end="url(#a)"/>
+  <line x1="450" y1="300" x2="340" y2="300" stroke="#000" stroke-width="3" marker-end="url(#a)"/>
+  <text x="352" y="240" font-size="12" fill="#000">leser</text>
+  <text x="352" y="322" font-size="12" fill="#000">skriver forslag</text>
+  <line x1="750" y1="250" x2="860" y2="250" stroke="#000" stroke-width="3" marker-end="url(#a)"/>
+  <line x1="860" y1="300" x2="750" y2="300" stroke="#000" stroke-width="3" marker-end="url(#a)"/>
+  <text x="762" y="240" font-size="12" fill="#000">app + varsler</text>
+  <text x="762" y="322" font-size="12" fill="#000">innlogging, forslag</text>
+  <!-- bunn: kontoer -->
+  <rect x="40" y="480" width="1120" height="200" rx="6" fill="#fff" stroke="#000" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="60" y="512" font-size="18" font-weight="bold" fill="#000">Kontoene som må eies av styret (i dag ligger de på Georg)</text>
+  <text x="60" y="548" font-size="14" fill="#000"><tspan font-weight="bold">1. Cloudflare</tspan>: der Worker-en kjører og nøklene ligger. Gratis.</text>
+  <text x="60" y="574" font-size="14" fill="#000"><tspan font-weight="bold">2. GitHub</tspan>: der koden ligger. Som en sikkerhetskopi med historikk. Gratis.</text>
+  <text x="60" y="600" font-size="14" fill="#000"><tspan font-weight="bold">3. Notion-integrasjonen «AHO PUBEN APP»</tspan>: nøkkelen appen bruker mot Notion. Ligger i ahopub-arbeidsområdet, opprettet av Ferdinand.</text>
+  <text x="60" y="626" font-size="14" fill="#000"><tspan font-weight="bold">4. DeepL Developer</tspan>: nøkkel for engelsk oversetting. Gratis.</text>
+  <text x="60" y="652" font-size="14" fill="#000"><tspan font-weight="bold">5. Push-nøkler (VAPID)</tspan>: lages med én kommando. Nye nøkler = alle må skru på varsler på nytt.</text>
+  <defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#000"/></marker></defs>
+</svg>
