@@ -20,6 +20,13 @@ async function messages(env, memberId, limit = 20) {
   return out;
 }
 
+// Tall til styret: hvor mange telefoner har varsler på, og hvor mange har lagt appen på Hjem-skjerm. Leses fra KV-metadata, ingen personopplysninger.
+async function stats(env) {
+  const week = Date.now() - 7 * 864e5;
+  const subs = (await env.KV.list({ prefix: 'sub:' })).keys, devs = (await env.KV.list({ prefix: 'dev:' })).keys;
+  return { subs: subs.length, subsMembers: subs.filter(k => k.metadata?.m).length, subsWeek: subs.filter(k => (k.metadata?.t || 0) > week).length, devices: devs.length, standalone: devs.filter(k => k.metadata?.s).length, standaloneWeek: devs.filter(k => k.metadata?.s && (k.metadata?.f || 0) > week).length };
+}
+
 export async function memberRoute(req, url, env, ctx, D) {
   const p = url.pathname, m = req.method, today = D.osloNow().date;
   const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '') || url.searchParams.get('t') || '';
@@ -68,7 +75,7 @@ export async function memberRoute(req, url, env, ctx, D) {
   if (p === '/api/member/home') {
     const { members, board, shifts, manuals } = await data();
     const counts = sess.boardId ? Object.fromEntries(['all', 'upcoming', 'active'].map(k => [k, recipients(k, members, shifts, today).length])) : null;
-    return D.json({ name: sess.name, board: !!sess.boardId, hasCode: sess.boardId ? !!(await env.KV.get('code:' + sess.boardId)) : false, today, shifts: myShifts(sess.memberId, shifts, members, board, sess.boardUserId), messages: await messages(env, sess.memberId || 'b' + sess.boardId), manuals, counts });
+    return D.json({ name: sess.name, board: !!sess.boardId, hasCode: sess.boardId ? !!(await env.KV.get('code:' + sess.boardId)) : false, today, shifts: myShifts(sess.memberId, shifts, members, board, sess.boardUserId), messages: await messages(env, sess.memberId || 'b' + sess.boardId), manuals, counts, stats: sess.boardId ? await stats(env) : null });
   }
   // Varselvalg på kontoen: alle push-abonnementer som tilhører medlemmet (telefonen) leses og oppdateres, så PC og telefon viser det samme.
   if (p === '/api/member/prefs') {

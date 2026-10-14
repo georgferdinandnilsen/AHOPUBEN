@@ -6,7 +6,10 @@ img{max-width:100%}.shots img{width:48%;max-width:300px;margin:6px 1% 6px 0;vert
 a{color:#0000ff}hr{border:0;border-top:1px solid #ddd;margin:30px 0}li{margin:4px 0}
 @media print{body{margin:0;max-width:none}h2{break-before:page}h2:first-of-type{break-before:auto}pre{white-space:pre-wrap}.shots img{width:30%}}</style></head><body><h1>AHO Puben-appen: overlevering til styret</h1>
 <p>
-Skrevet 14. oktober 2026 av Georg Ferdinand Nilsen (med hjelp av Claude). Denne pakken inneholder alt som trengs for å forstå, drifte og flytte appen til styrets egne kontoer. Les dette dokumentet først. Det er skrevet for folk som ikke har bygget nettsider før.
+Skrevet 14. oktober 2026 av Georg Ferdinand Nilsen (med hjelp av Claude), sist oppdatert samme kveld med PC-versjonen. Denne pakken inneholder alt som trengs for å forstå, drifte og flytte appen til styrets egne kontoer. Les dette dokumentet først. Det er skrevet for folk som ikke har bygget nettsider før.
+</p>
+<p>
+Appen er også pubens nettside: den er laget for både telefon og PC, og skal ligge rett på ahopuben.no.
 </p>
 <p>
 Adressen til appen i dag: <a href="https://aho-puben.georgferdinandnilsen.workers.dev">https://aho-puben.georgferdinandnilsen.workers.dev</a>
@@ -22,8 +25,13 @@ Den har tre lag:
 <ul>
 <li><b>For alle:</b> neste arrangement øverst, en kalender, forslagsskjema til styret, varsler man styrer selv, norsk og engelsk, lyst og mørkt tema.</li>
 <li><b>For medlemmer (bartendere):</b> logg inn med telefonnummer og få egne vakter, kolleger man kan ringe med ett trykk, manualene fra Notion, kalenderabonnement og varsel før vakt.</li>
-<li><b>For styret:</b> send melding til alle medlemmer eller dem på vakt, se hvor mange som har lest, og en logg over alt som er sendt.</li>
+<li><b>For styret:</b> send melding til alle medlemmer eller dem på vakt, se hvor mange som har lest, og en logg over alt som er sendt. Pluss en bryter som skjuler «Bli medlem»-knappen for alle når opptaket er stengt, og tall på hvor mange som har varsler på og har lagt appen på Hjem-skjerm.</li>
 </ul>
+<p>
+<b>På PC</b> er appen en vanlig nettside med samme innhold: topplinje med logo og åpningstider, plakaten i full bredde, kalender til venstre, kommende arrangementer og forslag til høyre, og tider, adresse, e-post og Instagram i bunnen. Det er samme fil og samme kode, bare bredere, så det finnes ingen egen PC-versjon å vedlikeholde. Fra 900 piksler bredde bytter den om av seg selv.
+</p>
+<div class="shots"><img src="skjermbilder/09-pc-forside.jpg" alt="PC: forsiden"></div>
+<div class="shots"><img src="skjermbilder/10-pc-kalender.jpg" alt="PC: kalender, kommende og forslag"></div>
 <div class="shots"><img src="skjermbilder/01-forside.jpg" alt="Forsiden"> <img src="skjermbilder/02-kalender-og-kommende.jpg" alt="Kalender og kommende"></div>
 <div class="shots"><img src="skjermbilder/03-varselmeny.jpg" alt="Varselmenyen"> <img src="skjermbilder/04-forslag.jpg" alt="Forslag"></div>
 <div class="shots"><img src="skjermbilder/05-medlem-vakter.jpg" alt="Mine vakter"> <img src="skjermbilder/06-medlem-vaktdetalj.jpg" alt="Vaktdetalj med ring-knapper"></div>
@@ -44,7 +52,7 @@ I tillegg ligger <b>koden på GitHub</b> som sikkerhetskopi med historikk, og <b
 </p>
 <hr>
 <h2>3. Hvem eier hva i dag</h2>
-<table><tr><th>Hva</th><th>Hvor</th><th>Eies av</th><th>Hva det brukes til</th></tr><tr><td>Cloudflare-konto</td><td>dash.cloudflare.com</td><td>Georg (georgferdinandnilsen@gmail.com)</td><td>Kjører Worker-en «aho-puben», lagret KV, alle hemmeligheter</td></tr><tr><td>Adressen</td><td>aho-puben.georgferdinandnilsen.workers.dev</td><td>Følger Cloudflare-kontoen</td><td>Det folk har lagt på Hjem-skjerm. Blir app.ahopuben.no etter flyttingen</td></tr><tr><td>GitHub-repo</td><td>github.com/georgferdinandnilsen/AHOPUBEN</td><td>Georg</td><td>Koden, med historikk</td></tr><tr><td>Notion-integrasjon «AHO PUBEN APP»</td><td>notion.so/profile/integrations</td><td>Opprettet av Ferdinand i AHO PUB-arbeidsområdet</td><td>Nøkkelen appen bruker mot Notion</td></tr><tr><td>DeepL Developer</td><td>deepl.com</td><td>Georg</td><td>Engelsk oversetting, gratis</td></tr><tr><td>Push-nøkler (VAPID)</td><td>Lagret i Cloudflare</td><td>Laget av Georg</td><td>Gjør at akkurat denne appen får sende push</td></tr><tr><td>Figma-fil «FERDINAND»</td><td>figma.com</td><td>Georg</td><td>Designet, tre utkast og den valgte versjonen</td></tr></table>
+<table><tr><th>Hva</th><th>Hvor</th><th>Eies av</th><th>Hva det brukes til</th></tr><tr><td>Cloudflare-konto</td><td>dash.cloudflare.com</td><td>Georg (georgferdinandnilsen@gmail.com)</td><td>Kjører Worker-en «aho-puben», lagret KV, alle hemmeligheter</td></tr><tr><td>Adressen</td><td>aho-puben.georgferdinandnilsen.workers.dev</td><td>Følger Cloudflare-kontoen</td><td>Det folk har lagt på Hjem-skjerm. Blir ahopuben.no etter flyttingen</td></tr><tr><td>Domenet ahopuben.no</td><td>Der domenet er registrert</td><td>Puben</td><td>Peker i dag på en Google Sites-side. Skal peke på appen</td></tr><tr><td>GitHub-repo</td><td>github.com/georgferdinandnilsen/AHOPUBEN</td><td>Georg</td><td>Koden, med historikk</td></tr><tr><td>Notion-integrasjon «AHO PUBEN APP»</td><td>notion.so/profile/integrations</td><td>Opprettet av Ferdinand i AHO PUB-arbeidsområdet</td><td>Nøkkelen appen bruker mot Notion</td></tr><tr><td>DeepL Developer</td><td>deepl.com</td><td>Georg</td><td>Engelsk oversetting, gratis</td></tr><tr><td>Push-nøkler (VAPID)</td><td>Lagret i Cloudflare</td><td>Laget av Georg</td><td>Gjør at akkurat denne appen får sende push</td></tr><tr><td>Figma-fil «FERDINAND»</td><td>figma.com</td><td>Georg</td><td>Designet, tre utkast og den valgte versjonen</td></tr></table>
 <p>
 <b>Hva skjer når Georg slutter?</b> Alt fortsetter å virke så lenge kontoene hans finnes. Men ingen i styret kan rette feil, bytte nøkler eller endre noe. Derfor må appen flyttes, eller styret må få tilgang. Begge veier står under.
 </p>
@@ -150,13 +158,14 @@ Database-id er de 32 tegnene i lenken til databasen i Notion. Id-ene til medlems
 <b>Steg 9. Legg appen på ahopuben.no</b>
 </p>
 <p>
-Velg adresse først, for den kan ikke byttes senere uten at alle må legge appen til på nytt. Anbefaling: <b>app.ahopuben.no</b>, så kan ahopuben.no fortsatt brukes til en vanlig nettside. Vil dere ha appen rett på ahopuben.no, går det også.
+Bestemt 14. oktober 2026: appen skal være selve forsiden på <b>ahopuben.no</b> og erstatte dagens Google Sites-side. Alt som står der i dag (åpningstider, adresse, e-post og Instagram) ligger allerede i bunnen av appen. Adressen kan ikke byttes senere uten at alle må legge appen til på nytt, så gjør dette før dere deler den.
 </p>
 <ol>
-<li>I Cloudflare: trykk «Add a domain» (Onboard a domain), skriv <code>ahopuben.no</code>, velg gratisplanen. Cloudflare leser inn dagens DNS-oppføringer. Sjekk at e-post og eventuell eksisterende nettside står der.</li>
+<li>I Cloudflare: trykk «Add a domain» (Onboard a domain), skriv <code>ahopuben.no</code>, velg gratisplanen. Cloudflare leser inn dagens DNS-oppføringer. Sjekk at det som skal beholdes står der (e-posten aho@puben.no ligger på et annet domene og berøres ikke).</li>
 <li>Cloudflare gir dere to navnetjenere (nameservers), for eksempel <code>anna.ns.cloudflare.com</code> og <code>bob.ns.cloudflare.com</code>. Logg inn der domenet er registrert, finn «Navnetjenere»/«DNS-servere» for ahopuben.no, og bytt til de to. Det tar fra noen minutter til et døgn før det slår inn. Cloudflare sender e-post når det er klart.</li>
-<li>I Cloudflare: Workers &amp; Pages → aho-puben → Settings → Domains &amp; Routes → Add → Custom Domain → skriv <code>app.ahopuben.no</code> (eller <code>ahopuben.no</code>) → Add. Cloudflare ordner sertifikat og DNS selv.</li>
-<li>Åpne <a href="https://app.ahopuben.no">https://app.ahopuben.no</a> på telefonen. Det er den endelige adressen. Den gamle workers.dev-adressen virker fortsatt, men del bare den nye.</li>
+<li>I Cloudflare: Workers &amp; Pages → aho-puben → Settings → Domains &amp; Routes → Add → Custom Domain → skriv <code>ahopuben.no</code> → Add. Gjør det samme en gang til med <code>www.ahopuben.no</code>, for dagens side bruker www. Cloudflare ordner sertifikat og DNS selv. Finnes det gamle DNS-oppføringer for ahopuben.no eller www som peker til Google Sites, ber Cloudflare dere fjerne dem.</li>
+<li>I Google Sites: åpne siden → Innstillinger → Egendefinerte domener, og fjern ahopuben.no, så den gamle siden ikke konkurrerer. Siden kan bli liggende upublisert som backup.</li>
+<li>Åpne <a href="https://ahopuben.no">https://ahopuben.no</a> på telefon og på PC. Det er den endelige adressen. Den gamle workers.dev-adressen virker fortsatt, men del bare den nye.</li>
 </ol>
 <p>
 <b>Steg 10. Test</b>
@@ -193,7 +202,7 @@ Appen følger disse reglene. Ingen kode trengs.
 <li>Et arrangement vises i appen når det har en dato i feltet <b>Når</b> som er i dag eller senere. Ingen dato, ingen visning.</li>
 <li><b>Type arrangement</b> blir etiketten (Aktivitet, DJ og så videre). Typen «Rolig Pub» betyr vanlig pub uten program.</li>
 <li><b>Info til APP</b> er teksten som vises under datoen. Oversettes automatisk til engelsk.</li>
-<li><b>Bilde til APP</b> blir bildet øverst. Uten bilde vises logoen.</li>
+<li><b>Bilde til APP</b> blir bildet øverst. Uten bilde vises et fast bilde av puben (filen <code>public/fallback.jpg</code>). Vil dere bytte det, bytt filen og kjør <code>npm run deploy</code>.</li>
 <li>Endringer vises i appen innen ti minutter.</li>
 <li>Torsdager uten rad i Notion vises automatisk som «Rolig pub, kl 19-01».</li>
 </ul>
@@ -241,6 +250,15 @@ Appen følger disse reglene. Ingen kode trengs.
 <li>Styremeldinger: med en gang, til innloggede medlemmer som har varsler på.</li>
 </ul>
 <p>
+<b>Innstillinger og tall styret ser i appen</b>
+</p>
+<ul>
+<li><b>«Bli medlem»-knappen</b> øverst kan skjules for alle. Logg inn som styremedlem, trykk bjella, og under MEDLEM står avkryssingen «Vis «Bli medlem» på nettsiden». Slå av når opptaket er stengt. Valget gjelder alle som åpner appen, med en gang. Selve lenken knappen går til (innmeldingsskjemaet i Notion) står øverst i <code>public/index.html</code> som <code>JOIN_URL</code>.</li>
+<li><b>Tall.</b> Øverst i «Send melding» ser styret hvor mange telefoner som har varsler på (og hvor mange av dem som er innloggede medlemmer), og hvor mange som har lagt appen på Hjem-skjerm, med antall nye siste sju dager. Hjem-skjerm telles når appen åpnes derfra, én gang per dag per telefon, uten navn eller numre.</li>
+<li><b>Varselvalg på PC.</b> PC-er får ikke push, så varselvalgene vises bare når man er innlogget. Da styrer de telefonen: appen leser valgene fra telefonens abonnement og skriver endringer tilbake, så PC og telefon er like.</li>
+<li><b>Kalender på PC.</b> «Legg i kalender» på PC gir en meny: Google Kalender, Outlook, abonnement i Apple Kalender på alle arrangementer, eller nedlasting av .ics. Valget huskes på maskinen og kan endres under innstillinger. Abonnementet henter fra adressen <code>/api/events.ics</code> og oppdaterer seg selv.</li>
+</ul>
+<p>
 <b>Styrekoder</b>
 </p>
 <ul>
@@ -248,7 +266,7 @@ Appen følger disse reglene. Ingen kode trengs.
 </ul>
 <hr>
 <h2>6. Når noe ikke virker</h2>
-<table><tr><th>Symptom</th><th>Sannsynlig årsak</th><th>Fiks</th></tr><tr><td>Appen viser Halloween, DJ: Dave Van Zon og Julepub med eksempeltekst</td><td>NOTION_TOKEN mangler eller er feil</td><td><code>npx wrangler secret put NOTION_TOKEN</code> på nytt</td></tr><tr><td>Et arrangement mangler</td><td>Ingen dato i Når, eller datoen er passert</td><td>Sett dato</td></tr><tr><td>Appen viser gamle data</td><td>Cache på ti minutter</td><td>Vent, eller slett nøkkelen <code>events</code> i KV</td></tr><tr><td>Styremedlem vises med rolle i stedet for navn</td><td>Integrasjonen mangler «Les brukerinformasjon uten e-postadresser»</td><td>Slå på i integrasjonens Capabilities. Logg ut og inn</td></tr><tr><td>«Fant ikke nummeret i medlemslisten»</td><td>Nummeret står annerledes i Notion, eller mangler landskode</td><td>Rett i Notion, eller bruk «Rett det med e-posten din» etter tre forsøk</td></tr><tr><td>Push kommer ikke på iPhone</td><td>Appen er åpnet i Safari, ikke fra Hjem-skjerm</td><td>Del → Legg til på Hjem-skjerm → åpne derfra → slå på varsler</td></tr><tr><td>Ingen engelsk tekst</td><td>DEEPL_KEY mangler eller kvoten er brukt opp</td><td>Sjekk nøkkelen på deepl.com</td></tr><tr><td>«Notion 404» i loggen</td><td>En side er ikke koblet til integrasjonen</td><td><code>…</code> → Tilkoblinger på siden</td></tr><tr><td>Alt er borte</td><td>Worker-en er slettet eller Cloudflare-kontoen er stengt</td><td>Sett opp på nytt etter Vei B</td></tr></table>
+<table><tr><th>Symptom</th><th>Sannsynlig årsak</th><th>Fiks</th></tr><tr><td>Appen viser Halloween, DJ: Dave Van Zon og Julepub med eksempeltekst</td><td>NOTION_TOKEN mangler eller er feil</td><td><code>npx wrangler secret put NOTION_TOKEN</code> på nytt</td></tr><tr><td>Et arrangement mangler</td><td>Ingen dato i Når, eller datoen er passert</td><td>Sett dato</td></tr><tr><td>Appen viser gamle data</td><td>Cache på ti minutter</td><td>Vent, eller slett nøkkelen <code>events</code> i KV</td></tr><tr><td>Styremedlem vises med rolle i stedet for navn</td><td>Integrasjonen mangler «Les brukerinformasjon uten e-postadresser»</td><td>Slå på i integrasjonens Capabilities. Logg ut og inn</td></tr><tr><td>«Fant ikke nummeret i medlemslisten»</td><td>Nummeret står annerledes i Notion, eller mangler landskode</td><td>Rett i Notion, eller bruk «Rett det med e-posten din» etter tre forsøk</td></tr><tr><td>Push kommer ikke på iPhone</td><td>Appen er åpnet i Safari, ikke fra Hjem-skjerm</td><td>Del → Legg til på Hjem-skjerm → åpne derfra → slå på varsler</td></tr><tr><td>Ingen engelsk tekst</td><td>DEEPL_KEY mangler eller kvoten er brukt opp</td><td>Sjekk nøkkelen på deepl.com</td></tr><tr><td>«Notion 404» i loggen</td><td>En side er ikke koblet til integrasjonen</td><td><code>…</code> → Tilkoblinger på siden</td></tr><tr><td>Alt er borte</td><td>Worker-en er slettet eller Cloudflare-kontoen er stengt</td><td>Sett opp på nytt etter steg 1 til 11 over</td></tr><tr><td>«Bli medlem»-knappen er borte</td><td>Et styremedlem har slått den av</td><td>Logg inn som styre, bjella, huk av «Vis «Bli medlem» på nettsiden»</td></tr><tr><td>PC viser den gamle versjonen etter en oppdatering</td><td>Nettleseren har lagret den gamle siden</td><td>Hard reload: Cmd+Shift+R på Mac, Ctrl+F5 på Windows</td></tr><tr><td>Et arrangement mangler bilde</td><td>Ingen fil i Bilde til APP</td><td>Det faste bildet av puben vises. Legg inn bilde i Notion om dere vil</td></tr></table>
 <p>
 <b>Se loggen live</b> mens dere feilsøker. I app-mappen:
 </p>
@@ -275,20 +293,28 @@ oversikt.svg                     Oversiktsdiagrammet
 skjermbilder/                    Appen slik den ser ut i dag
 design/                          Designet fra Figma: valgt versjon og alternativene som ble vurdert
 app/                             Hele koden, det samme som ligger på GitHub
-  public/index.html              Selve appen, én fil
+  public/index.html              Selve appen, én fil, for telefon og PC
   public/sw.js                   Mottar push-varsler på telefonen
   public/manifest.webmanifest    Navn og ikon på Hjem-skjerm
+  public/fallback.jpg            Bildet som vises når et arrangement mangler bilde
+  public/logo-wide.svg           Den brede logoen fra topplinjen på PC
   src/index.js                   Worker-en: Notion, DeepL, push, forslag, cron
   src/members.js, memberRoutes.js, notify.js, notion.js   Medlemsdel, varsellogikk, Notion-tolking
   test/                          Små tester: node test/members.test.mjs
   wrangler.toml                  Cloudflare-oppsett og Notion-id-er
   README.md                      Teknisk oppsett, kortversjon
-  docs/intent/aho-puben.md       Alle beslutninger og designprinsipper, kronologisk</pre>
+  docs/intent/aho-puben.md       Alle beslutninger og designprinsipper, kronologisk
+  docs/promo/manus-instagram.md  Manus for promovideoen (video, story og innlegg)</pre>
 <p>
 Figma-filen med designet: <a href="https://www.figma.com/design/OHP7bnByAgK4NZs1s80igy/FERDINAND?node-id=478-2">https://www.figma.com/design/OHP7bnByAgK4NZs1s80igy/FERDINAND?node-id=478-2</a>
 </p>
 <hr>
-<h2>9. Få hjelp av en AI</h2>
+<h2>9. Promovideo og lansering</h2>
+<p>
+Manuset til promovideoen for Instagram ligger i <code>app/docs/promo/manus-instagram.md</code>: en person foran puben viser telefonen, og alt grafisk ligger som overlay. Storyboardet med alle rutene (video, story og innlegg) ligger i Claude Design: <a href="https://claude.ai/artifact/JDdjR3HSart2mVVRj3F1iy">https://claude.ai/artifact/JDdjR3HSart2mVVRj3F1iy</a> (Georg må dele det fra Share-menyen). Når dere lanserer: legg appen på ahopuben.no først (steg 9), så peker linken i bio og videoen på riktig adresse fra dag én.
+</p>
+<hr>
+<h2>10. Få hjelp av en AI</h2>
 <p>
 Dere trenger ikke kunne dette selv. Åpne <code>AI-PROMPT.md</code>, lim inn teksten i en AI-assistent (ChatGPT, Claude, Gemini) og legg ved filene fra <code>app/</code> hvis den kan lese filer. Så ber dere den ta ett steg om gangen. Regelen er: <b>lim aldri nøkler eller passord inn i chatten.</b> AI-en trenger ikke dem. Den trenger bare å vite hvor de skal.
 </p></body></html>
