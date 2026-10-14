@@ -444,6 +444,7 @@ body.member .content{padding-bottom:64px}
 const API = location.port === '8000' ? 'http://localhost:8787' : ''; // ponytail: python-server-forhåndsvisning peker på wrangler dev; i prod er alt samme opprinnelse
 const JOIN_URL = 'https://ahopub.notion.site/306fc4bc274d8006adabe92827c1c11a'; // innmeldingsskjemaet i Notion, må være delt offentlig
 const IG_URL = 'https://www.instagram.com/ahopuben/', MAIL = 'aho@puben.no', ADDRESS = 'Maridalsveien 29, 0175 Oslo'; // fra dagens nettside, vises i bunnen på PC
+const FALLBACK_IMG = '/fallback.jpg'; // bilde av puben, brukes når «Bilde til APP» mangler i Notion
 const PC = () => matchMedia('(min-width:900px)').matches;
 matchMedia('(min-width:900px)').addEventListener('change', () => renderPanel());
 const KEYS = ['same','day','mon']; // samme dag (3 t før start), dagen før kl 12, mandag kl 12
@@ -492,13 +493,13 @@ const sub = e => e.plain ? `${t('noProgram')}, ${t('open')}` : `${typ(e)}${e.pub
 
 function renderHero() {
   const all = items(); const e = all[0]; const h = $('#hero');
-  if (!e) { h.className = 'hero noimg'; h.innerHTML = `<div class="genwrap"><img class="gen" src="/icon-512.png" alt=""></div><div class="tx"><h1>AHO PUB</h1></div>`; return; }
+  if (!e) { h.className = 'hero'; h.innerHTML = `<img src="${FALLBACK_IMG}" alt=""><div class="tx"><h1>AHO PUB</h1><div class="meta">${t('footHours')}</div></div>`; return; }
   const d = parse(e.date); const diff = (d - today()) / 864e5;
   const chip = diff === 0 ? t('tonight') : (d.getDay() === 4 && diff < 7 ? t('thisThu') : t('next'));
   const n = e.plain ? all.find(x => !x.plain) : null;
   const teaser = n ? `<button class="teaser" data-d="${n.date}">${t('nextEvent')}: ${title(n)}, ${fmt(n.date, { day:'numeric', month:'short' })} →</button>` : '';
-  h.className = 'hero' + (e.image ? '' : ' noimg');
-  h.innerHTML = `${e.image ? `<img src="${e.image}" alt="">` : '<div class="genwrap"><img class="gen" src="/icon-512.png" alt=""></div>'}<div class="tx"><span class="chip">${chip}</span><h1>${label(e)}</h1><div class="meta">${fmt(d, { weekday:'long', day:'numeric', month:'long' })}, ${t('open')}</div>${desc(e) ? `<p class="info">${desc(e)}</p>` : ''}${teaser}</div>`;
+  h.className = 'hero';
+  h.innerHTML = `<img src="${e.image || FALLBACK_IMG}" alt=""><div class="tx"><span class="chip">${chip}</span><h1>${label(e)}</h1><div class="meta">${fmt(d, { weekday:'long', day:'numeric', month:'long' })}, ${t('open')}</div>${desc(e) ? `<p class="info">${desc(e)}</p>` : ''}${teaser}</div>`;
   $('#desc').textContent = ''; $('#desc').hidden = true; // infoen står i hero-feltet
   $('#actions').innerHTML = e.plain ? '' : `<a class="btn primary" href="${API}/api/ics/${e.id}">${t('addCal')}</a>${navigator.share ? `<button class="btn ghost" id="share">${t('share')}</button>` : ''}`;
   $('#share')?.addEventListener('click', () => navigator.share({ title: label(e), text: `${label(e)}, ${fmt(d, { weekday:'long', day:'numeric', month:'long' })} ${t('open')}`, url: location.origin }).catch(() => {}));
@@ -515,8 +516,8 @@ function renderCal() {
     if (i >= 34 && (i + 1) % 7 === 0 && new Date(y, m, 1 - start + i + 1).getMonth() !== m) break;
   }
   const e = S.events.find(x => x.date === S.sel); const sd = S.sel ? parse(S.sel) : null;
-  const card = !S.sel ? '' : e ? `<div class="selcard">${e.image ? `<img src="${e.image}" alt="">` : '<div class="ph"></div>'}<div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${label(e)}</h3><p>${sub(e)}</p></div></div>`
-    : sd.getDay() === 4 && S.sel >= tod ? `<div class="selcard"><div class="ph"></div><div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${t('plain')}</h3><p>${t('noProgram')}</p></div></div>`
+  const card = !S.sel ? '' : e ? `<div class="selcard"><img src="${e.image || FALLBACK_IMG}" alt=""><div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${label(e)}</h3><p>${sub(e)}</p></div></div>`
+    : sd.getDay() === 4 && S.sel >= tod ? `<div class="selcard"><img src="${FALLBACK_IMG}" alt=""><div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${t('plain')}</h3><p>${t('noProgram')}</p></div></div>`
     : `<div class="selcard empty">${t('closed')}</div>`;
   $('#cal').innerHTML = `<div class="cal-head"><h2>${fmt(first, { month:'long', year:'numeric' })}</h2><div class="cal-nav"><button data-nav="-1" aria-label="Forrige">←</button><button data-nav="1" aria-label="Neste" style="color:var(--fg)">→</button></div></div><div class="grid">${t('wd').map((w, i) => `<div class="wd${i === 3 ? ' thu' : ''}">${w}</div>`).join('')}${cells}</div>${card}`;
 }
