@@ -69,7 +69,7 @@ Nederst i varselmenyen logger medlemmer inn med telefonnummer. Nummeret sjekkes 
 
 **Skjule «Bli medlem»:** styremedlemmer har en avkryssing i varselmenyen, «Vis «Bli medlem» på nettsiden». Den gjelder for alle som åpner appen, lagres i KV (`settings:join`) og trenger ikke styrekode. Slå av når opptaket er stengt.
 
-**Tall for styret:** øverst i «Send melding» står hvor mange telefoner som har varsler på (KV-nøkler `sub:`, med metadata) og hvor mange som har lagt appen på Hjem-skjerm (KV-nøkler `dev:`, telefonen melder seg via `POST /api/ping` én gang om dagen med en tilfeldig id, ingen personopplysninger).
+**Tall for styret:** «Se tall for appen» i varselmenyen (styre) eller «SE TALL» under Send melding. `GET /api/board/stats` teller fra KV-metadata: besøk som unike enheter siste døgn/7/30 dager og andel PC (`dev:`, hver nettleser melder seg via `POST /api/ping` én gang om dagen med en tilfeldig id), innloggede personer og enheter (`sess:`), telefoner med varsler på (`sub:`) og telefoner som har åpnet appen fra Hjem-skjerm (`dev:` med `s`). Ingen navn, numre eller IP-adresser. Én KV-skriving per enhet per dag.
 
 **Glemt styrekode:** trykk «Nullstill kode» i appen. Lederen åpner KV-lageret i Cloudflare og leser nøkkelen `reset:<styre-id>`, som inneholder en midlertidig kode. Styremedlemmet skriver den inn sammen med en ny kode.
 KV-lageret: https://dash.cloudflare.com/77c55d6b057cc69a033738170492d88b/workers/kv/namespaces/0bfeddb59d4e4152984b31df88491a13
@@ -89,7 +89,7 @@ Push på iPhone virker bare fra Hjem-skjerm (iOS 16.4 eller nyere). «Send testv
 
 ## Hvordan varslene sendes
 
-Cron kjører hver hele time. Worker-en regner ut Oslo-tid, går gjennom alle abonnenter og sender til de som har valgt akkurat denne timen og dagen relativt til et arrangement (samme dag kl 16, dagen før kl 12, osv.). Torsdager uten arrangement teller som «Rolig pub» hvis abonnenten har det på.
+Cron kjører hver hele time. Worker-en regner ut Oslo-tid, går gjennom alle abonnenter og sender til de som har valgt akkurat denne timen og dagen relativt til et arrangement (samme dag kl 16 eller dagen før kl 12; starter arrangementet før kl 19, kommer samme-dag-varselet tre timer før start). Torsdager uten arrangement teller som «Rolig pub» hvis abonnenten har det på.
 
 ## Overlevering til styret
 

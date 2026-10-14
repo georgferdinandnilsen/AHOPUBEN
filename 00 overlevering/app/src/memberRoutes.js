@@ -20,11 +20,20 @@ async function messages(env, memberId, limit = 20) {
   return out;
 }
 
-// Tall til styret: hvor mange telefoner har varsler på, og hvor mange har lagt appen på Hjem-skjerm. Leses fra KV-metadata, ingen personopplysninger.
+async function listAll(env, prefix) { const out = []; let cursor; do { const r = await env.KV.list({ prefix, cursor }); out.push(...r.keys); cursor = r.list_complete ? null : r.cursor; } while (cursor); return out; }
+// Tall til styret, fra KV-metadata. Ingen navn, numre eller IP-adresser. Eldre nøkler uten metadata får det skrevet på første gang.
 async function stats(env) {
-  const week = Date.now() - 7 * 864e5;
-  const subs = (await env.KV.list({ prefix: 'sub:' })).keys, devs = (await env.KV.list({ prefix: 'dev:' })).keys;
-  return { subs: subs.length, subsMembers: subs.filter(k => k.metadata?.m).length, subsWeek: subs.filter(k => (k.metadata?.t || 0) > week).length, devices: devs.length, standalone: devs.filter(k => k.metadata?.s).length, standaloneWeek: devs.filter(k => k.metadata?.s && (k.metadata?.f || 0) > week).length };
+  const now = Date.now(), day = now - 864e5, week = now - 7 * 864e5, month = now - 30 * 864e5;
+  const [subs, sess, devs] = await Promise.all(['sub:', 'sess:', 'dev:'].map(p => listAll(env, p)));
+  for (const k of subs.filter(k => !k.metadata).slice(0, 200)) { const v = await env.KV.get(k.name, 'json'); if (!v) continue; k.metadata = { m: v.memberId || v.boardUserId ? 1 : 0, f: v.t || now, t: v.t || now }; try { await env.KV.put(k.name, JSON.stringify(v), { metadata: k.metadata }); } catch (e) {} }
+  for (const k of sess.filter(k => !k.metadata).slice(0, 200)) { const v = await env.KV.get(k.name, 'json'); if (!v) continue; k.metadata = { u: v.memberId || (v.boardId ? 'b' + v.boardId : '') }; try { await env.KV.put(k.name, JSON.stringify(v), { metadata: k.metadata, ...(k.expiration ? { expiration: k.expiration } : { expirationTtl: 180 * 86400 }) }); } catch (e) {} }
+  const seen = t => devs.filter(k => (k.metadata?.t || 0) > t), since = k => k.metadata?.si || (k.metadata?.s ? k.metadata?.f : 0) || 0;
+  return {
+    visitors: { day: seen(day).length, week: seen(week).length, month: seen(month).length, pc: seen(month).filter(k => k.metadata?.d).length },
+    loggedIn: { people: new Set(sess.map(k => k.metadata?.u).filter(Boolean)).size, devices: sess.length },
+    push: { phones: subs.length, members: subs.filter(k => k.metadata?.m).length, week: subs.filter(k => (k.metadata?.f || 0) > week).length },
+    home: { phones: devs.filter(k => k.metadata?.s).length, week: devs.filter(k => since(k) > week).length },
+  };
 }
 
 export async function memberRoute(req, url, env, ctx, D) {
@@ -43,7 +52,7 @@ export async function memberRoute(req, url, env, ctx, D) {
     if (!me && !b) return D.json({ error: 'not_member' }, 404);
     if (me && !isActive(me, today) && !b) return D.json({ error: 'expired', until: me.until }, 403);
     const t = rand(); const name = me?.name || b.name || b.role;
-    await env.KV.put('sess:' + t, JSON.stringify({ memberId: me?.id || '', name, phone: ph, boardId: b?.id || '', boardUserId: b?.userId || '', t: Date.now() }), { expirationTtl: 180 * 86400 });
+    await env.KV.put('sess:' + t, JSON.stringify({ memberId: me?.id || '', name, phone: ph, boardId: b?.id || '', boardUserId: b?.userId || '', t: Date.now() }), { expirationTtl: 180 * 86400, metadata: { u: me?.id || (b?.id ? 'b' + b.id : '') } });
     return D.json({ token: t, name, board: !!b, hasCode: b ? !!(await env.KV.get('code:' + b.id)) : false });
   }
   // Glemt eller feil lagret nummer: finn medlemskortet med e-post, skriv inn nytt nummer, som lagres i Notion.
@@ -66,7 +75,7 @@ export async function memberRoute(req, url, env, ctx, D) {
     await env.KV.delete('recover:' + rt);
     console.log('Telefonnummer oppdatert via e-post for medlem', me.id);
     const b = board.find(x => x.phone === ph); const t = rand();
-    await env.KV.put('sess:' + t, JSON.stringify({ memberId: me.id, name: me.name, phone: ph, boardId: b?.id || '', boardUserId: b?.userId || '', t: Date.now() }), { expirationTtl: 180 * 86400 });
+    await env.KV.put('sess:' + t, JSON.stringify({ memberId: me.id, name: me.name, phone: ph, boardId: b?.id || '', boardUserId: b?.userId || '', t: Date.now() }), { expirationTtl: 180 * 86400, metadata: { u: me.id } });
     return D.json({ token: t, name: me.name, board: !!b, hasCode: b ? !!(await env.KV.get('code:' + b.id)) : false });
   }
   if (!sess) return D.json({ error: 'unauthorized' }, 401);
@@ -75,14 +84,14 @@ export async function memberRoute(req, url, env, ctx, D) {
   if (p === '/api/member/home') {
     const { members, board, shifts, manuals } = await data();
     const counts = sess.boardId ? Object.fromEntries(['all', 'upcoming', 'active'].map(k => [k, recipients(k, members, shifts, today).length])) : null;
-    return D.json({ name: sess.name, board: !!sess.boardId, hasCode: sess.boardId ? !!(await env.KV.get('code:' + sess.boardId)) : false, today, shifts: myShifts(sess.memberId, shifts, members, board, sess.boardUserId), messages: await messages(env, sess.memberId || 'b' + sess.boardId), manuals, counts, stats: sess.boardId ? await stats(env) : null });
+    return D.json({ name: sess.name, board: !!sess.boardId, hasCode: sess.boardId ? !!(await env.KV.get('code:' + sess.boardId)) : false, today, shifts: myShifts(sess.memberId, shifts, members, board, sess.boardUserId), messages: await messages(env, sess.memberId || 'b' + sess.boardId), manuals, counts });
   }
   // Varselvalg på kontoen: alle push-abonnementer som tilhører medlemmet (telefonen) leses og oppdateres, så PC og telefon viser det samme.
   if (p === '/api/member/prefs') {
     const mine = [];
-    for (const k of (await env.KV.list({ prefix: 'sub:' })).keys) { const s = await env.KV.get(k.name, 'json'); if (s && ((sess.memberId && s.memberId === sess.memberId) || (sess.boardUserId && s.boardUserId === sess.boardUserId))) mine.push({ k: k.name, s }); }
+    for (const k of await listAll(env, 'sub:')) { const s = await env.KV.get(k.name, 'json'); if (s && ((sess.memberId && s.memberId === sess.memberId) || (sess.boardUserId && s.boardUserId === sess.boardUserId))) mine.push({ k: k.name, s, md: k.metadata }); }
     if (m === 'POST') {
-      for (const { k, s } of mine) { s.prefs = { ...s.prefs, offsets: normOffsets(body.offsets ?? s.prefs?.offsets), plain: body.plain ?? s.prefs?.plain !== false, shift: body.shift ?? s.prefs?.shift !== false }; await env.KV.put(k, JSON.stringify(s)); }
+      for (const { k, s, md } of mine) { s.prefs = { ...s.prefs, offsets: normOffsets(body.offsets ?? s.prefs?.offsets), plain: body.plain ?? s.prefs?.plain !== false, shift: body.shift ?? s.prefs?.shift !== false }; await env.KV.put(k, JSON.stringify(s), { metadata: { ...(md || { m: s.memberId || s.boardUserId ? 1 : 0, f: s.t || Date.now() }), t: Date.now() } }); } // metadata beholdes, ellers forsvinner de fra tallene
       return D.json({ ok: true, devices: mine.length });
     }
     const latest = mine.sort((a, b) => (b.s.t || 0) - (a.s.t || 0))[0];
@@ -123,6 +132,7 @@ export async function memberRoute(req, url, env, ctx, D) {
     console.log('bli-medlem', on ? 'vist' : 'skjult', 'av', sess.name);
     return D.json({ ok: true, join: on });
   }
+  if (p === '/api/board/stats') return D.json(await stats(env)); // krever styreinnlogging, ikke kode
   if (!stored) return D.json({ error: 'no_code' }, 403);
   if (p === '/api/board/log') return D.json({ messages: await messages(env, null, 100) });
   if (p === '/api/board/send' && m === 'POST') {
@@ -134,7 +144,7 @@ export async function memberRoute(req, url, env, ctx, D) {
     const msg = { id: Date.now().toString(36) + rand().slice(0, 4), text, to, count: rec.size, sender: sess.name, t: Date.now() };
     await env.KV.put('msg:' + msg.id, JSON.stringify(msg));
     let pushed = 0;
-    for (const k of (await env.KV.list({ prefix: 'sub:' })).keys) { const s = await env.KV.get(k.name, 'json'); if (s?.memberId && rec.has(s.memberId) && await D.push(env, s.subscription, { title: s.prefs?.lang === 'en' ? 'Message from the board' : 'Melding fra styret', body: text, url: '/#medlem', tag: 'msg' + msg.id })) pushed++; }
+    for (const k of await listAll(env, 'sub:')) { const s = await env.KV.get(k.name, 'json'); if (s?.memberId && rec.has(s.memberId) && await D.push(env, s.subscription, { title: s.prefs?.lang === 'en' ? 'Message from the board' : 'Melding fra styret', body: text, url: '/#medlem', tag: 'msg' + msg.id })) pushed++; }
     return D.json({ ok: true, id: msg.id, count: rec.size, pushed });
   }
   return D.json({ error: 'not found' }, 404);

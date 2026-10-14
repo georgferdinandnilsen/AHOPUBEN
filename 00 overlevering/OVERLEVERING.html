@@ -245,7 +245,7 @@ Appen følger disse reglene. Ingen kode trengs.
 <b>Varsler</b>
 </p>
 <ul>
-<li>Arrangementer: hver bruker velger Samme dag (3 timer før start), Dagen før kl 12 og/eller Mandag kl 12. Standard er samme dag og dagen før.</li>
+<li>Arrangementer: hver bruker velger Samme dag kl 16 og/eller Dagen før kl 12. Standard er begge. Starter et arrangement tidligere enn kl 19 (starttid i Når), kommer samme-dag-varselet tre timer før start.</li>
 <li>Vakter: kl 19 dagen før, og én time før start.</li>
 <li>Styremeldinger: med en gang, til innloggede medlemmer som har varsler på.</li>
 </ul>
@@ -254,7 +254,7 @@ Appen følger disse reglene. Ingen kode trengs.
 </p>
 <ul>
 <li><b>«Bli medlem»-knappen</b> øverst kan skjules for alle. Logg inn som styremedlem, trykk bjella, og under MEDLEM står avkryssingen «Vis «Bli medlem» på nettsiden». Slå av når opptaket er stengt. Valget gjelder alle som åpner appen, med en gang. Selve lenken knappen går til (innmeldingsskjemaet i Notion) står øverst i <code>public/index.html</code> som <code>JOIN_URL</code>.</li>
-<li><b>Tall.</b> Øverst i «Send melding» ser styret hvor mange telefoner som har varsler på (og hvor mange av dem som er innloggede medlemmer), og hvor mange som har lagt appen på Hjem-skjerm, med antall nye siste sju dager. Hjem-skjerm telles når appen åpnes derfra, én gang per dag per telefon, uten navn eller numre.</li>
+<li><b>Tall.</b> Logg inn som styremedlem, trykk bjella og «Se tall for appen» (eller «SE TALL» under Send melding). Der står: besøk (unike enheter siste døgn, siste 7 og 30 dager, og hvor mange av dem fra PC), hvor mange som er innlogget (personer og enheter), hvor mange telefoner som har varsler på, og hvor mange som har lagt appen på Hjem-skjerm, med nye siste sju dager. Alt er antall: ingen navn, numre eller IP-adresser. Hver nettleser får en tilfeldig id som bare ligger i nettleseren, så samme person ikke telles to ganger samme dag. Tellingen startet 14. oktober 2026. Ekomloven kan kreve samtykke for slik lagring på brukerens enhet når den ikke er nødvendig for tjenesten: sjekk det, og ta tellingen ut av appen om dere er usikre (det er én blokk i <code>public/index.html</code> merket «telefonen melder seg»).</li>
 <li><b>Varselvalg på PC.</b> PC-er får ikke push, så varselvalgene vises bare når man er innlogget. Da styrer de telefonen: appen leser valgene fra telefonens abonnement og skriver endringer tilbake, så PC og telefon er like.</li>
 <li><b>Kalender på PC.</b> «Legg i kalender» på PC gir en meny: Google Kalender, Outlook, abonnement i Apple Kalender på alle arrangementer, eller nedlasting av .ics. Valget huskes på maskinen og kan endres under innstillinger. Abonnementet henter fra adressen <code>/api/events.ics</code> og oppdaterer seg selv.</li>
 </ul>
@@ -283,7 +283,7 @@ Trykk Ctrl+C for å stoppe.
 <p>
 Alt kjører på gratisnivåene, og en studentpub kommer ikke i nærheten av grensene. Domenet ahopuben.no betales som før hos registraren; Cloudflare tar ikke betalt for å bruke det.
 </p>
-<table><tr><th>Tjeneste</th><th>Gratisgrense</th><th>Hva appen bruker</th></tr><tr><td>Cloudflare Workers</td><td>100 000 forespørsler per dag</td><td>Noen hundre</td></tr><tr><td>Cloudflare KV</td><td>1 000 skrivinger per dag, 100 000 lesinger</td><td>Noen titalls skrivinger, bortsett fra når en styremelding sendes (én per medlem som leser)</td></tr><tr><td>DeepL Developer</td><td>1 million tegn, engangs</td><td>Noen tusen tegn i året</td></tr><tr><td>Notion API</td><td>Ingen kostnad</td><td>Hvert 10. minutt</td></tr></table>
+<table><tr><th>Tjeneste</th><th>Gratisgrense</th><th>Hva appen bruker</th></tr><tr><td>Cloudflare Workers</td><td>100 000 forespørsler per dag</td><td>Noen hundre</td></tr><tr><td>Cloudflare KV</td><td>1 000 skrivinger per dag, 100 000 lesinger</td><td>Én skriving per besøkende enhet per dag (tellingen), noen titalls til, og én per medlem som leser en styremelding. Over omtrent 900 unike besøkende per dag må tellingen tas ut, eller Workers oppgraderes til betalt plan (5 dollar i måneden)</td></tr><tr><td>DeepL Developer</td><td>1 million tegn, engangs</td><td>Noen tusen tegn i året</td></tr><tr><td>Notion API</td><td>Ingen kostnad</td><td>Hvert 10. minutt</td></tr></table>
 <hr>
 <h2>8. Filene i pakken</h2>
 <pre>OVERLEVERING.md / .html / .pdf   Dette dokumentet
