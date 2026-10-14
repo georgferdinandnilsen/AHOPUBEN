@@ -98,6 +98,12 @@ export async function memberRoute(req, url, env, ctx, D) {
     await env.KV.put('reset:' + sess.boardId, JSON.stringify({ code, name: sess.name, t: new Date().toISOString() }), { expirationTtl: 7 * 86400 });
     return D.json({ ok: true, key: 'reset:' + sess.boardId });
   }
+  if (p === '/api/board/join' && m === 'POST') { // avkryssing i innstillingene: vis eller skjul «Bli medlem» for alle. Krever bare styreinnlogging, ikke kode.
+    const on = body.visible !== false;
+    await env.KV.put('settings:join', on ? 'on' : 'off'); await env.KV.put('settings:join:meta', JSON.stringify({ name: sess.name, t: new Date().toISOString() }));
+    console.log('bli-medlem', on ? 'vist' : 'skjult', 'av', sess.name);
+    return D.json({ ok: true, join: on });
+  }
   if (!stored) return D.json({ error: 'no_code' }, 403);
   if (p === '/api/board/log') return D.json({ messages: await messages(env, null, 100) });
   if (p === '/api/board/send' && m === 'POST') {

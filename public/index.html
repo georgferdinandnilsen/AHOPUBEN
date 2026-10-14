@@ -197,8 +197,8 @@ body.member .content{padding-bottom:120px}
 .pill .arr{font-weight:700}
 .sscrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:12;opacity:0;pointer-events:none;transition:opacity .3s}
 .sscrim.open{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;max-height:92dvh;transform:translate(-50%,100%);background:var(--panel);border-radius:28px 28px 0 0;z-index:13;transition:transform .34s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;touch-action:pan-y}
-.sheet.open{transform:translate(-50%,0)}
+.sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;max-height:92dvh;--sx:-50%;transform:translate(var(--sx),100%);background:var(--panel);border-radius:28px 28px 0 0;z-index:13;transition:transform .34s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;touch-action:pan-y}
+.sheet.open{transform:translate(var(--sx),0)}
 .sheet.drag{transition:none}
 .grip{flex:none;padding:10px 0 4px;display:flex;justify-content:center}.grip i{width:36px;height:5px;border-radius:3px;background:#555}
 .sbody{overflow-y:auto;overscroll-behavior:contain;padding:0 20px calc(env(safe-area-inset-bottom) + 30px);display:flex;flex-direction:column;gap:14px}
@@ -249,14 +249,79 @@ body.member .content{padding-bottom:120px}
 .ta{font:inherit;font-size:15px;color:inherit;background:none;border:1px solid var(--field);padding:14px;min-height:110px;width:100%;resize:vertical}
 .ta:focus{outline:none;border-color:var(--blue)}
 .ghost{border:1px solid var(--chip);padding:12px;text-align:center;font-weight:700;font-size:12px;letter-spacing:.06em;width:100%}
+
+/* ---- felles småting ---- */
+[hidden]{display:none!important}
+.wordmark,.join-d,.foot{display:none}
+.cbrow{display:flex;gap:12px;align-items:flex-start;cursor:pointer;text-align:left}
+.cbrow input{width:20px;height:20px;accent-color:var(--blue);margin-top:1px;flex:none}
+.cbrow b{display:block;font-weight:700;font-size:14px}
+/* ---- PC (PC 1: Plakat, bredformat). Under 900 px er alt over urørt. ---- */
+@media (min-width:900px){
+.wrap,.chrome{max-width:none}
+.chrome{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:12px 40px}
+.wordmark{display:block;justify-self:start;font-family:"Archivo Black";font-size:14px;letter-spacing:.14em}
+.brand{justify-self:center}
+.brand img{width:56px;height:56px}
+#join{display:none}
+.join-d{display:inline-block;background:none;color:var(--fg);border:1px solid var(--chip);font-family:"Space Grotesk";font-weight:700;font-size:12px;letter-spacing:.06em;padding:10px 16px}
+.tools{justify-self:end;gap:16px}
+.hero{height:720px;min-height:0;max-height:none}
+.hero .tx{left:80px;right:80px;bottom:56px;gap:16px}
+.hero h1{font-size:96px}
+.hero .meta{font-size:16px}
+.hero .info{max-width:640px;font-size:17px}
+.hero.noimg{padding-top:120px}
+.hero.noimg .gen{height:min(300px,100%)}
+.hero.noimg .tx{padding:0 80px 56px}
+.content{display:grid;grid-template-columns:minmax(0,720px) minmax(0,1fr);column-gap:80px;row-gap:48px;padding:40px 80px 64px;align-items:start}
+.desc{grid-column:1;grid-row:1}
+#actions{grid-column:2;grid-row:1;justify-self:end}
+#actions:empty{display:none}
+.cal{grid-column:1;grid-row:2/4}
+.list{grid-column:2;grid-row:2}
+.cta{grid-column:2;grid-row:3}
+.foot{grid-column:1/3;grid-row:4}
+.btn.primary{flex:none;padding:16px 28px}
+.btn.ghost{padding:16px 22px}
+.grid{gap:6px}
+.day{height:64px;font-size:16px}
+.cal-head h2{font-size:26px}
+.list h2{font-size:18px}
+.cta{padding:22px 24px}
+.foot{display:grid;grid-template-columns:repeat(5,1fr);gap:40px;border-top:1px solid var(--line);padding-top:32px;font-size:14px}
+.foot b{display:block;font-weight:700;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+.foot a{color:inherit;text-decoration:none}
+.panel{width:400px;padding:36px 28px 32px}
+#home.view{display:block}
+#forslag.view.on{position:fixed;inset:0;z-index:14;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--scrim);overflow:auto;padding:40px}
+#forslag .top,#forslag .form{width:600px;max-width:100%;background:var(--panel);border:1px solid var(--line)}
+#forslag .top{padding:28px 36px 0;border-bottom:0;flex-direction:row-reverse;justify-content:space-between}
+#forslag .top h2{font-size:34px;line-height:.92;letter-spacing:-.01em}
+#back{font-size:0}
+#back::after{content:"×";font-size:26px;color:var(--muted);line-height:1}
+#forslag .form{padding:16px 36px 36px;border-top:0}
+.form h1{display:none}
+body:has(#forslag.on){overflow:hidden}
+.pill{left:40px;transform:none;bottom:24px}
+.pill.hide{transform:translateY(120px)}
+.sheet{--sx:0;left:40px;width:720px;max-width:720px;bottom:96px;max-height:calc(100dvh - 120px);border-radius:0;border:1px solid var(--line);box-shadow:0 16px 48px rgba(0,0,0,.45);transform:translate(0,calc(100% + 100px))}
+.sheet.open{transform:translate(0,0)}
+.grip{display:none}
+.sbody{padding:28px 32px 28px}
+body.member .content{padding-bottom:64px}
+.modal .box{max-width:420px}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div id="home" class="view on">
     <header class="chrome">
+      <span class="wordmark">ARRANGEMENTER</span>
       <div class="brand"><button id="brand" aria-label="Last inn på nytt"><img src="/icon-192.png" alt="AHO PUBEN"></button><a class="join" id="join" target="_blank" rel="noopener"></a></div>
       <div class="tools">
+        <a class="join join-d" target="_blank" rel="noopener"></a>
         <div class="lang"><button data-lang="no">NO</button><button data-lang="en">EN</button></div>
         <button class="bell" id="bell" aria-label="Varsler"><svg viewBox="0 0 24 24"><path d="M12 2a6 6 0 0 0-6 6v4.5L4 16v1h16v-1l-2-3.5V8a6 6 0 0 0-6-6zm0 20a2.5 2.5 0 0 0 2.5-2h-5A2.5 2.5 0 0 0 12 22z"/></svg></button>
       </div>
@@ -268,6 +333,7 @@ body.member .content{padding-bottom:120px}
       <section class="cal" id="cal"></section>
       <section class="list" id="list"></section>
       <button class="cta" id="cta"></button>
+      <footer class="foot" id="foot"></footer>
     </div>
   </div>
 
@@ -334,6 +400,7 @@ body.member .content{padding-bottom:120px}
     <div id="memberIn" hidden style="display:flex;flex-direction:column;gap:12px">
       <div><b id="memberName" style="font-weight:700;font-size:14px;display:block"></b><small class="hint" id="memberSub"></small></div>
       <button class="mrow" id="sendLink" hidden><div><b id="sendLinkT"></b><small id="sendLinkS"></small></div><span>›</span></button>
+      <label class="cbrow" id="joinRow" hidden><input type="checkbox" id="joinCb"><span><b id="joinCbT"></b><small class="hint" id="joinCbS"></small></span></label>
       <button class="linkbtn" id="logoutBtn"></button>
     </div>
     <p class="hint" id="pAuto"></p>
@@ -344,17 +411,19 @@ body.member .content{padding-bottom:120px}
 <script>
 const API = location.port === '8000' ? 'http://localhost:8787' : ''; // ponytail: python-server-forhåndsvisning peker på wrangler dev; i prod er alt samme opprinnelse
 const JOIN_URL = 'https://ahopub.notion.site/306fc4bc274d8006adabe92827c1c11a'; // innmeldingsskjemaet i Notion, må være delt offentlig
+const IG_URL = 'https://www.instagram.com/ahopuben/', MAIL = 'aho@puben.no', ADDRESS = 'Maridalsveien 29, 0175 Oslo'; // fra dagens nettside, vises i bunnen på PC
+const PC = () => matchMedia('(min-width:900px)').matches;
 const KEYS = ['same','day','mon']; // samme dag (3 t før start), dagen før kl 12, mandag kl 12
 const norm = a => { const old = { '0,16':'same', '1,12':'day' }; const o = [...new Set((Array.isArray(a) ? a : []).map(x => Array.isArray(x) ? old[x.join()] : x).filter(x => KEYS.includes(x)))]; return o.length ? o : ['same','day']; };
 const T = {
   no:{nextEvent:'NESTE ARRANGEMENT',join:'BLI MEDLEM',member:'Medlem',memberHint:'Bartender? Logg inn med telefonnummeret ditt, så får du vaktene og manualene dine på forsiden.',login:'LOGG INN',loggingIn:'LOGGER INN…',logout:'Logg ut',loggedAs:'Innlogget som',boardRole:'Styremedlem',memberUntil:'Medlem til',sendT:'Send melding',sendS:'Til alle medlemmer eller dem på vakt',errNotMember:'Fant ikke nummeret i medlemslisten.',recHint:'Kanskje nummeret ditt er lagret feil, eller i et annet format?',recLink:'Rett det med e-posten din',recTitle:'Feil nummer?',recIntro:'Skriv e-posten du meldte deg inn med, så kan du rette nummeret i medlemskortet ditt.',recEmail:'E-posten du meldte deg inn med',recFind:'FINN MEG',recNotFound:'Fant ingen med den e-posten.',recEmailBad:'Skriv en gyldig e-post.',recPhoneT:'Skriv nummeret ditt på nytt',recPhoneS:'Lagres i medlemskortet ditt, og du logges inn.',recSave:'LAGRE OG LOGG INN',recTaken:'Nummeret er registrert på et annet medlem. Ta kontakt med styret.',errExpired:'Medlemskapet har gått ut. Forny for å logge inn.',errPhone:'Skriv et gyldig telefonnummer.',errNet:'Fikk ikke kontakt. Prøv igjen.',myShifts:'MINE VAKTER',pillNone:'Ingen vakter satt opp',pillNext:'Neste: ',hi:'HEI, ',nShifts:' kommende vakter',oneShift:'1 kommende vakt',noShifts:'Ingen kommende vakter',tabs:['VAKTER','MANUALER','MELDINGER'],fromBoard:'FRA STYRET, ',obsK:'OBS FOR KVELDEN',nextShift:'NESTE VAKT',nowShift:'PÅGÅENDE VAKT',roleOpen:'Åpnevakt',roleClose:'Stengevakt',roleResp:'Ansvarlig',noProgramS:'Rolig pub',withS:'Med ',respS:'Ansvarlig: ',tapDetail:'Trykk for detaljer og ring.',allCal:'LEGG ALLE VAKTER I KALENDER',calHint:'Abonnement: oppdateres av seg selv, ingen duplikater.',shiftAlert:'Varsel om vakt',shiftAlertS:'Kl 19 dagen før og 1 time før',responsible:'ANSVARLIG STYREMEDLEM',workWith:'DU JOBBER MED',otherTeam:'SAMME KVELD, ',alone:'Ingen andre satt opp ennå.',manualsS:'Fra Notion, alltid oppdatert',loading:'Henter…',messagesS:'Fra styret',noMsgs:'Ingen meldinger ennå.',seenBy:' har sett',chooseCode:'VELG STYREKODE',chooseCodeS:'Nummeret ditt står i styrelisten. Velg en firesifret kode som du bruker for å sende meldinger.',saveCode:'LAGRE KODE',resetCode:'Nullstill kode',resetS:'Lederen henter den midlertidige koden i Cloudflare og gir deg den. Skriv den inn sammen med en ny kode.',tempCode:'Midlertidig kode',newCode:'Ny kode',to:'Til',toAll:'Alle aktive medlemmer',toUp:'Kommende vakt',toAct:'Pågående vakt',msg:'Melding',code:'Styrekode',sendTo:'SEND TIL ',sending:'SENDER…',sentTo:'Sendt til ',pushed:', push til ',seeLog:'SE LOGG',logT:'MELDINGSLOGG',logS:'Alle meldinger sendt fra appen. Kan ikke slettes.',wrongCode:'Feil kode.',tonight:'I KVELD',thisThu:'DENNE TORSDAGEN',next:'NESTE',upcoming:'KOMMENDE',plain:'Rolig pub',noProgram:'Ingen program',open:'kl 19-01',closed:'Ingen arrangement denne dagen',addCal:'LEGG I KALENDER',share:'DEL',idea:'SEND FORSLAG TIL ARRANGEMENTER',ideaSub:'Styret leser alle forslag →',
     notif:'VARSLER',notifOn:'Varsler på',notifSub:'Du får beskjed før hvert arrangement',how:'Hvor tidlig vil du ha beskjed?',chips:['Samme dag','Dagen før kl 12','Mandag kl 12'],alsoPlain:'Også når det bare er vanlig pub',test:'SEND TESTVARSEL NÅ',testSent:'SENDT. KOM DET?',testFail:'VIRKET IKKE. SE UNDER.',
-    look:'Utseende',light:'Lys',dark:'Mørk',auto:'Dag og natt',dayHint:'Solnedgangen i Oslo bytter tema for deg.',noTest:'Kom ikke testvarselet?',noTestBody:'Appen må ligge på Hjem-skjerm: trykk Del, så «Legg til på Hjem-skjerm». Prøv testvarselet etterpå.',auto2:'Lagres automatisk',credit:'Laget av Georg Ferdinand Nilsen',
+    look:'Utseende',light:'Lys',dark:'Mørk',auto:'Dag og natt',dayHint:'Solnedgangen i Oslo bytter tema for deg.',noTest:'Kom ikke testvarselet?',noTestBody:'Appen må ligge på Hjem-skjerm: trykk Del, så «Legg til på Hjem-skjerm». Prøv testvarselet etterpå.',auto2:'Lagres automatisk',credit:'Laget av Georg Ferdinand Nilsen',joinShow:'Vis «Bli medlem» på nettsiden',joinShowS:'Gjelder alle som åpner appen. Slå av når opptaket er stengt.',footAbout:'Studentpuben på AHO',footOpen:'ÅPENT',footHours:'Torsdager 19-01',footAddr:'ADRESSE',footMail:'E-POST',footFollow:'FØLG',
     sTitle:'FORSLAG',sHead:'HVA VIL DU HA PÅ PUBEN?',sSub:'Styret leser alt. Navn er valgfritt.',fIdea:'Idé',fIdeaPh:'F.eks. karaoke, vinsmaking, DJ-battle',fMore:'Fortell mer',fMorePh:'Hva, hvorfor, hvem bør komme?',fName:'Navn (valgfritt)',fNamePh:'Så styret kan takke deg',send:'SEND FORSLAG',sending:'SENDER…',sNote:'Lander rett i styrets Notion.',sent:'Takk!',sErr:'Noe gikk galt. Prøv igjen.',
     wd:['MA','TI','ON','TO','FR','LØ','SØ'],pub:'pub',and:'og',locale:'nb-NO'},
   en:{nextEvent:'NEXT EVENT',join:'JOIN',member:'Member',memberHint:'Bartender? Log in with your phone number to get your shifts and manuals on the front page.',login:'LOG IN',loggingIn:'LOGGING IN…',logout:'Log out',loggedAs:'Logged in as',boardRole:'Board member',memberUntil:'Member until',sendT:'Send message',sendS:'To all members or those on shift',errNotMember:'Number not found in the member list.',recHint:'Maybe your number was saved wrongly, or in another format?',recLink:'Fix it with your email',recTitle:'Wrong number?',recIntro:'Enter the email you signed up with to fix the number on your member card.',recEmail:'The email you signed up with',recFind:'FIND ME',recNotFound:'No member with that email.',recEmailBad:'Enter a valid email.',recPhoneT:'Enter your number again',recPhoneS:'Saved to your member card, and you are logged in.',recSave:'SAVE AND LOG IN',recTaken:'That number belongs to another member. Contact the board.',errExpired:'Membership has expired. Renew to log in.',errPhone:'Enter a valid phone number.',errNet:'No connection. Try again.',myShifts:'MY SHIFTS',pillNone:'No shifts scheduled',pillNext:'Next: ',hi:'HI, ',nShifts:' upcoming shifts',oneShift:'1 upcoming shift',noShifts:'No upcoming shifts',tabs:['SHIFTS','MANUALS','MESSAGES'],fromBoard:'FROM THE BOARD, ',obsK:'TONIGHT, NOTE',nextShift:'NEXT SHIFT',nowShift:'SHIFT IN PROGRESS',roleOpen:'Opening shift',roleClose:'Closing shift',roleResp:'In charge',noProgramS:'Quiet pub',withS:'With ',respS:'In charge: ',tapDetail:'Tap for details and to call.',allCal:'ADD ALL SHIFTS TO CALENDAR',calHint:'Subscription: updates itself, no duplicates.',shiftAlert:'Shift alerts',shiftAlertS:'7pm the day before and 1 hour before',responsible:'BOARD MEMBER IN CHARGE',workWith:'YOU WORK WITH',otherTeam:'SAME NIGHT, ',alone:'Nobody else scheduled yet.',manualsS:'From Notion, always up to date',loading:'Loading…',messagesS:'From the board',noMsgs:'No messages yet.',seenBy:' have seen',chooseCode:'CHOOSE BOARD CODE',chooseCodeS:'Your number is on the board list. Choose a four-digit code you use to send messages.',saveCode:'SAVE CODE',resetCode:'Reset code',resetS:'The chair fetches the temporary code in Cloudflare and gives it to you. Enter it together with a new code.',tempCode:'Temporary code',newCode:'New code',to:'To',toAll:'All active members',toUp:'Upcoming shift',toAct:'Shift in progress',msg:'Message',code:'Board code',sendTo:'SEND TO ',sending:'SENDING…',sentTo:'Sent to ',pushed:', pushed to ',seeLog:'SEE LOG',logT:'MESSAGE LOG',logS:'All messages sent from the app. Cannot be deleted.',wrongCode:'Wrong code.',tonight:'TONIGHT',thisThu:'THIS THURSDAY',next:'NEXT',upcoming:'UPCOMING',plain:'Quiet pub',noProgram:'No programme',open:'7pm-1am',closed:'No event this day',addCal:'ADD TO CALENDAR',share:'SHARE',idea:'SUGGEST AN EVENT',ideaSub:'The board reads every suggestion →',
     notif:'ALERTS',notifOn:'Alerts on',notifSub:'You get a heads-up before every event',how:'How early do you want to know?',chips:['Same day','Day before, 12pm','Monday, 12pm'],alsoPlain:'Also on plain pub nights',test:'SEND TEST ALERT NOW',testSent:'SENT. DID IT ARRIVE?',testFail:'DID NOT WORK. SEE BELOW.',
-    look:'Appearance',light:'Light',dark:'Dark',auto:'Day & night',dayHint:'Sunset in Oslo switches the theme for you.',noTest:'No test alert?',noTestBody:'The app must be on your Home Screen: tap Share, then "Add to Home Screen". Then try the test alert again.',auto2:'Saved automatically',credit:'Made by Georg Ferdinand Nilsen',
+    look:'Appearance',light:'Light',dark:'Dark',auto:'Day & night',dayHint:'Sunset in Oslo switches the theme for you.',noTest:'No test alert?',noTestBody:'The app must be on your Home Screen: tap Share, then "Add to Home Screen". Then try the test alert again.',auto2:'Saved automatically',credit:'Made by Georg Ferdinand Nilsen',joinShow:'Show "Join" on the site',joinShowS:'Applies to everyone who opens the app. Turn off when admissions are closed.',footAbout:'The student pub at AHO',footOpen:'OPEN',footHours:'Thursdays 7pm-1am',footAddr:'ADDRESS',footMail:'EMAIL',footFollow:'FOLLOW',
     sTitle:'SUGGEST',sHead:'WHAT DO YOU WANT AT THE PUB?',sSub:'The board reads everything. Name is optional.',fIdea:'Idea',fIdeaPh:'E.g. karaoke, wine tasting, DJ battle',fMore:'Tell us more',fMorePh:'What, why, who should come?',fName:'Name (optional)',fNamePh:'So the board can thank you',send:'SEND SUGGESTION',sending:'SENDING…',sNote:'Goes straight into the board\'s Notion.',sent:'Thanks!',sErr:'Something went wrong. Try again.',
     wd:['MO','TU','WE','TH','FR','SA','SU'],pub:'pub',and:'and',locale:'en-GB'}
 };
@@ -365,7 +434,7 @@ const SAMPLE = [
 ];
 const $ = s => document.querySelector(s);
 const ls = (k, v) => v === undefined ? JSON.parse(localStorage.getItem(k) || 'null') : localStorage.setItem(k, JSON.stringify(v));
-const S = { lang: ls('lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') ? 'no' : 'en'), theme: ls('theme') || 'dark', prefs: (p => ({ ...p, offsets: norm(p.offsets) }))(ls('prefs') || { on:false, plain:true }), events: [], ym: null, sel: null, vapid: null, member: ls('member') || null, home: null, tab: 'vakter', view: null };
+const S = { lang: ls('lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') ? 'no' : 'en'), theme: ls('theme') || 'dark', prefs: (p => ({ ...p, offsets: norm(p.offsets) }))(ls('prefs') || { on:false, plain:true }), events: [], ym: null, sel: null, vapid: null, member: ls('member') || null, home: null, tab: 'vakter', view: null, join: true };
 const t = k => T[S.lang][k];
 const pad = n => String(n).padStart(2, '0');
 const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -423,11 +492,13 @@ function renderList() {
   const all = items().slice(1, 6);
   $('#list').innerHTML = `<h2>${t('upcoming')}</h2>` + all.map(e => `<div class="item"><button class="sel" data-d="${e.date}"><span class="d">${fmt(e.date, { day:'numeric', month:'short' })}</span><span class="t"><b>${label(e)}</b><span>${sub(e)}</span></span></button><a class="plus" href="${API}/api/ics/${e.id}" aria-label="${t('addCal')}">+</a></div>`).join('');
   $('#cta').innerHTML = `<b>${t('idea')}</b><span>${t('ideaSub')}</span>`;
+  $('#foot').innerHTML = `<div><b>AHO PUBEN</b>${t('footAbout')}</div><div><b>${t('footOpen')}</b>${t('footHours')}</div><div><b>${t('footAddr')}</b>${ADDRESS}</div><div><b>${t('footMail')}</b><a href="mailto:${MAIL}">${MAIL}</a></div><div><b>${t('footFollow')}</b><a href="${IG_URL}" target="_blank" rel="noopener">Instagram</a></div>`;
 }
 
 function renderPanel() {
-  const ids = { join:'join', recHint:'recHint', recLink:'recLink', recTitle:'recTitle', recIntro:'recIntro', recFind:'recFind', recPhoneT:'recPhoneT', recPhoneS:'recPhoneS', recSave:'recSave', pMember:'member', pMemberHint:'memberHint', loginBtn:'login', logoutBtn:'logout', sendLinkT:'sendT', sendLinkS:'sendS', pillT:'myShifts', pTitle:'notif', pOn:'notifOn', pOnSub:'notifSub', pHow:'how', pPlain:'alsoPlain', test:'test', pLook:'look', pDayHint:'dayHint', pNoTest:'noTest', pNoTestBody:'noTestBody', pAuto:'auto2', pCredit:'credit', sTitle:'sTitle', sHead:'sHead', sSub:'sSub', fIdea:'fIdea', fMore:'fMore', fName:'fName', send:'send', sNote:'sNote' };
+  const ids = { joinCbT:'joinShow', joinCbS:'joinShowS', recHint:'recHint', recLink:'recLink', recTitle:'recTitle', recIntro:'recIntro', recFind:'recFind', recPhoneT:'recPhoneT', recPhoneS:'recPhoneS', recSave:'recSave', pMember:'member', pMemberHint:'memberHint', loginBtn:'login', logoutBtn:'logout', sendLinkT:'sendT', sendLinkS:'sendS', pillT:'myShifts', pTitle:'notif', pOn:'notifOn', pOnSub:'notifSub', pHow:'how', pPlain:'alsoPlain', test:'test', pLook:'look', pDayHint:'dayHint', pNoTest:'noTest', pNoTestBody:'noTestBody', pAuto:'auto2', pCredit:'credit', sTitle:'sTitle', sHead:'sHead', sSub:'sSub', fIdea:'fIdea', fMore:'fMore', fName:'fName', send:'send', sNote:'sNote' };
   for (const [id, k] of Object.entries(ids)) $('#' + id).textContent = t(k);
+  for (const a of document.querySelectorAll('.join')) { a.textContent = t('join'); a.href = JOIN_URL; a.hidden = !S.join; } // styret kan skjule knappen for alle
   $('#idea').placeholder = t('fIdeaPh'); $('#more').placeholder = t('fMorePh'); $('#name').placeholder = t('fNamePh');
   $('#swOn').classList.toggle('on', S.prefs.on); $('#swPlain').classList.toggle('on', S.prefs.plain);
   $('#chips').innerHTML = KEYS.map((k, i) => `<button data-k="${k}" class="${S.prefs.offsets.includes(k) ? 'on' : ''}">${t('chips')[i]}</button>`).join('');
@@ -478,7 +549,7 @@ panel.addEventListener('pointercancel', () => { panel.classList.remove('drag'); 
 
 // ---- hendelser ----
 $('#brand').onclick = () => location.reload(); // logoen henter alt på nytt
-$('#join').href = JOIN_URL;
+$('#joinCb').onchange = async e => { const on = e.target.checked; const r = await api('/api/board/join', { visible: on }).catch(() => ({ ok:false })); if (r.ok) { S.join = on; renderPanel(); toast('OK'); } else { e.target.checked = S.join; } };
 $('#bell').onclick = () => openPanel(true);
 $('#close').onclick = scrim.onclick = () => openPanel(false);
 $('#swOn').onclick = toggleOn;
@@ -497,8 +568,10 @@ $('#hero').addEventListener('click', e => { const b = e.target.closest('.teaser'
 $('#cta').onclick = () => { location.hash = 'forslag'; };
 $('#back').onclick = () => { history.length > 1 ? history.back() : (location.hash = ''); };
 function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2800); }
-function route() { if (location.hash === '#medlem') { history.replaceState(null, '', location.pathname); if (S.member) openSheet(true, null); return; } const f = location.hash === '#forslag'; $('#forslag').classList.toggle('on', f); $('#home').classList.toggle('on', !f); if (f) window.scrollTo(0, 0); }
+function route() { if (location.hash === '#medlem') { history.replaceState(null, '', location.pathname); if (S.member) openSheet(true, null); return; } const f = location.hash === '#forslag'; $('#forslag').classList.toggle('on', f); $('#home').classList.toggle('on', !f); if (f && !PC()) window.scrollTo(0, 0); }
 addEventListener('hashchange', route);
+$('#forslag').addEventListener('click', e => { if (e.target === e.currentTarget && PC()) $('#back').click(); }); // PC: dialog, klikk utenfor lukker
+addEventListener('keydown', e => { if (e.key !== 'Escape') return; if ($('#forslag').classList.contains('on')) $('#back').click(); else if (panel.classList.contains('open')) openPanel(false); else if (sheet.classList.contains('open')) openSheet(false); });
 $('#form').onsubmit = async e => { e.preventDefault(); const b = $('#send'); b.disabled = true; b.textContent = t('sending');
   const fd = Object.fromEntries(new FormData(e.target));
   const r = await fetch(API + '/api/suggest', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify(fd) }).catch(() => null);
@@ -518,7 +591,7 @@ function setMember(mem) { S.member = mem; ls('member', mem); S.home = null; S.vi
 async function loadCountries() { const r = await api('/api/member/countries').catch(() => null); const codes = r?.ok && r.data.codes?.length ? r.data.codes : ['47']; const sel = $('#cc'); const cur = sel.value; sel.innerHTML = codes.map(c => `<option value="${c}">+${c}</option>`).join(''); if (codes.includes(cur)) sel.value = cur; }
 function renderMemberPanel() {
   const m = S.member; $('#memberOut').style.display = m ? 'none' : 'flex'; $('#memberIn').hidden = !m; $('#memberIn').style.display = m ? 'flex' : 'none';
-  if (m) { $('#memberName').textContent = t('loggedAs') + ' ' + m.name; $('#memberSub').textContent = m.board ? t('boardRole') : ''; $('#sendLink').hidden = !m.board; }
+  if (m) { $('#memberName').textContent = t('loggedAs') + ' ' + m.name; $('#memberSub').textContent = m.board ? t('boardRole') : ''; $('#sendLink').hidden = !m.board; $('#joinRow').hidden = !m.board; $('#joinCb').checked = S.join; }
 }
 function renderPill() {
   const p = $('#pill'); const m = S.member; p.classList.toggle('hide', !m); document.body.classList.toggle('member', !!m); if (!m) return;
@@ -547,7 +620,7 @@ const sheet = $('#sheet'), sscrim = $('#sscrim');
 function openSheet(o, view) { if (o && !S.member) return; if (view !== undefined) S.view = view; sheet.classList.toggle('open', o); sscrim.classList.toggle('open', o); if (o) { renderSheet(); if (!S.home) loadHome(); } }
 let sdrag = null;
 sheet.addEventListener('pointerdown', e => { if (e.target.closest('button,a,input,textarea,details') || $('#sbody').scrollTop > 0) return; sdrag = { y: e.clientY, t: performance.now(), dy: 0, vy: 0 }; sheet.setPointerCapture(e.pointerId); });
-sheet.addEventListener('pointermove', e => { if (!sdrag) return; const dy = Math.max(0, e.clientY - sdrag.y), now = performance.now(); sdrag.vy = (dy - sdrag.dy) / Math.max(1, now - sdrag.t); sdrag.dy = dy; sdrag.t = now; sheet.classList.add('drag'); sheet.style.transform = `translate(-50%,${dy}px)`; });
+sheet.addEventListener('pointermove', e => { if (!sdrag) return; const dy = Math.max(0, e.clientY - sdrag.y), now = performance.now(); sdrag.vy = (dy - sdrag.dy) / Math.max(1, now - sdrag.t); sdrag.dy = dy; sdrag.t = now; sheet.classList.add('drag'); sheet.style.transform = `translate(var(--sx),${dy}px)`; });
 sheet.addEventListener('pointerup', () => { if (!sdrag) return; const close = sdrag.vy > 0.3 || sdrag.dy > sheet.offsetHeight * 0.35; sheet.classList.remove('drag'); sheet.style.transform = ''; sdrag = null; openSheet(!close); });
 sheet.addEventListener('pointercancel', () => { sheet.classList.remove('drag'); sheet.style.transform = ''; sdrag = null; });
 $('#pill').onclick = () => openSheet(true, null);
@@ -644,6 +717,7 @@ $('#sendLink').onclick = () => { openPanel(false); openSheet(true, { type:'send'
 // ---- start ----
 (async () => {
   applyTheme(); const d = today(); S.ym = { y: d.getFullYear(), m: d.getMonth() };
+  fetch(API + '/api/settings').then(r => r.json()).then(x => { S.join = x.join !== false; renderPanel(); }).catch(() => {});
   try { const r = await fetch(API + '/api/events'); if (!r.ok) throw 0; S.events = await r.json(); } catch { S.events = location.hostname === 'localhost' ? SAMPLE : []; }
   S.sel = items()[0]?.date || null; if (S.sel) { const sd = parse(S.sel); S.ym = { y: sd.getFullYear(), m: sd.getMonth() }; }
   renderAll(); route(); renderPill(); if (S.member) loadHome(); else loadCountries();

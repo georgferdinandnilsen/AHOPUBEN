@@ -43,6 +43,7 @@ async function route(req, url, env, ctx) {
   if (p.startsWith('/api/member/') || p.startsWith('/api/board/')) return memberRoute(req, url, env, ctx, { notion, json, push, osloNow, addDays });
   if (p === '/api/events' && m === 'GET') return json(await events(env, ctx));
   if (p === '/api/vapid') return json({ key: env.VAPID_PUBLIC || '' });
+  if (p === '/api/settings') return json({ join: (await env.KV.get('settings:join')) !== 'off' }); // styret kan skjule «Bli medlem» for alle
   if (p === '/api/subscribe' && m === 'POST') {
     const { subscription, prefs } = await req.json();
     if (!subscription?.endpoint?.startsWith('https://') || !subscription.keys?.p256dh) return json({ error: 'bad subscription' }, 400);

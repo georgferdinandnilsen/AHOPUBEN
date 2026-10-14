@@ -240,3 +240,12 @@ Tre forslag i Figma (side «AHO pub – app utkast», node 478:2), under de eksi
 Felles for alle tre: topplinje med logo + ARRANGEMENTER til venstre og BLI MEDLEM, NO/EN og bjelle til høyre. Kontaktinfo fra dagens nettside i bunnen. Manualer-fanen, Meldinger-fanen, styrekode og logg har samme innhold som på mobil og bor i samme flate som Vakter og Send melding.
 
 Teknisk notat: hjelpekoden som bygde PC-rammene ligger i et skjult, låst tekstlag «__pc_helpers» (node 552:2) på Figma-siden. Det kan slettes når forslagene er valgt.
+
+### Valgt og bygget: PC 1 (14.10.2026)
+
+Georg valgte PC 1 (PLAKAT, bredformat) med to endringer: logoen står sentrert i topplinjen (ARRANGEMENTER til venstre, BLI MEDLEM, NO/EN og bjelle til høyre), og styremedlemmer kan skjule «Bli medlem»-knappen for alle via en avkryssing i sine innstillinger (varselmenyen, under MEDLEM når man er innlogget som styre). Figma-seksjonen PC 1 er oppdatert med dette, pluss en lys variant av hjem.
+
+Bygget samme dag i samme kodebase:
+- `public/index.html`: PC-layout fra 900 px bredde (grid med kalender venstre, Kommende og forslag høyre, plakat 720 px høy, kontaktinfo i bunn, sidemeny 400 px, forslag som dialog med Esc og klikk utenfor, pille nede til venstre og ark 720 px som vokser opp fra pillen). Under 900 px er mobilversjonen urørt. Avkryssingen «Vis «Bli medlem» på nettsiden» for styret. Kontaktinfo (adresse, e-post, Instagram @ahopuben) ligger som konstanter øverst i skriptet.
+- Worker: `GET /api/settings` gir `{ join }`. `POST /api/board/join { visible }` (krever styreinnlogging, ikke kode) lagrer `settings:join` i KV med hvem og når i `settings:join:meta`.
+- Gjenstår for lansering: peke ahopuben.no fra Google Sites til Cloudflare (Custom Domain på Worker-en), og teste på ekte PC-nettlesere.
