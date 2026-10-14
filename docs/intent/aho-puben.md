@@ -220,3 +220,23 @@ Figma: seksjonen «Medlemsdel: valgt» (node 518:2). De to andre forslagssettene
 
 Mappen `overlevering/` (og zip-filen `AHO-PUBEN-APP-overlevering.zip` i prosjektmappen) inneholder OVERLEVERING.md/.html/.pdf, SJEKKLISTE.md, AI-PROMPT.md, oversiktsdiagram, skjermbilder av appen, Figma-eksporter og en kopi av koden. Skrevet for et styre uten utviklererfaring: to veier for overføring (gi tilgang, eller sette opp alt på nytt), driftsregler i Notion, feilsøking, kostnader.
 - 14.10.2026: CTA på forsiden heter nå «Send forslag til arrangementer». Overleveringspakken (mappen «00 overlevering») peker nå kun på vei B, med steg for å legge appen på app.ahopuben.no via Cloudflare Custom Domains. Alle åtte varseltyper er sendt til Georgs telefon som demo.
+
+## PC-versjon og lansering på ahopuben.no (14.10.2026)
+
+Bekreftet i intervju 14.10.2026:
+
+- Appen lanseres som nettapp i løpet av uka og blir selve forsiden på https://www.ahopuben.no/. Dagens Google Sites-side (tider, adresse, e-post, Instagram) erstattes, og den infoen bakes inn i PC-layouten.
+- Brukere på PC: studenter og gjester, og styret og bartendere, like mye. PC-versjonen må bære begge roller like godt.
+- Mobilversjonen er urørt. Under 900 px bredde tar mobil-layouten over.
+- Forslagene vises i mørk modus først. Lys variant lages på det forslaget som velges.
+- Ingen nye funksjoner. Domenepeking fra Google Sites til Cloudflare er et eget steg etter at design er valgt.
+
+Tre forslag i Figma (side «AHO pub – app utkast», node 478:2), under de eksisterende utkastene. Hvert forslag har seks rammer på 1440 px: hjem, varsler, forslag, medlem innlogget, send melding (styre), pluss én ekstra.
+
+- **PC 1: PLAKAT, bredformat** (node 552:3). Mobilappen i bredformat: plakaten fyller hele bredden, under ligger kalender til venstre og Kommende + forslag til høyre, siden scroller. Varsler er sidemeny fra høyre (400 px). Forslag er dialog. Innlogget: pillen nede til venstre, arket vokser opp fra pillen (720 px). Minst å lære og minst å kode.
+- **PC 2: OPPSLAG, to halvdeler** (node 552:14). Plakaten står fast til venstre (720 px) med tittel, tekst og knapper. Høyre halvdel scroller med kalender, Kommende, forslag og kontaktinfo. Varsler legger seg over høyre halvdel i to spalter. Forslag erstatter høyre halvdel. Innlogget: pille på plakaten, arket glir opp over høyre halvdel.
+- **PC 3: TAVLE, alt på én skjerm** (node 552:25). Ingen scroll: plakat 880 px, måned 440 px, Kommende som fire kort nederst, kontaktlinje i bunn. Varsler er popover under bjella uten dimming. Forslag er dialog. Innlogget: fast medlemsspalte (340 px) til venstre, plakat og kalender krymper. Send melding er dialog fra spalten.
+
+Felles for alle tre: topplinje med logo + ARRANGEMENTER til venstre og BLI MEDLEM, NO/EN og bjelle til høyre. Kontaktinfo fra dagens nettside i bunnen. Manualer-fanen, Meldinger-fanen, styrekode og logg har samme innhold som på mobil og bor i samme flate som Vakter og Send melding.
+
+Teknisk notat: hjelpekoden som bygde PC-rammene ligger i et skjult, låst tekstlag «__pc_helpers» (node 552:2) på Figma-siden. Det kan slettes når forslagene er valgt.
