@@ -1,5 +1,6 @@
 // HTTP-delen av medlemsdelen. Innlogging med telefonnummer, mine vakter, manualer, kalender, styremeldinger og styrekode.
 import { normPhone, isActive, myShifts, recipients, loadAll, manualHtml, shiftsIcs, countryCodes } from './members.js';
+import { normOffsets } from './notify.js';
 
 async function notionPatch(env, notion, pageId, properties) {
   const r = await fetch('https://api.notion.com/v1/pages/' + pageId, { method: 'PATCH', headers: { authorization: 'Bearer ' + env.NOTION_TOKEN, 'notion-version': '2025-09-03', 'content-type': 'application/json' }, body: JSON.stringify({ properties }) });
@@ -68,6 +69,17 @@ export async function memberRoute(req, url, env, ctx, D) {
     const { members, board, shifts, manuals } = await data();
     const counts = sess.boardId ? Object.fromEntries(['all', 'upcoming', 'active'].map(k => [k, recipients(k, members, shifts, today).length])) : null;
     return D.json({ name: sess.name, board: !!sess.boardId, hasCode: sess.boardId ? !!(await env.KV.get('code:' + sess.boardId)) : false, today, shifts: myShifts(sess.memberId, shifts, members, board, sess.boardUserId), messages: await messages(env, sess.memberId || 'b' + sess.boardId), manuals, counts });
+  }
+  // Varselvalg på kontoen: alle push-abonnementer som tilhører medlemmet (telefonen) leses og oppdateres, så PC og telefon viser det samme.
+  if (p === '/api/member/prefs') {
+    const mine = [];
+    for (const k of (await env.KV.list({ prefix: 'sub:' })).keys) { const s = await env.KV.get(k.name, 'json'); if (s && ((sess.memberId && s.memberId === sess.memberId) || (sess.boardUserId && s.boardUserId === sess.boardUserId))) mine.push({ k: k.name, s }); }
+    if (m === 'POST') {
+      for (const { k, s } of mine) { s.prefs = { ...s.prefs, offsets: normOffsets(body.offsets ?? s.prefs?.offsets), plain: body.plain ?? s.prefs?.plain !== false, shift: body.shift ?? s.prefs?.shift !== false }; await env.KV.put(k, JSON.stringify(s)); }
+      return D.json({ ok: true, devices: mine.length });
+    }
+    const latest = mine.sort((a, b) => (b.s.t || 0) - (a.s.t || 0))[0];
+    return D.json({ found: !!latest, devices: mine.length, prefs: latest ? latest.s.prefs : null });
   }
   if (p.startsWith('/api/member/manual/')) {
     const id = p.split('/')[4]; if (!/^[0-9a-f]{32}$/.test(id)) return D.json({ error: 'bad id' }, 400);

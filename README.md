@@ -78,7 +78,7 @@ Datakilde-id-ene for medlemsdelen står i `wrangler.toml` under `[vars]`. Integr
 
 ## På PC
 
-Samme fil, samme kode. Fra 900 px bredde bytter CSS-en til PC-layouten (Figma: «PC 1: PLAKAT»): plakaten fyller bredden, kalender til venstre, Kommende og forslag til høyre, kontaktinfo (tider, adresse, e-post, Instagram) i bunnen. Logoen står midt i topplinjen. Varsler er sidemeny, forslag er dialog (Esc eller klikk utenfor lukker), medlemsarket vokser opp fra pillen nede til venstre. Under 900 px er mobilversjonen uendret. Kontaktinfoen står i `public/index.html` (`IG_URL`, `MAIL`, `ADDRESS`).
+Samme fil, samme kode. Fra 900 px bredde bytter CSS-en til PC-layouten (Figma: «PC 1: PLAKAT»): plakaten fyller bredden, kalender til venstre, Kommende og forslag til høyre, kontaktinfo (tider, adresse, e-post, Instagram) i bunnen. Logoen står midt i topplinjen. Varsler er sidemeny, forslag er dialog (Esc eller klikk utenfor lukker), medlemsarket vokser opp fra pillen nede til venstre. Under 900 px er mobilversjonen uendret. Kontaktinfoen står i `public/index.html` (`IG_URL`, `MAIL`, `ADDRESS`). Den brede logoen ligger inline i samme fil og følger tekstfargen. På PC får man ikke push, så varselvalgene vises bare når man er innlogget; da styrer de telefonen via kontoen (`/api/member/prefs`).
 
 ## På iPhone
 
