@@ -256,6 +256,14 @@ body.member .content{padding-bottom:120px}
 .wordmark,.join-d,.foot{display:none}
 .nblock{display:flex;flex-direction:column;gap:14px}
 #pSync{display:none}
+.calblock{display:none}
+.calmenu{position:absolute;z-index:9;width:320px;background:var(--panel);border:1.5px solid var(--blue);display:flex;flex-direction:column;padding:6px;box-shadow:0 16px 48px rgba(0,0,0,.35);transform-origin:top left;animation:pop .18s cubic-bezier(.32,.72,0,1)}
+@keyframes pop{from{opacity:0;transform:scale(.96)}}
+.calmenu a{display:flex;flex-direction:column;gap:2px;padding:10px 12px;text-decoration:none;color:inherit}
+.calmenu a:hover{background:var(--blue);color:#fff}
+.calmenu b{font-weight:700;font-size:14px}
+.calmenu small{font-size:12px;color:var(--muted)}
+.calmenu a:hover small{color:#fff;opacity:.85}
 .cbrow{display:flex;gap:12px;align-items:flex-start;cursor:pointer;text-align:left}
 .cbrow input{width:20px;height:20px;accent-color:var(--blue);margin-top:1px;flex:none}
 .cbrow b{display:block;font-weight:700;font-size:14px}
@@ -305,6 +313,7 @@ body.member .content{padding-bottom:120px}
 body.member .nblock{display:flex}
 body.member .nblock .dev{display:none}
 body.member #pSync{display:block}
+.calblock{display:flex}
 #home.view{display:block}
 #forslag.view.on{position:fixed;inset:0;z-index:14;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--scrim);overflow:auto;padding:40px}
 #forslag .top,#forslag .form{width:600px;max-width:100%;background:var(--panel);border:1px solid var(--line)}
@@ -381,6 +390,7 @@ body.member .content{padding-bottom:64px}
       <p class="hint err" id="recErr" hidden></p>
     </div>
   </div>
+  <div class="calmenu" id="calmenu" hidden></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="scrim" id="scrim"></div>
   <aside class="panel" id="panel" aria-label="Varsler og utseende">
@@ -400,6 +410,12 @@ body.member .content{padding-bottom:64px}
     <div class="chips half" id="themeRow"><button data-th="light"></button><button data-th="dark"></button></div>
     <div class="chips" id="themeRow2"><button data-th="auto" style="flex:1"></button></div>
     <p class="hint" id="pDayHint"></p>
+    <div class="nblock calblock" id="calBlock">
+    <div class="hr"></div>
+    <div class="lbl" id="pCal"></div>
+    <div class="chips" id="calChips"></div>
+    <p class="hint" id="pCalHint"></p>
+    </div>
     <div class="hr"></div>
     <div class="lbl" id="pMember"></div>
     <div id="memberOut" style="display:flex;flex-direction:column;gap:12px">
@@ -434,12 +450,12 @@ const norm = a => { const old = { '0,16':'same', '1,12':'day' }; const o = [...n
 const T = {
   no:{nextEvent:'NESTE ARRANGEMENT',join:'BLI MEDLEM',member:'Medlem',memberHint:'Bartender? Logg inn med telefonnummeret ditt, så får du vaktene og manualene dine på forsiden.',login:'LOGG INN',loggingIn:'LOGGER INN…',logout:'Logg ut',loggedAs:'Innlogget som',boardRole:'Styremedlem',memberUntil:'Medlem til',sendT:'Send melding',sendS:'Til alle medlemmer eller dem på vakt',errNotMember:'Fant ikke nummeret i medlemslisten.',recHint:'Kanskje nummeret ditt er lagret feil, eller i et annet format?',recLink:'Rett det med e-posten din',recTitle:'Feil nummer?',recIntro:'Skriv e-posten du meldte deg inn med, så kan du rette nummeret i medlemskortet ditt.',recEmail:'E-posten du meldte deg inn med',recFind:'FINN MEG',recNotFound:'Fant ingen med den e-posten.',recEmailBad:'Skriv en gyldig e-post.',recPhoneT:'Skriv nummeret ditt på nytt',recPhoneS:'Lagres i medlemskortet ditt, og du logges inn.',recSave:'LAGRE OG LOGG INN',recTaken:'Nummeret er registrert på et annet medlem. Ta kontakt med styret.',errExpired:'Medlemskapet har gått ut. Forny for å logge inn.',errPhone:'Skriv et gyldig telefonnummer.',errNet:'Fikk ikke kontakt. Prøv igjen.',myShifts:'MINE VAKTER',pillNone:'Ingen vakter satt opp',pillNext:'Neste: ',hi:'HEI, ',nShifts:' kommende vakter',oneShift:'1 kommende vakt',noShifts:'Ingen kommende vakter',tabs:['VAKTER','MANUALER','MELDINGER'],fromBoard:'FRA STYRET, ',obsK:'OBS FOR KVELDEN',nextShift:'NESTE VAKT',nowShift:'PÅGÅENDE VAKT',roleOpen:'Åpnevakt',roleClose:'Stengevakt',roleResp:'Ansvarlig',noProgramS:'Rolig pub',withS:'Med ',respS:'Ansvarlig: ',tapDetail:'Trykk for detaljer og ring.',allCal:'LEGG ALLE VAKTER I KALENDER',calHint:'Abonnement: oppdateres av seg selv, ingen duplikater.',shiftAlert:'Varsel om vakt',shiftAlertS:'Kl 19 dagen før og 1 time før',responsible:'ANSVARLIG STYREMEDLEM',workWith:'DU JOBBER MED',otherTeam:'SAMME KVELD, ',alone:'Ingen andre satt opp ennå.',manualsS:'Fra Notion, alltid oppdatert',loading:'Henter…',messagesS:'Fra styret',noMsgs:'Ingen meldinger ennå.',seenBy:' har sett',chooseCode:'VELG STYREKODE',chooseCodeS:'Nummeret ditt står i styrelisten. Velg en firesifret kode som du bruker for å sende meldinger.',saveCode:'LAGRE KODE',resetCode:'Nullstill kode',resetS:'Lederen henter den midlertidige koden i Cloudflare og gir deg den. Skriv den inn sammen med en ny kode.',tempCode:'Midlertidig kode',newCode:'Ny kode',to:'Til',toAll:'Alle aktive medlemmer',toUp:'Kommende vakt',toAct:'Pågående vakt',msg:'Melding',code:'Styrekode',sendTo:'SEND TIL ',sending:'SENDER…',sentTo:'Sendt til ',pushed:', push til ',seeLog:'SE LOGG',logT:'MELDINGSLOGG',logS:'Alle meldinger sendt fra appen. Kan ikke slettes.',wrongCode:'Feil kode.',tonight:'I KVELD',thisThu:'DENNE TORSDAGEN',next:'NESTE',upcoming:'KOMMENDE',plain:'Rolig pub',noProgram:'Ingen program',open:'kl 19-01',closed:'Ingen arrangement denne dagen',addCal:'LEGG I KALENDER',share:'DEL',idea:'SEND FORSLAG TIL ARRANGEMENTER',ideaSub:'Styret leser alle forslag →',
     notif:'VARSLER',notifOn:'Varsler på',notifSub:'Du får beskjed før hvert arrangement',how:'Hvor tidlig vil du ha beskjed?',chips:['Samme dag','Dagen før kl 12','Mandag kl 12'],alsoPlain:'Også når det bare er vanlig pub',test:'SEND TESTVARSEL NÅ',testSent:'SENDT. KOM DET?',testFail:'VIRKET IKKE. SE UNDER.',
-    look:'Utseende',light:'Lys',dark:'Mørk',auto:'Dag og natt',dayHint:'Solnedgangen i Oslo bytter tema for deg.',noTest:'Kom ikke testvarselet?',noTestBody:'Appen må ligge på Hjem-skjerm: trykk Del, så «Legg til på Hjem-skjerm». Prøv testvarselet etterpå.',auto2:'Lagres automatisk',credit:'Laget av Georg Ferdinand Nilsen',settings:'INNSTILLINGER',sync:'Gjelder varslene på telefonen din. Lagres på kontoen din.',syncNone:'Slå på varsler på telefonen først, så kan du styre dem herfra.',joinShow:'Vis «Bli medlem» på nettsiden',joinShowS:'Gjelder alle som åpner appen. Slå av når opptaket er stengt.',footAbout:'Studentpuben på AHO',footOpen:'ÅPENT',footHours:'Torsdager 19:00 - 01:00',hours:'Torsdager 19:00 - 01:00',footAddr:'ADRESSE',footMail:'E-POST',footFollow:'FØLG',
+    look:'Utseende',light:'Lys',dark:'Mørk',auto:'Dag og natt',dayHint:'Solnedgangen i Oslo bytter tema for deg.',noTest:'Kom ikke testvarselet?',noTestBody:'Appen må ligge på Hjem-skjerm: trykk Del, så «Legg til på Hjem-skjerm». Prøv testvarselet etterpå.',auto2:'Lagres automatisk',credit:'Laget av Georg Ferdinand Nilsen',calPref:'Kalender på PC',calAsk:'Spør hver gang',calPrefHint:'Valget huskes på denne maskinen.',calSaved:'Husket. Endre under innstillinger.',calGoogle:'Google Kalender',calOutlook:'Outlook på nett',calWeb:'Åpner i ny fane, trykk Lagre',calApple:'Abonner i Apple Kalender',calAppleS:'Alle arrangementer, oppdateres av seg selv',calIcs:'Last ned .ics',calIcsS:'Kalender på Mac, Outlook-appen og andre',settings:'INNSTILLINGER',sync:'Gjelder varslene på telefonen din. Lagres på kontoen din.',syncNone:'Slå på varsler på telefonen først, så kan du styre dem herfra.',joinShow:'Vis «Bli medlem» på nettsiden',joinShowS:'Gjelder alle som åpner appen. Slå av når opptaket er stengt.',footAbout:'Studentpuben på AHO',footOpen:'ÅPENT',footHours:'Torsdager 19:00 - 01:00',hours:'Torsdager 19:00 - 01:00',footAddr:'ADRESSE',footMail:'E-POST',footFollow:'FØLG',
     sTitle:'FORSLAG',sHead:'HVA VIL DU HA PÅ PUBEN?',sSub:'Styret leser alt. Navn er valgfritt.',fIdea:'Idé',fIdeaPh:'F.eks. karaoke, vinsmaking, DJ-battle',fMore:'Fortell mer',fMorePh:'Hva, hvorfor, hvem bør komme?',fName:'Navn (valgfritt)',fNamePh:'Så styret kan takke deg',send:'SEND FORSLAG',sending:'SENDER…',sNote:'Lander rett i styrets Notion.',sent:'Takk!',sErr:'Noe gikk galt. Prøv igjen.',
     wd:['MA','TI','ON','TO','FR','LØ','SØ'],pub:'pub',and:'og',locale:'nb-NO'},
   en:{nextEvent:'NEXT EVENT',join:'JOIN',member:'Member',memberHint:'Bartender? Log in with your phone number to get your shifts and manuals on the front page.',login:'LOG IN',loggingIn:'LOGGING IN…',logout:'Log out',loggedAs:'Logged in as',boardRole:'Board member',memberUntil:'Member until',sendT:'Send message',sendS:'To all members or those on shift',errNotMember:'Number not found in the member list.',recHint:'Maybe your number was saved wrongly, or in another format?',recLink:'Fix it with your email',recTitle:'Wrong number?',recIntro:'Enter the email you signed up with to fix the number on your member card.',recEmail:'The email you signed up with',recFind:'FIND ME',recNotFound:'No member with that email.',recEmailBad:'Enter a valid email.',recPhoneT:'Enter your number again',recPhoneS:'Saved to your member card, and you are logged in.',recSave:'SAVE AND LOG IN',recTaken:'That number belongs to another member. Contact the board.',errExpired:'Membership has expired. Renew to log in.',errPhone:'Enter a valid phone number.',errNet:'No connection. Try again.',myShifts:'MY SHIFTS',pillNone:'No shifts scheduled',pillNext:'Next: ',hi:'HI, ',nShifts:' upcoming shifts',oneShift:'1 upcoming shift',noShifts:'No upcoming shifts',tabs:['SHIFTS','MANUALS','MESSAGES'],fromBoard:'FROM THE BOARD, ',obsK:'TONIGHT, NOTE',nextShift:'NEXT SHIFT',nowShift:'SHIFT IN PROGRESS',roleOpen:'Opening shift',roleClose:'Closing shift',roleResp:'In charge',noProgramS:'Quiet pub',withS:'With ',respS:'In charge: ',tapDetail:'Tap for details and to call.',allCal:'ADD ALL SHIFTS TO CALENDAR',calHint:'Subscription: updates itself, no duplicates.',shiftAlert:'Shift alerts',shiftAlertS:'7pm the day before and 1 hour before',responsible:'BOARD MEMBER IN CHARGE',workWith:'YOU WORK WITH',otherTeam:'SAME NIGHT, ',alone:'Nobody else scheduled yet.',manualsS:'From Notion, always up to date',loading:'Loading…',messagesS:'From the board',noMsgs:'No messages yet.',seenBy:' have seen',chooseCode:'CHOOSE BOARD CODE',chooseCodeS:'Your number is on the board list. Choose a four-digit code you use to send messages.',saveCode:'SAVE CODE',resetCode:'Reset code',resetS:'The chair fetches the temporary code in Cloudflare and gives it to you. Enter it together with a new code.',tempCode:'Temporary code',newCode:'New code',to:'To',toAll:'All active members',toUp:'Upcoming shift',toAct:'Shift in progress',msg:'Message',code:'Board code',sendTo:'SEND TO ',sending:'SENDING…',sentTo:'Sent to ',pushed:', pushed to ',seeLog:'SEE LOG',logT:'MESSAGE LOG',logS:'All messages sent from the app. Cannot be deleted.',wrongCode:'Wrong code.',tonight:'TONIGHT',thisThu:'THIS THURSDAY',next:'NEXT',upcoming:'UPCOMING',plain:'Quiet pub',noProgram:'No programme',open:'7pm-1am',closed:'No event this day',addCal:'ADD TO CALENDAR',share:'SHARE',idea:'SUGGEST AN EVENT',ideaSub:'The board reads every suggestion →',
     notif:'ALERTS',notifOn:'Alerts on',notifSub:'You get a heads-up before every event',how:'How early do you want to know?',chips:['Same day','Day before, 12pm','Monday, 12pm'],alsoPlain:'Also on plain pub nights',test:'SEND TEST ALERT NOW',testSent:'SENT. DID IT ARRIVE?',testFail:'DID NOT WORK. SEE BELOW.',
-    look:'Appearance',light:'Light',dark:'Dark',auto:'Day & night',dayHint:'Sunset in Oslo switches the theme for you.',noTest:'No test alert?',noTestBody:'The app must be on your Home Screen: tap Share, then "Add to Home Screen". Then try the test alert again.',auto2:'Saved automatically',credit:'Made by Georg Ferdinand Nilsen',settings:'SETTINGS',sync:'Applies to the alerts on your phone. Saved to your account.',syncNone:'Turn on alerts on your phone first, then you can manage them here.',joinShow:'Show "Join" on the site',joinShowS:'Applies to everyone who opens the app. Turn off when admissions are closed.',footAbout:'The student pub at AHO',footOpen:'OPEN',footHours:'Thursdays 19:00 - 01:00',hours:'Thursdays 19:00 - 01:00',footAddr:'ADDRESS',footMail:'EMAIL',footFollow:'FOLLOW',
+    look:'Appearance',light:'Light',dark:'Dark',auto:'Day & night',dayHint:'Sunset in Oslo switches the theme for you.',noTest:'No test alert?',noTestBody:'The app must be on your Home Screen: tap Share, then "Add to Home Screen". Then try the test alert again.',auto2:'Saved automatically',credit:'Made by Georg Ferdinand Nilsen',calPref:'Calendar on PC',calAsk:'Ask every time',calPrefHint:'Remembered on this computer.',calSaved:'Remembered. Change it in settings.',calGoogle:'Google Calendar',calOutlook:'Outlook on the web',calWeb:'Opens in a new tab, press Save',calApple:'Subscribe in Apple Calendar',calAppleS:'All events, updates itself',calIcs:'Download .ics',calIcsS:'Calendar on Mac, the Outlook app and others',settings:'SETTINGS',sync:'Applies to the alerts on your phone. Saved to your account.',syncNone:'Turn on alerts on your phone first, then you can manage them here.',joinShow:'Show "Join" on the site',joinShowS:'Applies to everyone who opens the app. Turn off when admissions are closed.',footAbout:'The student pub at AHO',footOpen:'OPEN',footHours:'Thursdays 19:00 - 01:00',hours:'Thursdays 19:00 - 01:00',footAddr:'ADDRESS',footMail:'EMAIL',footFollow:'FOLLOW',
     sTitle:'SUGGEST',sHead:'WHAT DO YOU WANT AT THE PUB?',sSub:'The board reads everything. Name is optional.',fIdea:'Idea',fIdeaPh:'E.g. karaoke, wine tasting, DJ battle',fMore:'Tell us more',fMorePh:'What, why, who should come?',fName:'Name (optional)',fNamePh:'So the board can thank you',send:'SEND SUGGESTION',sending:'SENDING…',sNote:'Goes straight into the board\'s Notion.',sent:'Thanks!',sErr:'Something went wrong. Try again.',
     wd:['MO','TU','WE','TH','FR','SA','SU'],pub:'pub',and:'and',locale:'en-GB'}
 };
@@ -450,7 +466,7 @@ const SAMPLE = [
 ];
 const $ = s => document.querySelector(s);
 const ls = (k, v) => v === undefined ? JSON.parse(localStorage.getItem(k) || 'null') : localStorage.setItem(k, JSON.stringify(v));
-const S = { lang: ls('lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') ? 'no' : 'en'), theme: ls('theme') || 'dark', prefs: (p => ({ ...p, offsets: norm(p.offsets) }))(ls('prefs') || { on:false, plain:true }), events: [], ym: null, sel: null, vapid: null, member: ls('member') || null, home: null, tab: 'vakter', view: null, join: true, acct: null };
+const S = { lang: ls('lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') ? 'no' : 'en'), theme: ls('theme') || 'dark', prefs: (p => ({ ...p, offsets: norm(p.offsets) }))(ls('prefs') || { on:false, plain:true }), events: [], ym: null, sel: null, vapid: null, member: ls('member') || null, home: null, tab: 'vakter', view: null, join: true, acct: null, cal: ls('cal') || null };
 const t = k => T[S.lang][k];
 const pad = n => String(n).padStart(2, '0');
 const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -515,6 +531,8 @@ function renderPanel() {
   const ids = { hoursPc:'hours', joinCbT:'joinShow', joinCbS:'joinShowS', recHint:'recHint', recLink:'recLink', recTitle:'recTitle', recIntro:'recIntro', recFind:'recFind', recPhoneT:'recPhoneT', recPhoneS:'recPhoneS', recSave:'recSave', pMember:'member', pMemberHint:'memberHint', loginBtn:'login', logoutBtn:'logout', sendLinkT:'sendT', sendLinkS:'sendS', pillT:'myShifts', pOn:'notifOn', pOnSub:'notifSub', pHow:'how', pPlain:'alsoPlain', test:'test', pLook:'look', pDayHint:'dayHint', pNoTest:'noTest', pNoTestBody:'noTestBody', pAuto:'auto2', pCredit:'credit', sTitle:'sTitle', sHead:'sHead', sSub:'sSub', fIdea:'fIdea', fMore:'fMore', fName:'fName', send:'send', sNote:'sNote' };
   for (const [id, k] of Object.entries(ids)) $('#' + id).textContent = t(k);
   for (const a of document.querySelectorAll('.join')) { a.textContent = t('join'); a.href = JOIN_URL; a.hidden = !S.join; } // styret kan skjule knappen for alle
+  $('#pCal').textContent = t('calPref'); $('#pCalHint').textContent = t('calPrefHint');
+  $('#calChips').innerHTML = [['g', 'Google'], ['o', 'Outlook'], ['w', 'Apple (abonner)'], ['i', '.ics'], ['', t('calAsk')]].map(([k, l]) => `<button data-cal="${k}" class="${(S.cal || '') === k ? 'on' : ''}">${l}</button>`).join('');
   $('#pTitle').textContent = PC() && !S.member ? t('settings') : t('notif'); $('#pSync').textContent = S.acct?.found ? t('sync') : t('syncNone');
   $('#idea').placeholder = t('fIdeaPh'); $('#more').placeholder = t('fMorePh'); $('#name').placeholder = t('fNamePh');
   $('#swOn').classList.toggle('on', S.prefs.on); $('#swPlain').classList.toggle('on', S.prefs.plain);
@@ -585,12 +603,36 @@ function selectDate(k) { const d = parse(k); S.sel = k; S.ym = { y: d.getFullYea
 $('#list').addEventListener('click', e => { const b = e.target.closest('.sel'); if (b) selectDate(b.dataset.d); });
 $('#hero').addEventListener('click', e => { const b = e.target.closest('.teaser'); if (b) selectDate(b.dataset.d); });
 $('#cta').onclick = () => { location.hash = 'forslag'; };
+// PC: «Legg i kalender» og «+» åpner en liten meny i stedet for å laste ned. Mobil åpner .ics direkte (iPhone legger den rett i Kalender).
+function calLinks(e) {
+  const d2 = iso(new Date(parse(e.date).getTime() + 864e5)), st = e.time || '19:00';
+  const title = label(e), details = e.plain ? `${t('noProgram')}, ${t('open')}` : desc(e), loc = 'AHO Puben, ' + ADDRESS, q = encodeURIComponent;
+  return { g: `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${q(title)}&dates=${e.date.replace(/-/g, '')}T${st.replace(':', '')}00/${d2.replace(/-/g, '')}T010000&ctz=Europe/Oslo&details=${q(details)}&location=${q(loc)}`,
+    o: `https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&subject=${q(title)}&startdt=${e.date}T${st}:00&enddt=${d2}T01:00:00&body=${q(details)}&location=${q(loc)}`,
+    w: `webcal://${location.host}/api/events.ics`, i: `${API}/api/ics/${e.id}` };
+}
+function openCalMenu(e, anchor) {
+  const m = $('#calmenu'), L = calLinks(e);
+  m.innerHTML = `<a href="${L.g}" data-cal="g" target="_blank" rel="noopener"><b>${t('calGoogle')}</b><small>${t('calWeb')}</small></a><a href="${L.o}" data-cal="o" target="_blank" rel="noopener"><b>${t('calOutlook')}</b><small>${t('calWeb')}</small></a><a href="${L.w}" data-cal="w"><b>${t('calApple')}</b><small>${t('calAppleS')}</small></a><a href="${L.i}" data-cal="i"><b>${t('calIcs')}</b><small>${t('calIcsS')}</small></a>`;
+  const r = anchor.getBoundingClientRect(), w = $('.wrap').getBoundingClientRect();
+  m.hidden = false; m.style.left = Math.max(8, Math.min(r.left - w.left, w.width - 328)) + 'px'; m.style.top = (r.bottom - w.top + 8) + 'px';
+}
+const closeCalMenu = () => { $('#calmenu').hidden = true; };
+function goCal(L, k) { if (k === 'g' || k === 'o') window.open(L[k], '_blank', 'noopener'); else location.href = L[k]; } // husket valg: rett til kalenderen, ingen meny
+document.addEventListener('click', ev => {
+  const pick = ev.target.closest('#calmenu a[data-cal]');
+  if (pick) { S.cal = pick.dataset.cal; ls('cal', S.cal); renderPanel(); toast(t('calSaved')); closeCalMenu(); return; } // lenken åpnes som vanlig, valget huskes
+  const a = ev.target.closest('a[href*="/api/ics/"]');
+  if (a && PC()) { const e = items().find(x => x.id === decodeURIComponent(a.getAttribute('href').split('/api/ics/')[1])); if (e) { ev.preventDefault(); if (S.cal) goCal(calLinks(e), S.cal); else openCalMenu(e, a); return; } }
+  if (!ev.target.closest('#calmenu')) closeCalMenu();
+});
+$('#calChips').onclick = e => { const b = e.target.closest('button'); if (!b) return; S.cal = b.dataset.cal || null; ls('cal', S.cal); renderPanel(); };
 $('#back').onclick = () => { history.length > 1 ? history.back() : (location.hash = ''); };
 function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2800); }
 function route() { if (location.hash === '#medlem') { history.replaceState(null, '', location.pathname); if (S.member) openSheet(true, null); return; } const f = location.hash === '#forslag'; $('#forslag').classList.toggle('on', f); $('#home').classList.toggle('on', !f); if (f && !PC()) window.scrollTo(0, 0); }
 addEventListener('hashchange', route);
 $('#forslag').addEventListener('click', e => { if (e.target === e.currentTarget && PC()) $('#back').click(); }); // PC: dialog, klikk utenfor lukker
-addEventListener('keydown', e => { if (e.key !== 'Escape') return; if ($('#forslag').classList.contains('on')) $('#back').click(); else if (panel.classList.contains('open')) openPanel(false); else if (sheet.classList.contains('open')) openSheet(false); });
+addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!$('#calmenu').hidden) { closeCalMenu(); return; } if ($('#forslag').classList.contains('on')) $('#back').click(); else if (panel.classList.contains('open')) openPanel(false); else if (sheet.classList.contains('open')) openSheet(false); });
 $('#form').onsubmit = async e => { e.preventDefault(); const b = $('#send'); b.disabled = true; b.textContent = t('sending');
   const fd = Object.fromEntries(new FormData(e.target));
   const r = await fetch(API + '/api/suggest', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify(fd) }).catch(() => null);
