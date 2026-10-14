@@ -222,13 +222,13 @@ Appen følger disse reglene. Ingen kode trengs.
 - Alle undersidene under overskriften **HOW-TO** vises som manualer i appen, i samme rekkefølge, gruppert av skillelinjene. Alt annet på siden hoppes over. Rett i Notion, så er appen oppdatert innen ti minutter.
 
 **Varsler**
-- Arrangementer: hver bruker velger Samme dag (3 timer før start), Dagen før kl 12 og/eller Mandag kl 12. Standard er samme dag og dagen før.
+- Arrangementer: hver bruker velger Samme dag kl 16 og/eller Dagen før kl 12. Standard er begge. Starter et arrangement tidligere enn kl 19 (starttid i Når), kommer samme-dag-varselet tre timer før start.
 - Vakter: kl 19 dagen før, og én time før start.
 - Styremeldinger: med en gang, til innloggede medlemmer som har varsler på.
 
 **Innstillinger og tall styret ser i appen**
 - **«Bli medlem»-knappen** øverst kan skjules for alle. Logg inn som styremedlem, trykk bjella, og under MEDLEM står avkryssingen «Vis «Bli medlem» på nettsiden». Slå av når opptaket er stengt. Valget gjelder alle som åpner appen, med en gang. Selve lenken knappen går til (innmeldingsskjemaet i Notion) står øverst i `public/index.html` som `JOIN_URL`.
-- **Tall.** Øverst i «Send melding» ser styret hvor mange telefoner som har varsler på (og hvor mange av dem som er innloggede medlemmer), og hvor mange som har lagt appen på Hjem-skjerm, med antall nye siste sju dager. Hjem-skjerm telles når appen åpnes derfra, én gang per dag per telefon, uten navn eller numre.
+- **Tall.** Logg inn som styremedlem, trykk bjella og «Se tall for appen» (eller «SE TALL» under Send melding). Der står: besøk (unike enheter siste døgn, siste 7 og 30 dager, og hvor mange av dem fra PC), hvor mange som er innlogget (personer og enheter), hvor mange telefoner som har varsler på, og hvor mange som har lagt appen på Hjem-skjerm, med nye siste sju dager. Alt er antall: ingen navn, numre eller IP-adresser. Hver nettleser får en tilfeldig id som bare ligger i nettleseren, så samme person ikke telles to ganger samme dag. Tellingen startet 14. oktober 2026. Ekomloven kan kreve samtykke for slik lagring på brukerens enhet når den ikke er nødvendig for tjenesten: sjekk det, og ta tellingen ut av appen om dere er usikre (det er én blokk i `public/index.html` merket «telefonen melder seg»).
 - **Varselvalg på PC.** PC-er får ikke push, så varselvalgene vises bare når man er innlogget. Da styrer de telefonen: appen leser valgene fra telefonens abonnement og skriver endringer tilbake, så PC og telefon er like.
 - **Kalender på PC.** «Legg i kalender» på PC gir en meny: Google Kalender, Outlook, abonnement i Apple Kalender på alle arrangementer, eller nedlasting av .ics. Valget huskes på maskinen og kan endres under innstillinger. Abonnementet henter fra adressen `/api/events.ics` og oppdaterer seg selv.
 
@@ -277,7 +277,7 @@ Alt kjører på gratisnivåene, og en studentpub kommer ikke i nærheten av gren
 | Tjeneste | Gratisgrense | Hva appen bruker |
 |---|---|---|
 | Cloudflare Workers | 100 000 forespørsler per dag | Noen hundre |
-| Cloudflare KV | 1 000 skrivinger per dag, 100 000 lesinger | Noen titalls skrivinger, bortsett fra når en styremelding sendes (én per medlem som leser) |
+| Cloudflare KV | 1 000 skrivinger per dag, 100 000 lesinger | Én skriving per besøkende enhet per dag (tellingen), noen titalls til, og én per medlem som leser en styremelding. Over omtrent 900 unike besøkende per dag må tellingen tas ut, eller Workers oppgraderes til betalt plan (5 dollar i måneden) |
 | DeepL Developer | 1 million tegn, engangs | Noen tusen tegn i året |
 | Notion API | Ingen kostnad | Hvert 10. minutt |
 

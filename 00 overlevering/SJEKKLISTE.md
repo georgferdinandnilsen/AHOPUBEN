@@ -53,7 +53,7 @@ Kryss av etter hvert. Rekkefølgen er viktig. Alt er gratis.
 - [ ] Logget inn som styremedlem, valgt styrekode, sendt testmelding
 - [ ] Byttet til engelsk: tekstene er oversatt
 - [ ] På PC: topplinje med bred logo og åpningstider, kalender til venstre, kommende til høyre, kontaktinfo i bunnen
-- [ ] Som styre: avkryssingen «Vis Bli medlem på nettsiden» virker begge veier, og tallene øverst i «Send melding» vises
+- [ ] Som styre: avkryssingen «Vis Bli medlem på nettsiden» virker begge veier, og «Se tall for appen» viser tall
 
 ## Bytte over
 - [ ] Ny adresse sendt til alle, med beskjed om å legge til på Hjem-skjerm på nytt
