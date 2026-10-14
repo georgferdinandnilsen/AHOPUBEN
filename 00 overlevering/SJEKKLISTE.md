@@ -38,12 +38,13 @@ Kryss av etter hvert. Rekkefølgen er viktig. Alt er gratis.
 - [ ] `npm run deploy` kjørt, og den midlertidige workers.dev-adressen notert
 
 ## Domene ahopuben.no
-- [ ] Bestemt endelig adresse: app.ahopuben.no (anbefalt) eller ahopuben.no
+- [ ] Endelig adresse er ahopuben.no (appen er forsiden, bestemt 14.10.2026)
 - [ ] ahopuben.no lagt til i Cloudflare («Add a domain», gratisplan)
 - [ ] Navnetjenerne byttet hos registraren til de to Cloudflare oppga
 - [ ] Cloudflare har bekreftet at domenet er aktivt (e-post)
-- [ ] Custom Domain lagt til på Worker-en: Workers & Pages → aho-puben → Settings → Domains & Routes
-- [ ] https://app.ahopuben.no åpner appen på telefon
+- [ ] Custom Domain lagt til på Worker-en: Workers & Pages → aho-puben → Settings → Domains & Routes, både ahopuben.no og www.ahopuben.no
+- [ ] Google Sites koblet fra domenet (Innstillinger → Egendefinerte domener)
+- [ ] https://ahopuben.no åpner appen på telefon og på PC
 
 ## Test
 - [ ] Den endelige adressen åpnet på telefon: ekte arrangementer vises (ikke Halloween-eksempelet)
@@ -51,6 +52,8 @@ Kryss av etter hvert. Rekkefølgen er viktig. Alt er gratis.
 - [ ] Logget inn som medlem, egne vakter vises
 - [ ] Logget inn som styremedlem, valgt styrekode, sendt testmelding
 - [ ] Byttet til engelsk: tekstene er oversatt
+- [ ] På PC: topplinje med bred logo og åpningstider, kalender til venstre, kommende til høyre, kontaktinfo i bunnen
+- [ ] Som styre: avkryssingen «Vis Bli medlem på nettsiden» virker begge veier, og tallene øverst i «Send melding» vises
 
 ## Bytte over
 - [ ] Ny adresse sendt til alle, med beskjed om å legge til på Hjem-skjerm på nytt

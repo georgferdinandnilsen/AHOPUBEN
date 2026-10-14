@@ -13,9 +13,10 @@ Du skal hjelpe meg, som ikke er utvikler, med å flytte en liten nettside-app ti
 - Hemmeligheter som må settes med `npx wrangler secret put`: NOTION_TOKEN, NOTION_DB_ID, NOTION_SUGGEST_DB_ID, DEEPL_KEY, VAPID_PUBLIC, VAPID_PRIVATE. VAPID-nøkler lages med `npm run vapid` (kjører `web-push generate-vapid-keys`).
 - Kommandoer: `npm install`, `npx wrangler login`, `npx wrangler kv namespace create KV`, `npm run deploy`, `npx wrangler tail` for logg, `node test/members.test.mjs` for tester.
 - Uten NOTION_TOKEN kjører appen i eksempelmodus med tre oppdiktede arrangementer. Det er slik man ser at Notion-koblingen mangler.
+- Samme `index.html` virker på telefon og PC (CSS fra 900 px bredde). Styret kan skjule «Bli medlem»-knappen via `POST /api/board/join` (lagres i KV `settings:join`). Varselvalg synkes til kontoen via `/api/member/prefs`. Alle arrangementer finnes som kalenderabonnement på `/api/events.ics`. Telefoner som har lagt appen på Hjem-skjerm melder seg via `POST /api/ping` (KV-nøkler `dev:`), og styret ser tallene i «Send melding».
 
 **Det jeg vil**
-Sette opp alt på nytt på styrets egen Cloudflare-konto, med ny Notion-integrasjon og ny DeepL-nøkkel, og legge appen på pubens eget domene ahopuben.no (helst app.ahopuben.no) via Cloudflare Custom Domains. Domenet er registrert hos [registrar].
+Sette opp alt på nytt på styrets egen Cloudflare-konto, med ny Notion-integrasjon og ny DeepL-nøkkel, og legge appen rett på pubens eget domene ahopuben.no (og www.ahopuben.no) via Cloudflare Custom Domains. Appen er forsiden og erstatter en Google Sites-side som ligger der i dag. Domenet er registrert hos [registrar].
 
 **Min situasjon**
 - Operativsystem: [Mac / Windows]

@@ -67,12 +67,18 @@ Nederst i varselmenyen logger medlemmer inn med telefonnummer. Nummeret sjekkes 
 
 **Styret:** nummer i STYREMEDLEMMER gir «Send melding» i varselmenyen. Første gang velger man en firesifret styrekode. Meldingen går som push til innloggede medlemmer med varsler på, og ligger i appen for alle innloggede. Loggen viser hvem som sendte hva og hvor mange som har sett.
 
+**Skjule «Bli medlem»:** styremedlemmer har en avkryssing i varselmenyen, «Vis «Bli medlem» på nettsiden». Den gjelder for alle som åpner appen, lagres i KV (`settings:join`) og trenger ikke styrekode. Slå av når opptaket er stengt.
+
 **Glemt styrekode:** trykk «Nullstill kode» i appen. Lederen åpner KV-lageret i Cloudflare og leser nøkkelen `reset:<styre-id>`, som inneholder en midlertidig kode. Styremedlemmet skriver den inn sammen med en ny kode.
 KV-lageret: https://dash.cloudflare.com/77c55d6b057cc69a033738170492d88b/workers/kv/namespaces/0bfeddb59d4e4152984b31df88491a13
 
 Styremedlemmers navn hentes fra Person-feltet i Styremedlemmer. Det krever at integrasjonen har rettigheten «Read user information without email» (notion.so/profile/integrations → integrasjonen → Capabilities). Uten den vises rollen som navn.
 
 Datakilde-id-ene for medlemsdelen står i `wrangler.toml` under `[vars]`. Integrasjonen må være koblet til MEDLEMMER, STYREMEDLEMMER, VAKTPLAN og infosiden.
+
+## På PC
+
+Samme fil, samme kode. Fra 900 px bredde bytter CSS-en til PC-layouten (Figma: «PC 1: PLAKAT»): plakaten fyller bredden, kalender til venstre, Kommende og forslag til høyre, kontaktinfo (tider, adresse, e-post, Instagram) i bunnen. Logoen står midt i topplinjen. Varsler er sidemeny, forslag er dialog (Esc eller klikk utenfor lukker), medlemsarket vokser opp fra pillen nede til venstre. Under 900 px er mobilversjonen uendret. «Legg i kalender» på PC åpner en meny (Google Kalender, Outlook, abonnement i Apple Kalender via `/api/events.ics`, eller .ics); valget huskes på maskinen og kan endres under innstillinger. Kontaktinfoen står i `public/index.html` (`IG_URL`, `MAIL`, `ADDRESS`). Den brede logoen ligger inline i samme fil og følger tekstfargen. På PC får man ikke push, så varselvalgene vises bare når man er innlogget; da styrer de telefonen via kontoen (`/api/member/prefs`).
 
 ## På iPhone
 

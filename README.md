@@ -69,6 +69,8 @@ Nederst i varselmenyen logger medlemmer inn med telefonnummer. Nummeret sjekkes 
 
 **Skjule «Bli medlem»:** styremedlemmer har en avkryssing i varselmenyen, «Vis «Bli medlem» på nettsiden». Den gjelder for alle som åpner appen, lagres i KV (`settings:join`) og trenger ikke styrekode. Slå av når opptaket er stengt.
 
+**Tall for styret:** øverst i «Send melding» står hvor mange telefoner som har varsler på (KV-nøkler `sub:`, med metadata) og hvor mange som har lagt appen på Hjem-skjerm (KV-nøkler `dev:`, telefonen melder seg via `POST /api/ping` én gang om dagen med en tilfeldig id, ingen personopplysninger).
+
 **Glemt styrekode:** trykk «Nullstill kode» i appen. Lederen åpner KV-lageret i Cloudflare og leser nøkkelen `reset:<styre-id>`, som inneholder en midlertidig kode. Styremedlemmet skriver den inn sammen med en ny kode.
 KV-lageret: https://dash.cloudflare.com/77c55d6b057cc69a033738170492d88b/workers/kv/namespaces/0bfeddb59d4e4152984b31df88491a13
 

@@ -53,8 +53,9 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 /* chrome */
 .chrome{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:5;background:var(--chrome);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);padding:calc(env(safe-area-inset-top) + 8px) 20px 12px;display:flex;justify-content:space-between;align-items:center;transition:background .3s}
 .brand{display:flex;align-items:center;gap:10px}
-.brand img{width:36px;height:36px;border-radius:0}
-[data-theme=dark] .brand img{filter:invert(1)}
+.brand img.ic{width:36px;height:36px;border-radius:0}
+.brand-pc{display:none}
+[data-theme=dark] .brand img.ic{filter:invert(1)}
 .brand button{display:flex}
 .join{background:var(--btn-bg);color:var(--btn-fg);font-family:"Archivo Black";font-size:11px;letter-spacing:.04em;padding:8px 11px;text-decoration:none;white-space:nowrap}
 .join:active{transform:scale(.97)}
@@ -151,9 +152,9 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 .opt{font-weight:500;font-size:14px}
 .test{border:1px solid var(--chip);padding:11px;font-weight:700;font-size:12px;letter-spacing:.06em;text-align:center}
 .hint{font-size:12px;color:var(--muted)}
-.info{border:1px solid var(--line);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
-.info b{font-weight:700;font-size:13px}
-.info p{font-size:12px;color:var(--muted)}
+.panel .info{border:1px solid var(--line);padding:12px 14px;display:flex;flex-direction:column;gap:6px} /* bare infoboksen i panelet, ikke teksten i plakaten */
+.panel .info b{font-weight:700;font-size:13px}
+.panel .info p{font-size:12px;color:var(--muted)}
 .credit{font-weight:300;font-size:11px;letter-spacing:.02em;color:var(--credit);margin-top:auto}
 /* forslag */
 .view{display:none}
@@ -197,8 +198,8 @@ body.member .content{padding-bottom:120px}
 .pill .arr{font-weight:700}
 .sscrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:12;opacity:0;pointer-events:none;transition:opacity .3s}
 .sscrim.open{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;max-height:92dvh;transform:translate(-50%,100%);background:var(--panel);border-radius:28px 28px 0 0;z-index:13;transition:transform .34s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;touch-action:pan-y}
-.sheet.open{transform:translate(-50%,0)}
+.sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;max-height:92dvh;--sx:-50%;transform:translate(var(--sx),100%);background:var(--panel);border-radius:28px 28px 0 0;z-index:13;transition:transform .34s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;touch-action:pan-y}
+.sheet.open{transform:translate(var(--sx),0)}
 .sheet.drag{transition:none}
 .grip{flex:none;padding:10px 0 4px;display:flex;justify-content:center}.grip i{width:36px;height:5px;border-radius:3px;background:#555}
 .sbody{overflow-y:auto;overscroll-behavior:contain;padding:0 20px calc(env(safe-area-inset-bottom) + 30px);display:flex;flex-direction:column;gap:14px}
@@ -249,14 +250,100 @@ body.member .content{padding-bottom:120px}
 .ta{font:inherit;font-size:15px;color:inherit;background:none;border:1px solid var(--field);padding:14px;min-height:110px;width:100%;resize:vertical}
 .ta:focus{outline:none;border-color:var(--blue)}
 .ghost{border:1px solid var(--chip);padding:12px;text-align:center;font-weight:700;font-size:12px;letter-spacing:.06em;width:100%}
+
+/* ---- felles småting ---- */
+[hidden]{display:none!important}
+.wordmark,.join-d,.foot{display:none}
+.nblock{display:flex;flex-direction:column;gap:14px}
+#pSync{display:none}
+.calblock{display:none}
+.calmenu{position:absolute;z-index:9;width:320px;background:var(--panel);border:1.5px solid var(--blue);display:flex;flex-direction:column;padding:6px;box-shadow:0 16px 48px rgba(0,0,0,.35);transform-origin:top left;animation:pop .18s cubic-bezier(.32,.72,0,1)}
+@keyframes pop{from{opacity:0;transform:scale(.96)}}
+.calmenu a{display:flex;flex-direction:column;gap:2px;padding:10px 12px;text-decoration:none;color:inherit}
+.calmenu a:hover{background:var(--blue);color:#fff}
+.calmenu b{font-weight:700;font-size:14px}
+.calmenu small{font-size:12px;color:var(--muted)}
+.calmenu a:hover small{color:#fff;opacity:.85}
+.cbrow{display:flex;gap:12px;align-items:flex-start;cursor:pointer;text-align:left}
+.cbrow input{width:20px;height:20px;accent-color:var(--blue);margin-top:1px;flex:none}
+.cbrow b{display:block;font-weight:700;font-size:14px}
+/* ---- PC (PC 1: Plakat, bredformat). Under 900 px er alt over urørt. ---- */
+@media (min-width:900px){
+.wrap,.chrome{max-width:none}
+.chrome{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:12px 40px}
+.wordmark{display:block;justify-self:start;font-family:"Archivo Black";font-size:14px;letter-spacing:.14em}
+.brand{justify-self:center}
+.brand img.ic{display:none}
+.brand-pc{display:flex;flex-direction:column;align-items:center;gap:3px}
+.brand-pc svg{width:205px;height:auto;display:block;fill:currentColor} /* brikkene følger tekstfargen: hvite i mørk, svarte i lys */
+.brand-pc small{font-size:10px;font-weight:700;letter-spacing:.02em;line-height:1}
+#join{display:none}
+.join-d{display:inline-block;background:none;color:var(--fg);border:1px solid var(--chip);font-family:"Space Grotesk";font-weight:700;font-size:12px;letter-spacing:.06em;padding:10px 16px}
+.tools{justify-self:end;gap:16px}
+.hero{height:720px;min-height:0;max-height:none}
+.hero .tx{left:80px;right:80px;bottom:56px;gap:16px}
+.hero h1{font-size:96px}
+.hero .meta{font-size:16px}
+.hero .info{max-width:640px;font-size:17px}
+.hero.noimg{padding-top:120px}
+.hero.noimg .gen{height:min(300px,100%)}
+.hero.noimg .tx{padding:0 80px 56px}
+.content{display:grid;grid-template-columns:minmax(0,720px) minmax(0,1fr);column-gap:80px;row-gap:48px;padding:40px 80px 64px;align-items:start}
+.desc{grid-column:1;grid-row:1}
+#actions{grid-column:2;grid-row:1;justify-self:end}
+#actions:empty{display:none}
+.cal{grid-column:1;grid-row:2/4;align-self:stretch}
+.cal .selcard{margin-top:auto;min-height:92px;box-sizing:border-box} /* kortet og forslagsknappen: lik høyde, bunnkant på samme linje */
+.list{grid-column:2;grid-row:2}
+.cta{grid-column:2;grid-row:3;align-self:end;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:16px 20px;min-height:92px;box-sizing:border-box} /* bare i høyre spalte, nederst i flukt med kalenderen */
+.cta b{font-size:15px;margin:0}
+.cta span{font-size:13px}
+.foot{grid-column:1/3;grid-row:4}
+.btn.primary{flex:none;padding:16px 28px}
+.btn.ghost{padding:16px 22px}
+.grid{gap:6px}
+.day{height:64px;font-size:16px}
+.cal-head h2{font-size:26px}
+.list h2{font-size:18px}
+.foot{display:grid;grid-template-columns:repeat(5,1fr);gap:40px;border-top:1px solid var(--line);padding-top:32px;font-size:14px}
+.foot b{display:block;font-weight:700;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+.foot a{color:inherit;text-decoration:none}
+.panel{width:400px;padding:36px 28px 32px}
+/* PC får ikke push: varselvalgene vises bare innlogget, og styrer da telefonen via kontoen */
+.nblock{display:none}
+body.member .nblock{display:flex}
+body.member .nblock .dev{display:none}
+body.member #pSync{display:block}
+.calblock{display:flex}
+#home.view{display:block}
+#forslag.view.on{position:fixed;inset:0;z-index:14;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--scrim);overflow:auto;padding:40px}
+#forslag .top,#forslag .form{width:600px;max-width:100%;background:var(--panel);border:1px solid var(--line)}
+#forslag .top{padding:28px 36px 0;border-bottom:0;flex-direction:row-reverse;justify-content:space-between}
+#forslag .top h2{font-size:34px;line-height:.92;letter-spacing:-.01em}
+#back{font-size:0}
+#back::after{content:"×";font-size:26px;color:var(--muted);line-height:1}
+#forslag .form{padding:16px 36px 36px;border-top:0}
+.form h1{display:none}
+body:has(#forslag.on){overflow:hidden}
+.pill{left:40px;transform:none;bottom:24px}
+.pill.hide{transform:translateY(120px)}
+.sheet{--sx:0;left:40px;width:720px;max-width:720px;bottom:96px;max-height:calc(100dvh - 120px);border-radius:0;border:1px solid var(--line);box-shadow:0 16px 48px rgba(0,0,0,.45);transform:translate(0,calc(100% + 100px))}
+.sheet.open{transform:translate(0,0)}
+.grip{display:none}
+.sbody{padding:28px 32px 28px}
+body.member .content{padding-bottom:64px}
+.modal .box{max-width:420px}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div id="home" class="view on">
     <header class="chrome">
-      <div class="brand"><button id="brand" aria-label="Last inn på nytt"><img src="/icon-192.png" alt="AHO PUBEN"></button><a class="join" id="join" target="_blank" rel="noopener"></a></div>
+      <span class="wordmark">ARRANGEMENTER</span>
+      <div class="brand"><button id="brand" aria-label="Last inn på nytt"><img class="ic" src="/icon-192.png" alt="AHO PUBEN"><span class="brand-pc"><svg viewBox="0 0 1031 175" role="img" aria-label="AHO PUB"><path d="M27 25.6479V148.175H68.2534C68.2534 137.098 77.2308 128.122 88.3101 128.122C99.3893 128.122 108.367 137.098 108.367 148.175H149.62V25.6479H27ZM108.367 88.5143C108.367 99.5915 99.3893 108.567 88.3101 108.567C77.2308 108.567 68.2534 99.5915 68.2534 88.5143V60.3046C68.2534 49.2273 77.2308 40.2515 88.3101 40.2515C99.3893 40.2515 108.367 49.2273 108.367 60.3046V88.5143Z"/><path d="M264.296 25.6479C264.296 25.6479 264.296 25.9685 264.296 26.1466V54.3563C264.296 65.4336 255.319 74.4094 244.239 74.4094C233.16 74.4094 224.183 65.4336 224.183 54.3563V26.1466C224.183 26.1466 224.183 25.826 224.183 25.6479H182.929V148.175H224.218C224.218 147.854 224.218 147.534 224.218 147.213V119.004C224.218 107.926 233.196 98.9504 244.275 98.9504C255.354 98.9504 264.332 107.926 264.332 119.004V147.213C264.332 147.534 264.332 147.854 264.332 148.175H305.621V25.6479H264.367H264.296Z"/><path d="M338.894 25.6479V148.175H461.514V25.6479H338.894ZM420.225 101.016C420.225 112.094 411.248 121.069 400.169 121.069C389.089 121.069 380.112 112.094 380.112 101.016V72.8066C380.112 61.7293 389.089 52.7535 400.169 52.7535C411.248 52.7535 420.225 61.7293 420.225 72.8066V101.016Z"/><path d="M672.591 121.098C672.591 110.128 681.39 101.223 692.327 101.045V25H569.707V147.527H672.591V121.098ZM638.462 88.7212H610.426V48.615H638.462C649.541 48.615 658.519 57.5907 658.519 68.668C658.519 79.7453 649.541 88.7212 638.462 88.7212Z"/><path d="M807.003 25V93.8502H786.483C775.688 93.8502 766.925 85.0881 766.925 74.2957V25H725.671V147.527H848.292V25H807.038H807.003Z"/><path d="M881.601 25V147.527H1004.22V25H881.601ZM908.747 52.9247C908.747 41.8475 917.724 32.8717 928.803 32.8717H957.018C968.097 32.8717 977.075 41.8475 977.075 52.9247C977.075 64.002 968.097 72.9779 957.018 72.9779H928.803C917.724 72.9779 908.747 64.002 908.747 52.9247ZM979.426 118.676C979.426 129.896 970.342 138.979 959.12 138.979H930.264V98.3737H959.12C970.342 98.3737 979.426 107.456 979.426 118.676Z"/></svg><small id="hoursPc"></small></span></button><a class="join" id="join" target="_blank" rel="noopener"></a></div>
       <div class="tools">
+        <a class="join join-d" target="_blank" rel="noopener"></a>
         <div class="lang"><button data-lang="no">NO</button><button data-lang="en">EN</button></div>
         <button class="bell" id="bell" aria-label="Varsler"><svg viewBox="0 0 24 24"><path d="M12 2a6 6 0 0 0-6 6v4.5L4 16v1h16v-1l-2-3.5V8a6 6 0 0 0-6-6zm0 20a2.5 2.5 0 0 0 2.5-2h-5A2.5 2.5 0 0 0 12 22z"/></svg></button>
       </div>
@@ -268,6 +355,7 @@ body.member .content{padding-bottom:120px}
       <section class="cal" id="cal"></section>
       <section class="list" id="list"></section>
       <button class="cta" id="cta"></button>
+      <footer class="foot" id="foot"></footer>
     </div>
   </div>
 
@@ -303,22 +391,32 @@ body.member .content{padding-bottom:120px}
       <p class="hint err" id="recErr" hidden></p>
     </div>
   </div>
+  <div class="calmenu" id="calmenu" hidden></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <div class="scrim" id="scrim"></div>
   <aside class="panel" id="panel" aria-label="Varsler og utseende">
     <div class="ph"><h2 id="pTitle"></h2><button id="close" aria-label="Lukk">×</button></div>
-    <div class="between"><div><b id="pOn"></b><small id="pOnSub"></small></div><button class="sw" id="swOn" role="switch"></button></div>
-    <div class="hr"></div>
+    <div class="nblock" id="notif">
+    <div class="between dev"><div><b id="pOn"></b><small id="pOnSub"></small></div><button class="sw" id="swOn" role="switch"></button></div>
+    <div class="hr dev"></div>
     <div class="lbl" id="pHow"></div>
     <div class="chips" id="chips"></div>
     <div class="between"><span class="opt" id="pPlain"></span><button class="sw sm" id="swPlain" role="switch"></button></div>
-    <button class="test" id="test"></button>
-    <div class="info"><b id="pNoTest"></b><p id="pNoTestBody"></p></div>
+    <p class="hint" id="pSync"></p>
+    <button class="test dev" id="test"></button>
+    <div class="info dev"><b id="pNoTest"></b><p id="pNoTestBody"></p></div>
     <div class="hr"></div>
+    </div>
     <div class="lbl" id="pLook"></div>
     <div class="chips half" id="themeRow"><button data-th="light"></button><button data-th="dark"></button></div>
     <div class="chips" id="themeRow2"><button data-th="auto" style="flex:1"></button></div>
     <p class="hint" id="pDayHint"></p>
+    <div class="nblock calblock" id="calBlock">
+    <div class="hr"></div>
+    <div class="lbl" id="pCal"></div>
+    <div class="chips" id="calChips"></div>
+    <p class="hint" id="pCalHint"></p>
+    </div>
     <div class="hr"></div>
     <div class="lbl" id="pMember"></div>
     <div id="memberOut" style="display:flex;flex-direction:column;gap:12px">
@@ -334,6 +432,7 @@ body.member .content{padding-bottom:120px}
     <div id="memberIn" hidden style="display:flex;flex-direction:column;gap:12px">
       <div><b id="memberName" style="font-weight:700;font-size:14px;display:block"></b><small class="hint" id="memberSub"></small></div>
       <button class="mrow" id="sendLink" hidden><div><b id="sendLinkT"></b><small id="sendLinkS"></small></div><span>›</span></button>
+      <label class="cbrow" id="joinRow" hidden><input type="checkbox" id="joinCb"><span><b id="joinCbT"></b><small class="hint" id="joinCbS"></small></span></label>
       <button class="linkbtn" id="logoutBtn"></button>
     </div>
     <p class="hint" id="pAuto"></p>
@@ -344,17 +443,21 @@ body.member .content{padding-bottom:120px}
 <script>
 const API = location.port === '8000' ? 'http://localhost:8787' : ''; // ponytail: python-server-forhåndsvisning peker på wrangler dev; i prod er alt samme opprinnelse
 const JOIN_URL = 'https://ahopub.notion.site/306fc4bc274d8006adabe92827c1c11a'; // innmeldingsskjemaet i Notion, må være delt offentlig
+const IG_URL = 'https://www.instagram.com/ahopuben/', MAIL = 'aho@puben.no', ADDRESS = 'Maridalsveien 29, 0175 Oslo'; // fra dagens nettside, vises i bunnen på PC
+const FALLBACK_IMG = '/fallback.jpg'; // bilde av puben, brukes når «Bilde til APP» mangler i Notion
+const PC = () => matchMedia('(min-width:900px)').matches;
+matchMedia('(min-width:900px)').addEventListener('change', () => renderPanel());
 const KEYS = ['same','day','mon']; // samme dag (3 t før start), dagen før kl 12, mandag kl 12
 const norm = a => { const old = { '0,16':'same', '1,12':'day' }; const o = [...new Set((Array.isArray(a) ? a : []).map(x => Array.isArray(x) ? old[x.join()] : x).filter(x => KEYS.includes(x)))]; return o.length ? o : ['same','day']; };
 const T = {
   no:{nextEvent:'NESTE ARRANGEMENT',join:'BLI MEDLEM',member:'Medlem',memberHint:'Bartender? Logg inn med telefonnummeret ditt, så får du vaktene og manualene dine på forsiden.',login:'LOGG INN',loggingIn:'LOGGER INN…',logout:'Logg ut',loggedAs:'Innlogget som',boardRole:'Styremedlem',memberUntil:'Medlem til',sendT:'Send melding',sendS:'Til alle medlemmer eller dem på vakt',errNotMember:'Fant ikke nummeret i medlemslisten.',recHint:'Kanskje nummeret ditt er lagret feil, eller i et annet format?',recLink:'Rett det med e-posten din',recTitle:'Feil nummer?',recIntro:'Skriv e-posten du meldte deg inn med, så kan du rette nummeret i medlemskortet ditt.',recEmail:'E-posten du meldte deg inn med',recFind:'FINN MEG',recNotFound:'Fant ingen med den e-posten.',recEmailBad:'Skriv en gyldig e-post.',recPhoneT:'Skriv nummeret ditt på nytt',recPhoneS:'Lagres i medlemskortet ditt, og du logges inn.',recSave:'LAGRE OG LOGG INN',recTaken:'Nummeret er registrert på et annet medlem. Ta kontakt med styret.',errExpired:'Medlemskapet har gått ut. Forny for å logge inn.',errPhone:'Skriv et gyldig telefonnummer.',errNet:'Fikk ikke kontakt. Prøv igjen.',myShifts:'MINE VAKTER',pillNone:'Ingen vakter satt opp',pillNext:'Neste: ',hi:'HEI, ',nShifts:' kommende vakter',oneShift:'1 kommende vakt',noShifts:'Ingen kommende vakter',tabs:['VAKTER','MANUALER','MELDINGER'],fromBoard:'FRA STYRET, ',obsK:'OBS FOR KVELDEN',nextShift:'NESTE VAKT',nowShift:'PÅGÅENDE VAKT',roleOpen:'Åpnevakt',roleClose:'Stengevakt',roleResp:'Ansvarlig',noProgramS:'Rolig pub',withS:'Med ',respS:'Ansvarlig: ',tapDetail:'Trykk for detaljer og ring.',allCal:'LEGG ALLE VAKTER I KALENDER',calHint:'Abonnement: oppdateres av seg selv, ingen duplikater.',shiftAlert:'Varsel om vakt',shiftAlertS:'Kl 19 dagen før og 1 time før',responsible:'ANSVARLIG STYREMEDLEM',workWith:'DU JOBBER MED',otherTeam:'SAMME KVELD, ',alone:'Ingen andre satt opp ennå.',manualsS:'Fra Notion, alltid oppdatert',loading:'Henter…',messagesS:'Fra styret',noMsgs:'Ingen meldinger ennå.',seenBy:' har sett',chooseCode:'VELG STYREKODE',chooseCodeS:'Nummeret ditt står i styrelisten. Velg en firesifret kode som du bruker for å sende meldinger.',saveCode:'LAGRE KODE',resetCode:'Nullstill kode',resetS:'Lederen henter den midlertidige koden i Cloudflare og gir deg den. Skriv den inn sammen med en ny kode.',tempCode:'Midlertidig kode',newCode:'Ny kode',to:'Til',toAll:'Alle aktive medlemmer',toUp:'Kommende vakt',toAct:'Pågående vakt',msg:'Melding',code:'Styrekode',sendTo:'SEND TIL ',sending:'SENDER…',sentTo:'Sendt til ',pushed:', push til ',seeLog:'SE LOGG',logT:'MELDINGSLOGG',logS:'Alle meldinger sendt fra appen. Kan ikke slettes.',wrongCode:'Feil kode.',tonight:'I KVELD',thisThu:'DENNE TORSDAGEN',next:'NESTE',upcoming:'KOMMENDE',plain:'Rolig pub',noProgram:'Ingen program',open:'kl 19-01',closed:'Ingen arrangement denne dagen',addCal:'LEGG I KALENDER',share:'DEL',idea:'SEND FORSLAG TIL ARRANGEMENTER',ideaSub:'Styret leser alle forslag →',
     notif:'VARSLER',notifOn:'Varsler på',notifSub:'Du får beskjed før hvert arrangement',how:'Hvor tidlig vil du ha beskjed?',chips:['Samme dag','Dagen før kl 12','Mandag kl 12'],alsoPlain:'Også når det bare er vanlig pub',test:'SEND TESTVARSEL NÅ',testSent:'SENDT. KOM DET?',testFail:'VIRKET IKKE. SE UNDER.',
-    look:'Utseende',light:'Lys',dark:'Mørk',auto:'Dag og natt',dayHint:'Solnedgangen i Oslo bytter tema for deg.',noTest:'Kom ikke testvarselet?',noTestBody:'Appen må ligge på Hjem-skjerm: trykk Del, så «Legg til på Hjem-skjerm». Prøv testvarselet etterpå.',auto2:'Lagres automatisk',credit:'Laget av Georg Ferdinand Nilsen',
+    look:'Utseende',light:'Lys',dark:'Mørk',auto:'Dag og natt',dayHint:'Solnedgangen i Oslo bytter tema for deg.',noTest:'Kom ikke testvarselet?',noTestBody:'Appen må ligge på Hjem-skjerm: trykk Del, så «Legg til på Hjem-skjerm». Prøv testvarselet etterpå.',auto2:'Lagres automatisk',credit:'Laget av Georg Ferdinand Nilsen',calPref:'Kalender på PC',calAsk:'Spør hver gang',calPrefHint:'Valget huskes på denne maskinen.',calSaved:'Husket. Endre under innstillinger.',calGoogle:'Google Kalender',calOutlook:'Outlook på nett',calWeb:'Åpner i ny fane, trykk Lagre',calApple:'Abonner i Apple Kalender',calAppleS:'Alle arrangementer, oppdateres av seg selv',calIcs:'Last ned .ics',calIcsS:'Kalender på Mac, Outlook-appen og andre',settings:'INNSTILLINGER',sync:'Gjelder varslene på telefonen din. Lagres på kontoen din.',syncNone:'Slå på varsler på telefonen først, så kan du styre dem herfra.',joinShow:'Vis «Bli medlem» på nettsiden',joinShowS:'Gjelder alle som åpner appen. Slå av når opptaket er stengt.',footAbout:'Studentpuben på AHO',footOpen:'ÅPENT',footHours:'Torsdager 19:00 - 01:00',hours:'Torsdager 19:00 - 01:00',footAddr:'ADRESSE',footMail:'E-POST',footFollow:'FØLG',
     sTitle:'FORSLAG',sHead:'HVA VIL DU HA PÅ PUBEN?',sSub:'Styret leser alt. Navn er valgfritt.',fIdea:'Idé',fIdeaPh:'F.eks. karaoke, vinsmaking, DJ-battle',fMore:'Fortell mer',fMorePh:'Hva, hvorfor, hvem bør komme?',fName:'Navn (valgfritt)',fNamePh:'Så styret kan takke deg',send:'SEND FORSLAG',sending:'SENDER…',sNote:'Lander rett i styrets Notion.',sent:'Takk!',sErr:'Noe gikk galt. Prøv igjen.',
     wd:['MA','TI','ON','TO','FR','LØ','SØ'],pub:'pub',and:'og',locale:'nb-NO'},
   en:{nextEvent:'NEXT EVENT',join:'JOIN',member:'Member',memberHint:'Bartender? Log in with your phone number to get your shifts and manuals on the front page.',login:'LOG IN',loggingIn:'LOGGING IN…',logout:'Log out',loggedAs:'Logged in as',boardRole:'Board member',memberUntil:'Member until',sendT:'Send message',sendS:'To all members or those on shift',errNotMember:'Number not found in the member list.',recHint:'Maybe your number was saved wrongly, or in another format?',recLink:'Fix it with your email',recTitle:'Wrong number?',recIntro:'Enter the email you signed up with to fix the number on your member card.',recEmail:'The email you signed up with',recFind:'FIND ME',recNotFound:'No member with that email.',recEmailBad:'Enter a valid email.',recPhoneT:'Enter your number again',recPhoneS:'Saved to your member card, and you are logged in.',recSave:'SAVE AND LOG IN',recTaken:'That number belongs to another member. Contact the board.',errExpired:'Membership has expired. Renew to log in.',errPhone:'Enter a valid phone number.',errNet:'No connection. Try again.',myShifts:'MY SHIFTS',pillNone:'No shifts scheduled',pillNext:'Next: ',hi:'HI, ',nShifts:' upcoming shifts',oneShift:'1 upcoming shift',noShifts:'No upcoming shifts',tabs:['SHIFTS','MANUALS','MESSAGES'],fromBoard:'FROM THE BOARD, ',obsK:'TONIGHT, NOTE',nextShift:'NEXT SHIFT',nowShift:'SHIFT IN PROGRESS',roleOpen:'Opening shift',roleClose:'Closing shift',roleResp:'In charge',noProgramS:'Quiet pub',withS:'With ',respS:'In charge: ',tapDetail:'Tap for details and to call.',allCal:'ADD ALL SHIFTS TO CALENDAR',calHint:'Subscription: updates itself, no duplicates.',shiftAlert:'Shift alerts',shiftAlertS:'7pm the day before and 1 hour before',responsible:'BOARD MEMBER IN CHARGE',workWith:'YOU WORK WITH',otherTeam:'SAME NIGHT, ',alone:'Nobody else scheduled yet.',manualsS:'From Notion, always up to date',loading:'Loading…',messagesS:'From the board',noMsgs:'No messages yet.',seenBy:' have seen',chooseCode:'CHOOSE BOARD CODE',chooseCodeS:'Your number is on the board list. Choose a four-digit code you use to send messages.',saveCode:'SAVE CODE',resetCode:'Reset code',resetS:'The chair fetches the temporary code in Cloudflare and gives it to you. Enter it together with a new code.',tempCode:'Temporary code',newCode:'New code',to:'To',toAll:'All active members',toUp:'Upcoming shift',toAct:'Shift in progress',msg:'Message',code:'Board code',sendTo:'SEND TO ',sending:'SENDING…',sentTo:'Sent to ',pushed:', pushed to ',seeLog:'SEE LOG',logT:'MESSAGE LOG',logS:'All messages sent from the app. Cannot be deleted.',wrongCode:'Wrong code.',tonight:'TONIGHT',thisThu:'THIS THURSDAY',next:'NEXT',upcoming:'UPCOMING',plain:'Quiet pub',noProgram:'No programme',open:'7pm-1am',closed:'No event this day',addCal:'ADD TO CALENDAR',share:'SHARE',idea:'SUGGEST AN EVENT',ideaSub:'The board reads every suggestion →',
     notif:'ALERTS',notifOn:'Alerts on',notifSub:'You get a heads-up before every event',how:'How early do you want to know?',chips:['Same day','Day before, 12pm','Monday, 12pm'],alsoPlain:'Also on plain pub nights',test:'SEND TEST ALERT NOW',testSent:'SENT. DID IT ARRIVE?',testFail:'DID NOT WORK. SEE BELOW.',
-    look:'Appearance',light:'Light',dark:'Dark',auto:'Day & night',dayHint:'Sunset in Oslo switches the theme for you.',noTest:'No test alert?',noTestBody:'The app must be on your Home Screen: tap Share, then "Add to Home Screen". Then try the test alert again.',auto2:'Saved automatically',credit:'Made by Georg Ferdinand Nilsen',
+    look:'Appearance',light:'Light',dark:'Dark',auto:'Day & night',dayHint:'Sunset in Oslo switches the theme for you.',noTest:'No test alert?',noTestBody:'The app must be on your Home Screen: tap Share, then "Add to Home Screen". Then try the test alert again.',auto2:'Saved automatically',credit:'Made by Georg Ferdinand Nilsen',calPref:'Calendar on PC',calAsk:'Ask every time',calPrefHint:'Remembered on this computer.',calSaved:'Remembered. Change it in settings.',calGoogle:'Google Calendar',calOutlook:'Outlook on the web',calWeb:'Opens in a new tab, press Save',calApple:'Subscribe in Apple Calendar',calAppleS:'All events, updates itself',calIcs:'Download .ics',calIcsS:'Calendar on Mac, the Outlook app and others',settings:'SETTINGS',sync:'Applies to the alerts on your phone. Saved to your account.',syncNone:'Turn on alerts on your phone first, then you can manage them here.',joinShow:'Show "Join" on the site',joinShowS:'Applies to everyone who opens the app. Turn off when admissions are closed.',footAbout:'The student pub at AHO',footOpen:'OPEN',footHours:'Thursdays 19:00 - 01:00',hours:'Thursdays 19:00 - 01:00',footAddr:'ADDRESS',footMail:'EMAIL',footFollow:'FOLLOW',
     sTitle:'SUGGEST',sHead:'WHAT DO YOU WANT AT THE PUB?',sSub:'The board reads everything. Name is optional.',fIdea:'Idea',fIdeaPh:'E.g. karaoke, wine tasting, DJ battle',fMore:'Tell us more',fMorePh:'What, why, who should come?',fName:'Name (optional)',fNamePh:'So the board can thank you',send:'SEND SUGGESTION',sending:'SENDING…',sNote:'Goes straight into the board\'s Notion.',sent:'Thanks!',sErr:'Something went wrong. Try again.',
     wd:['MO','TU','WE','TH','FR','SA','SU'],pub:'pub',and:'and',locale:'en-GB'}
 };
@@ -365,7 +468,7 @@ const SAMPLE = [
 ];
 const $ = s => document.querySelector(s);
 const ls = (k, v) => v === undefined ? JSON.parse(localStorage.getItem(k) || 'null') : localStorage.setItem(k, JSON.stringify(v));
-const S = { lang: ls('lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') ? 'no' : 'en'), theme: ls('theme') || 'dark', prefs: (p => ({ ...p, offsets: norm(p.offsets) }))(ls('prefs') || { on:false, plain:true }), events: [], ym: null, sel: null, vapid: null, member: ls('member') || null, home: null, tab: 'vakter', view: null };
+const S = { lang: ls('lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') ? 'no' : 'en'), theme: ls('theme') || 'dark', prefs: (p => ({ ...p, offsets: norm(p.offsets) }))(ls('prefs') || { on:false, plain:true }), events: [], ym: null, sel: null, vapid: null, member: ls('member') || null, home: null, tab: 'vakter', view: null, join: true, acct: null, cal: ls('cal') || null };
 const t = k => T[S.lang][k];
 const pad = n => String(n).padStart(2, '0');
 const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -390,13 +493,13 @@ const sub = e => e.plain ? `${t('noProgram')}, ${t('open')}` : `${typ(e)}${e.pub
 
 function renderHero() {
   const all = items(); const e = all[0]; const h = $('#hero');
-  if (!e) { h.className = 'hero noimg'; h.innerHTML = `<div class="genwrap"><img class="gen" src="/icon-512.png" alt=""></div><div class="tx"><h1>AHO PUB</h1></div>`; return; }
+  if (!e) { h.className = 'hero'; h.innerHTML = `<img src="${FALLBACK_IMG}" alt=""><div class="tx"><h1>AHO PUB</h1><div class="meta">${t('footHours')}</div></div>`; return; }
   const d = parse(e.date); const diff = (d - today()) / 864e5;
   const chip = diff === 0 ? t('tonight') : (d.getDay() === 4 && diff < 7 ? t('thisThu') : t('next'));
   const n = e.plain ? all.find(x => !x.plain) : null;
   const teaser = n ? `<button class="teaser" data-d="${n.date}">${t('nextEvent')}: ${title(n)}, ${fmt(n.date, { day:'numeric', month:'short' })} →</button>` : '';
-  h.className = 'hero' + (e.image ? '' : ' noimg');
-  h.innerHTML = `${e.image ? `<img src="${e.image}" alt="">` : '<div class="genwrap"><img class="gen" src="/icon-512.png" alt=""></div>'}<div class="tx"><span class="chip">${chip}</span><h1>${label(e)}</h1><div class="meta">${fmt(d, { weekday:'long', day:'numeric', month:'long' })}, ${t('open')}</div>${desc(e) ? `<p class="info">${desc(e)}</p>` : ''}${teaser}</div>`;
+  h.className = 'hero';
+  h.innerHTML = `<img src="${e.image || FALLBACK_IMG}" alt=""><div class="tx"><span class="chip">${chip}</span><h1>${label(e)}</h1><div class="meta">${fmt(d, { weekday:'long', day:'numeric', month:'long' })}, ${t('open')}</div>${desc(e) ? `<p class="info">${desc(e)}</p>` : ''}${teaser}</div>`;
   $('#desc').textContent = ''; $('#desc').hidden = true; // infoen står i hero-feltet
   $('#actions').innerHTML = e.plain ? '' : `<a class="btn primary" href="${API}/api/ics/${e.id}">${t('addCal')}</a>${navigator.share ? `<button class="btn ghost" id="share">${t('share')}</button>` : ''}`;
   $('#share')?.addEventListener('click', () => navigator.share({ title: label(e), text: `${label(e)}, ${fmt(d, { weekday:'long', day:'numeric', month:'long' })} ${t('open')}`, url: location.origin }).catch(() => {}));
@@ -413,8 +516,8 @@ function renderCal() {
     if (i >= 34 && (i + 1) % 7 === 0 && new Date(y, m, 1 - start + i + 1).getMonth() !== m) break;
   }
   const e = S.events.find(x => x.date === S.sel); const sd = S.sel ? parse(S.sel) : null;
-  const card = !S.sel ? '' : e ? `<div class="selcard">${e.image ? `<img src="${e.image}" alt="">` : '<div class="ph"></div>'}<div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${label(e)}</h3><p>${sub(e)}</p></div></div>`
-    : sd.getDay() === 4 && S.sel >= tod ? `<div class="selcard"><div class="ph"></div><div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${t('plain')}</h3><p>${t('noProgram')}</p></div></div>`
+  const card = !S.sel ? '' : e ? `<div class="selcard"><img src="${e.image || FALLBACK_IMG}" alt=""><div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${label(e)}</h3><p>${sub(e)}</p></div></div>`
+    : sd.getDay() === 4 && S.sel >= tod ? `<div class="selcard"><img src="${FALLBACK_IMG}" alt=""><div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${t('plain')}</h3><p>${t('noProgram')}</p></div></div>`
     : `<div class="selcard empty">${t('closed')}</div>`;
   $('#cal').innerHTML = `<div class="cal-head"><h2>${fmt(first, { month:'long', year:'numeric' })}</h2><div class="cal-nav"><button data-nav="-1" aria-label="Forrige">←</button><button data-nav="1" aria-label="Neste" style="color:var(--fg)">→</button></div></div><div class="grid">${t('wd').map((w, i) => `<div class="wd${i === 3 ? ' thu' : ''}">${w}</div>`).join('')}${cells}</div>${card}`;
 }
@@ -423,11 +526,16 @@ function renderList() {
   const all = items().slice(1, 6);
   $('#list').innerHTML = `<h2>${t('upcoming')}</h2>` + all.map(e => `<div class="item"><button class="sel" data-d="${e.date}"><span class="d">${fmt(e.date, { day:'numeric', month:'short' })}</span><span class="t"><b>${label(e)}</b><span>${sub(e)}</span></span></button><a class="plus" href="${API}/api/ics/${e.id}" aria-label="${t('addCal')}">+</a></div>`).join('');
   $('#cta').innerHTML = `<b>${t('idea')}</b><span>${t('ideaSub')}</span>`;
+  $('#foot').innerHTML = `<div><b>AHO PUBEN</b>${t('footAbout')}</div><div><b>${t('footOpen')}</b>${t('footHours')}</div><div><b>${t('footAddr')}</b>${ADDRESS}</div><div><b>${t('footMail')}</b><a href="mailto:${MAIL}">${MAIL}</a></div><div><b>${t('footFollow')}</b><a href="${IG_URL}" target="_blank" rel="noopener">Instagram</a></div>`;
 }
 
 function renderPanel() {
-  const ids = { join:'join', recHint:'recHint', recLink:'recLink', recTitle:'recTitle', recIntro:'recIntro', recFind:'recFind', recPhoneT:'recPhoneT', recPhoneS:'recPhoneS', recSave:'recSave', pMember:'member', pMemberHint:'memberHint', loginBtn:'login', logoutBtn:'logout', sendLinkT:'sendT', sendLinkS:'sendS', pillT:'myShifts', pTitle:'notif', pOn:'notifOn', pOnSub:'notifSub', pHow:'how', pPlain:'alsoPlain', test:'test', pLook:'look', pDayHint:'dayHint', pNoTest:'noTest', pNoTestBody:'noTestBody', pAuto:'auto2', pCredit:'credit', sTitle:'sTitle', sHead:'sHead', sSub:'sSub', fIdea:'fIdea', fMore:'fMore', fName:'fName', send:'send', sNote:'sNote' };
+  const ids = { hoursPc:'hours', joinCbT:'joinShow', joinCbS:'joinShowS', recHint:'recHint', recLink:'recLink', recTitle:'recTitle', recIntro:'recIntro', recFind:'recFind', recPhoneT:'recPhoneT', recPhoneS:'recPhoneS', recSave:'recSave', pMember:'member', pMemberHint:'memberHint', loginBtn:'login', logoutBtn:'logout', sendLinkT:'sendT', sendLinkS:'sendS', pillT:'myShifts', pOn:'notifOn', pOnSub:'notifSub', pHow:'how', pPlain:'alsoPlain', test:'test', pLook:'look', pDayHint:'dayHint', pNoTest:'noTest', pNoTestBody:'noTestBody', pAuto:'auto2', pCredit:'credit', sTitle:'sTitle', sHead:'sHead', sSub:'sSub', fIdea:'fIdea', fMore:'fMore', fName:'fName', send:'send', sNote:'sNote' };
   for (const [id, k] of Object.entries(ids)) $('#' + id).textContent = t(k);
+  for (const a of document.querySelectorAll('.join')) { a.textContent = t('join'); a.href = JOIN_URL; a.hidden = !S.join; } // styret kan skjule knappen for alle
+  $('#pCal').textContent = t('calPref'); $('#pCalHint').textContent = t('calPrefHint');
+  $('#calChips').innerHTML = [['g', 'Google'], ['o', 'Outlook'], ['w', 'Apple (abonner)'], ['i', '.ics'], ['', t('calAsk')]].map(([k, l]) => `<button data-cal="${k}" class="${(S.cal || '') === k ? 'on' : ''}">${l}</button>`).join('');
+  $('#pTitle').textContent = PC() && !S.member ? t('settings') : t('notif'); $('#pSync').textContent = S.acct?.found ? t('sync') : t('syncNone');
   $('#idea').placeholder = t('fIdeaPh'); $('#more').placeholder = t('fMorePh'); $('#name').placeholder = t('fNamePh');
   $('#swOn').classList.toggle('on', S.prefs.on); $('#swPlain').classList.toggle('on', S.prefs.plain);
   $('#chips').innerHTML = KEYS.map((k, i) => `<button data-k="${k}" class="${S.prefs.offsets.includes(k) ? 'on' : ''}">${t('chips')[i]}</button>`).join('');
@@ -445,7 +553,9 @@ setInterval(applyTheme, 60e3);
 // ---- push ----
 const b64 = s => { const b = atob((s + '='.repeat((4 - s.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(b, c => c.charCodeAt(0)); };
 async function sw() { return navigator.serviceWorker.register('/sw.js'); }
-async function savePrefs() { ls('prefs', S.prefs); renderPanel(); if (!S.prefs.on) return;
+async function savePrefs() { ls('prefs', S.prefs); renderPanel();
+  if (S.member) api('/api/member/prefs', { offsets: S.prefs.offsets, plain: S.prefs.plain, shift: S.prefs.shift !== false }).catch(() => {}); // valgene følger kontoen, så PC og telefon er like
+  if (!S.prefs.on) return;
   const reg = await sw(); const s = await reg.pushManager.getSubscription(); if (!s) return;
   await fetch(API + '/api/subscribe', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ subscription: s.toJSON(), prefs: { offsets: S.prefs.offsets, plain: S.prefs.plain, shift: S.prefs.shift !== false, lang: S.lang, memberToken: S.member?.token || '' } }) }).catch(() => {}); }
 async function toggleOn() {
@@ -478,7 +588,7 @@ panel.addEventListener('pointercancel', () => { panel.classList.remove('drag'); 
 
 // ---- hendelser ----
 $('#brand').onclick = () => location.reload(); // logoen henter alt på nytt
-$('#join').href = JOIN_URL;
+$('#joinCb').onchange = async e => { const on = e.target.checked; const r = await api('/api/board/join', { visible: on }).catch(() => ({ ok:false })); if (r.ok) { S.join = on; renderPanel(); toast('OK'); } else { e.target.checked = S.join; } };
 $('#bell').onclick = () => openPanel(true);
 $('#close').onclick = scrim.onclick = () => openPanel(false);
 $('#swOn').onclick = toggleOn;
@@ -495,10 +605,36 @@ function selectDate(k) { const d = parse(k); S.sel = k; S.ym = { y: d.getFullYea
 $('#list').addEventListener('click', e => { const b = e.target.closest('.sel'); if (b) selectDate(b.dataset.d); });
 $('#hero').addEventListener('click', e => { const b = e.target.closest('.teaser'); if (b) selectDate(b.dataset.d); });
 $('#cta').onclick = () => { location.hash = 'forslag'; };
+// PC: «Legg i kalender» og «+» åpner en liten meny i stedet for å laste ned. Mobil åpner .ics direkte (iPhone legger den rett i Kalender).
+function calLinks(e) {
+  const d2 = iso(new Date(parse(e.date).getTime() + 864e5)), st = e.time || '19:00';
+  const title = label(e), details = e.plain ? `${t('noProgram')}, ${t('open')}` : desc(e), loc = 'AHO Puben, ' + ADDRESS, q = encodeURIComponent;
+  return { g: `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${q(title)}&dates=${e.date.replace(/-/g, '')}T${st.replace(':', '')}00/${d2.replace(/-/g, '')}T010000&ctz=Europe/Oslo&details=${q(details)}&location=${q(loc)}`,
+    o: `https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&subject=${q(title)}&startdt=${e.date}T${st}:00&enddt=${d2}T01:00:00&body=${q(details)}&location=${q(loc)}`,
+    w: `webcal://${location.host}/api/events.ics`, i: `${API}/api/ics/${e.id}` };
+}
+function openCalMenu(e, anchor) {
+  const m = $('#calmenu'), L = calLinks(e);
+  m.innerHTML = `<a href="${L.g}" data-cal="g" target="_blank" rel="noopener"><b>${t('calGoogle')}</b><small>${t('calWeb')}</small></a><a href="${L.o}" data-cal="o" target="_blank" rel="noopener"><b>${t('calOutlook')}</b><small>${t('calWeb')}</small></a><a href="${L.w}" data-cal="w"><b>${t('calApple')}</b><small>${t('calAppleS')}</small></a><a href="${L.i}" data-cal="i"><b>${t('calIcs')}</b><small>${t('calIcsS')}</small></a>`;
+  const r = anchor.getBoundingClientRect(), w = $('.wrap').getBoundingClientRect();
+  m.hidden = false; m.style.left = Math.max(8, Math.min(r.left - w.left, w.width - 328)) + 'px'; m.style.top = (r.bottom - w.top + 8) + 'px';
+}
+const closeCalMenu = () => { $('#calmenu').hidden = true; };
+function goCal(L, k) { if (k === 'g' || k === 'o') window.open(L[k], '_blank', 'noopener'); else location.href = L[k]; } // husket valg: rett til kalenderen, ingen meny
+document.addEventListener('click', ev => {
+  const pick = ev.target.closest('#calmenu a[data-cal]');
+  if (pick) { S.cal = pick.dataset.cal; ls('cal', S.cal); renderPanel(); toast(t('calSaved')); closeCalMenu(); return; } // lenken åpnes som vanlig, valget huskes
+  const a = ev.target.closest('a[href*="/api/ics/"]');
+  if (a && PC()) { const e = items().find(x => x.id === decodeURIComponent(a.getAttribute('href').split('/api/ics/')[1])); if (e) { ev.preventDefault(); if (S.cal) goCal(calLinks(e), S.cal); else openCalMenu(e, a); return; } }
+  if (!ev.target.closest('#calmenu')) closeCalMenu();
+});
+$('#calChips').onclick = e => { const b = e.target.closest('button'); if (!b) return; S.cal = b.dataset.cal || null; ls('cal', S.cal); renderPanel(); };
 $('#back').onclick = () => { history.length > 1 ? history.back() : (location.hash = ''); };
 function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2800); }
-function route() { if (location.hash === '#medlem') { history.replaceState(null, '', location.pathname); if (S.member) openSheet(true, null); return; } const f = location.hash === '#forslag'; $('#forslag').classList.toggle('on', f); $('#home').classList.toggle('on', !f); if (f) window.scrollTo(0, 0); }
+function route() { if (location.hash === '#medlem') { history.replaceState(null, '', location.pathname); if (S.member) openSheet(true, null); return; } const f = location.hash === '#forslag'; $('#forslag').classList.toggle('on', f); $('#home').classList.toggle('on', !f); if (f && !PC()) window.scrollTo(0, 0); }
 addEventListener('hashchange', route);
+$('#forslag').addEventListener('click', e => { if (e.target === e.currentTarget && PC()) $('#back').click(); }); // PC: dialog, klikk utenfor lukker
+addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!$('#calmenu').hidden) { closeCalMenu(); return; } if ($('#forslag').classList.contains('on')) $('#back').click(); else if (panel.classList.contains('open')) openPanel(false); else if (sheet.classList.contains('open')) openSheet(false); });
 $('#form').onsubmit = async e => { e.preventDefault(); const b = $('#send'); b.disabled = true; b.textContent = t('sending');
   const fd = Object.fromEntries(new FormData(e.target));
   const r = await fetch(API + '/api/suggest', { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify(fd) }).catch(() => null);
@@ -518,7 +654,7 @@ function setMember(mem) { S.member = mem; ls('member', mem); S.home = null; S.vi
 async function loadCountries() { const r = await api('/api/member/countries').catch(() => null); const codes = r?.ok && r.data.codes?.length ? r.data.codes : ['47']; const sel = $('#cc'); const cur = sel.value; sel.innerHTML = codes.map(c => `<option value="${c}">+${c}</option>`).join(''); if (codes.includes(cur)) sel.value = cur; }
 function renderMemberPanel() {
   const m = S.member; $('#memberOut').style.display = m ? 'none' : 'flex'; $('#memberIn').hidden = !m; $('#memberIn').style.display = m ? 'flex' : 'none';
-  if (m) { $('#memberName').textContent = t('loggedAs') + ' ' + m.name; $('#memberSub').textContent = m.board ? t('boardRole') : ''; $('#sendLink').hidden = !m.board; }
+  if (m) { $('#memberName').textContent = t('loggedAs') + ' ' + m.name; $('#memberSub').textContent = m.board ? t('boardRole') : ''; $('#sendLink').hidden = !m.board; $('#joinRow').hidden = !m.board; $('#joinCb').checked = S.join; }
 }
 function renderPill() {
   const p = $('#pill'); const m = S.member; p.classList.toggle('hide', !m); document.body.classList.toggle('member', !!m); if (!m) return;
@@ -526,6 +662,7 @@ function renderPill() {
   const next = S.home?.shifts?.find(s => s.date >= S.home.today);
   $('#pillNext').textContent = next ? t('pillNext') + fmt(next.date, { weekday:'short', day:'numeric', month:'short' }) + ', ' + next.time : (S.home ? t('pillNone') : t('loading'));
 }
+async function pullPrefs() { if (!S.member) return; const r = await api('/api/member/prefs').catch(() => null); if (!r?.ok) return; S.acct = { found: r.data.found, devices: r.data.devices }; if (r.data.found && r.data.prefs) { const p = r.data.prefs; S.prefs.offsets = norm(p.offsets); S.prefs.plain = p.plain !== false; S.prefs.shift = p.shift !== false; ls('prefs', S.prefs); } renderPanel(); } // kontoens valg (fra telefonen) vinner over det som ligger lokalt
 async function loadHome() { if (!S.member) return; const r = await api('/api/member/home'); if (r.ok) { S.home = r.data; renderPill(); if ($('#sheet').classList.contains('open')) renderSheet(); } }
 let recToken = '', failedLogins = Number(sessionStorage.getItem('failedLogins') || 0);
 function recErr(msg) { const e = $('#recErr'); e.textContent = msg; e.hidden = !msg; }
@@ -539,7 +676,7 @@ async function login() {
   if (!r.ok) { err.textContent = r.data.error === 'not_member' ? t('errNotMember') : r.data.error === 'expired' ? t('errExpired') : r.status === 400 ? t('errPhone') : t('errNet'); err.hidden = false; if (r.data.error === 'not_member') { failedLogins++; sessionStorage.setItem('failedLogins', failedLogins); if (failedLogins >= 3) { $('#recover').hidden = false; $('#recover').style.display = 'flex'; } } return; }
   failedLogins = 0; sessionStorage.removeItem('failedLogins');
   setMember({ token: r.data.token, name: r.data.name, board: r.data.board, hasCode: r.data.hasCode }); $('#phone').value = '';
-  savePrefs(); await loadHome(); toast(t('hi') + first(S.member.name).toUpperCase());
+  await pullPrefs(); savePrefs(); await loadHome(); toast(t('hi') + first(S.member.name).toUpperCase());
 }
 async function logout() { if (S.member) api('/api/member/logout').catch(() => {}); setMember(null); savePrefs(); }
 // arket
@@ -547,7 +684,7 @@ const sheet = $('#sheet'), sscrim = $('#sscrim');
 function openSheet(o, view) { if (o && !S.member) return; if (view !== undefined) S.view = view; sheet.classList.toggle('open', o); sscrim.classList.toggle('open', o); if (o) { renderSheet(); if (!S.home) loadHome(); } }
 let sdrag = null;
 sheet.addEventListener('pointerdown', e => { if (e.target.closest('button,a,input,textarea,details') || $('#sbody').scrollTop > 0) return; sdrag = { y: e.clientY, t: performance.now(), dy: 0, vy: 0 }; sheet.setPointerCapture(e.pointerId); });
-sheet.addEventListener('pointermove', e => { if (!sdrag) return; const dy = Math.max(0, e.clientY - sdrag.y), now = performance.now(); sdrag.vy = (dy - sdrag.dy) / Math.max(1, now - sdrag.t); sdrag.dy = dy; sdrag.t = now; sheet.classList.add('drag'); sheet.style.transform = `translate(-50%,${dy}px)`; });
+sheet.addEventListener('pointermove', e => { if (!sdrag) return; const dy = Math.max(0, e.clientY - sdrag.y), now = performance.now(); sdrag.vy = (dy - sdrag.dy) / Math.max(1, now - sdrag.t); sdrag.dy = dy; sdrag.t = now; sheet.classList.add('drag'); sheet.style.transform = `translate(var(--sx),${dy}px)`; });
 sheet.addEventListener('pointerup', () => { if (!sdrag) return; const close = sdrag.vy > 0.3 || sdrag.dy > sheet.offsetHeight * 0.35; sheet.classList.remove('drag'); sheet.style.transform = ''; sdrag = null; openSheet(!close); });
 sheet.addEventListener('pointercancel', () => { sheet.classList.remove('drag'); sheet.style.transform = ''; sdrag = null; });
 $('#pill').onclick = () => openSheet(true, null);
@@ -636,7 +773,7 @@ $('#recSave').onclick = async () => { recErr(''); const raw = $('#recPhone').val
   const b = $('#recSave'); b.disabled = true; const r = await api('/api/member/recover/phone', { token: recToken, phone: pretty }).catch(() => ({ ok:false, data:{} })); b.disabled = false;
   if (!r.ok) return recErr(r.data.error === 'phone_taken' ? t('recTaken') : r.data.error === 'bad_phone' ? t('errPhone') : t('errNet'));
   resetRecover(); $('#loginErr').hidden = true; failedLogins = 0; sessionStorage.removeItem('failedLogins');
-  setMember({ token: r.data.token, name: r.data.name, board: r.data.board, hasCode: r.data.hasCode }); savePrefs(); await loadHome(); toast(t('hi') + first(S.member.name).toUpperCase()); };
+  setMember({ token: r.data.token, name: r.data.name, board: r.data.board, hasCode: r.data.hasCode }); await pullPrefs(); savePrefs(); await loadHome(); toast(t('hi') + first(S.member.name).toUpperCase()); };
 $('#loginBtn').onclick = login; $('#phone').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 $('#logoutBtn').onclick = logout;
 $('#sendLink').onclick = () => { openPanel(false); openSheet(true, { type:'send' }); };
@@ -644,9 +781,10 @@ $('#sendLink').onclick = () => { openPanel(false); openSheet(true, { type:'send'
 // ---- start ----
 (async () => {
   applyTheme(); const d = today(); S.ym = { y: d.getFullYear(), m: d.getMonth() };
+  fetch(API + '/api/settings').then(r => r.json()).then(x => { S.join = x.join !== false; renderPanel(); }).catch(() => {});
   try { const r = await fetch(API + '/api/events'); if (!r.ok) throw 0; S.events = await r.json(); } catch { S.events = location.hostname === 'localhost' ? SAMPLE : []; }
   S.sel = items()[0]?.date || null; if (S.sel) { const sd = parse(S.sel); S.ym = { y: sd.getFullYear(), m: sd.getMonth() }; }
-  renderAll(); route(); renderPill(); if (S.member) loadHome(); else loadCountries();
+  renderAll(); route(); renderPill(); if (S.member) { loadHome(); pullPrefs(); } else loadCountries();
   if ('serviceWorker' in navigator) { sw().then(async reg => { const s = await reg.pushManager.getSubscription(); if (S.prefs.on && !s) { S.prefs.on = false; ls('prefs', S.prefs); renderPanel(); } }); }
 })();
 </script>

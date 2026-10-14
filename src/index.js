@@ -43,13 +43,20 @@ async function route(req, url, env, ctx) {
   if (p.startsWith('/api/member/') || p.startsWith('/api/board/')) return memberRoute(req, url, env, ctx, { notion, json, push, osloNow, addDays });
   if (p === '/api/events' && m === 'GET') return json(await events(env, ctx));
   if (p === '/api/vapid') return json({ key: env.VAPID_PUBLIC || '' });
+  if (p === '/api/ping' && m === 'POST') { // telefoner melder seg én gang om dagen: lagt på Hjem-skjerm eller ikke. Ingen navn, bare en tilfeldig id.
+    const { id: did, standalone } = await req.json().catch(() => ({}));
+    if (!/^[a-z0-9]{8,32}$/.test(String(did || ''))) return json({ error: 'bad id' }, 400);
+    const k = 'dev:' + did, old = await env.KV.getWithMetadata(k);
+    await env.KV.put(k, '1', { metadata: { s: standalone ? 1 : 0, f: old?.metadata?.f || Date.now(), t: Date.now() }, expirationTtl: 400 * 86400 });
+    return json({ ok: true });
+  }
   if (p === '/api/settings') return json({ join: (await env.KV.get('settings:join')) !== 'off' }); // styret kan skjule «Bli medlem» for alle
   if (p === '/api/subscribe' && m === 'POST') {
     const { subscription, prefs } = await req.json();
     if (!subscription?.endpoint?.startsWith('https://') || !subscription.keys?.p256dh) return json({ error: 'bad subscription' }, 400);
     const offsets = normOffsets(prefs?.offsets);
     const ms = /^[0-9a-f]{48}$/.test(String(prefs?.memberToken || '')) ? await env.KV.get('sess:' + prefs.memberToken, 'json') : null; // innlogget medlem → vaktvarsler og styremeldinger
-    await env.KV.put('sub:' + await id(subscription.endpoint), JSON.stringify({ subscription, memberId: ms?.memberId || '', boardUserId: ms?.boardUserId || '', prefs: { offsets, plain: prefs?.plain !== false, shift: prefs?.shift !== false, lang: prefs?.lang === 'en' ? 'en' : 'no' }, t: Date.now() }));
+    await env.KV.put('sub:' + await id(subscription.endpoint), JSON.stringify({ subscription, memberId: ms?.memberId || '', boardUserId: ms?.boardUserId || '', prefs: { offsets, plain: prefs?.plain !== false, shift: prefs?.shift !== false, lang: prefs?.lang === 'en' ? 'en' : 'no' }, t: Date.now() }), { metadata: { m: ms?.memberId ? 1 : 0, t: Date.now() } }); // metadata gjør at styret kan telle uten å lese hvert abonnement
     return json({ ok: true });
   }
   if (p === '/api/subscribe' && m === 'DELETE') { const { endpoint } = await req.json(); await env.KV.delete('sub:' + await id(String(endpoint))); return json({ ok: true }); }

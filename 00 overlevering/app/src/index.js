@@ -43,6 +43,7 @@ async function route(req, url, env, ctx) {
   if (p.startsWith('/api/member/') || p.startsWith('/api/board/')) return memberRoute(req, url, env, ctx, { notion, json, push, osloNow, addDays });
   if (p === '/api/events' && m === 'GET') return json(await events(env, ctx));
   if (p === '/api/vapid') return json({ key: env.VAPID_PUBLIC || '' });
+  if (p === '/api/settings') return json({ join: (await env.KV.get('settings:join')) !== 'off' }); // styret kan skjule «Bli medlem» for alle
   if (p === '/api/subscribe' && m === 'POST') {
     const { subscription, prefs } = await req.json();
     if (!subscription?.endpoint?.startsWith('https://') || !subscription.keys?.p256dh) return json({ error: 'bad subscription' }, 400);
@@ -60,6 +61,7 @@ async function route(req, url, env, ctx) {
     return json({ ok }, ok ? 200 : 502);
   }
   if (p === '/api/suggest' && m === 'POST') return suggest(req, env);
+  if (p === '/api/events.ics' && m === 'GET') return new Response(icsAll(await events(env, ctx)), { headers: { 'content-type': 'text/calendar; charset=utf-8', 'cache-control': 'public, max-age=600' } });
   if (p.startsWith('/api/ics/') && m === 'GET') {
     const id = p.slice(9), day = /^p\d{4}-\d\d-\d\d$/.test(id) ? id.slice(1) : '';
     const e = (await events(env, ctx)).find(x => x.id === id) || (day && weekday(day) === 4 ? { id, date: day, title: 'Rolig pub', desc: 'Ingen program. Åpent 19-01.' } : null);
@@ -157,12 +159,15 @@ async function suggest(req, env) {
 }
 
 // ---------- kalenderfil ----------
-function ics(e) {
+function vevent(e) {
   const esc = s => String(s || '').replace(/[\;,]/g, m => '\\' + m).replace(/\n/g, '\\n');
   const d = e.date.replace(/-/g, ''), d2 = addDays(e.date, 1).replace(/-/g, '');
-  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AHO Puben//NO', 'BEGIN:VEVENT', `UID:${e.id}@ahopuben`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`,
-    `DTSTART;TZID=${OSLO}:${d}T${(e.time || '19:00').replace(':', '')}00`, `DTEND;TZID=${OSLO}:${d2}T010000`, `SUMMARY:${esc(e.title)}`, `DESCRIPTION:${esc(e.desc)}`, 'LOCATION:AHO Puben', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  return ['BEGIN:VEVENT', `UID:${e.id}@ahopuben`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`,
+    `DTSTART;TZID=${OSLO}:${d}T${(e.time || '19:00').replace(':', '')}00`, `DTEND;TZID=${OSLO}:${d2}T010000`, `SUMMARY:${esc(e.title)}`, `DESCRIPTION:${esc(e.desc)}`, 'LOCATION:AHO Puben', 'END:VEVENT'];
 }
+function ics(e) { return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AHO Puben//NO', ...vevent(e), 'END:VCALENDAR'].join('\r\n'); }
+// Abonnement (webcal) på alle kommende arrangementer: Kalender på Mac og Outlook holder seg oppdatert selv.
+function icsAll(items) { return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AHO Puben//NO', 'X-WR-CALNAME:AHO Pub arrangementer', 'REFRESH-INTERVAL;VALUE=DURATION:PT6H', ...items.flatMap(vevent), 'END:VCALENDAR'].join('\r\n'); }
 
 // ---------- push ----------
 async function push(env, subscription, data) {
