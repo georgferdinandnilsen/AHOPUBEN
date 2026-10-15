@@ -21,6 +21,7 @@ export function fromNotion(p) {
     time: (dateProp?.date?.start || '').length > 10 ? dateProp.date.start.slice(11, 16) : '', // starttid hvis styret har satt klokkeslett i «Når»
     title: rt(P.find(([, v]) => v.type === 'title')?.[1].title).trim(),
     type: tags.find(t => !/^forslag/i.test(t)) || '',
+    tags, // alle typene, så appen kan velge «Hør DJ-en», «Hør bandet» eller «Hør artisten»
     plain: tags.some(t => /^rolig/i.test(t)), // «Rolig Pub»-rader er vanlig pub, ikke et program
     image: file?.file?.url || file?.external?.url || '',
     desc: rt(info?.rich_text).trim(),
