@@ -4,7 +4,9 @@ Skrevet 14. oktober 2026 av Georg Ferdinand Nilsen (med hjelp av Claude), sist o
 
 Appen er også pubens nettside: den er laget for både telefon og PC, og skal ligge rett på ahopuben.no.
 
-Adressen til appen i dag: https://aho-puben.georgferdinandnilsen.workers.dev
+Adressen til appen: https://ahopuben.no (og www.ahopuben.no). Reserveadresse: https://aho-puben.aho-puben-app.workers.dev
+
+**Status 15. oktober 2026:** appen er flyttet til pubens egen Cloudflare-konto (Puben@aho.no), med alle data og nøkler, og koblet til ahopuben.no. Stegene i kapittel 4 er derfor allerede gjort én gang. De står der for neste gang noe må settes opp på nytt.
 
 ---
 
@@ -52,9 +54,10 @@ I tillegg ligger **koden på GitHub** som sikkerhetskopi med historikk, og **des
 
 | Hva | Hvor | Eies av | Hva det brukes til |
 |---|---|---|---|
-| Cloudflare-konto | dash.cloudflare.com | Georg (georgferdinandnilsen@gmail.com) | Kjører Worker-en «aho-puben», lagret KV, alle hemmeligheter |
-| Adressen | aho-puben.georgferdinandnilsen.workers.dev | Følger Cloudflare-kontoen | Det folk har lagt på Hjem-skjerm. Blir ahopuben.no etter flyttingen |
-| Domenet ahopuben.no | Der domenet er registrert | Puben | Peker i dag på en Google Sites-side. Skal peke på appen |
+| Cloudflare-konto | dash.cloudflare.com | Puben (puben@aho.no), fra 15.10.2026 | Kjører Worker-en «aho-puben», lagret KV, alle hemmeligheter, og DNS for ahopuben.no |
+| Adressen | ahopuben.no og www.ahopuben.no | Puben | Det folk legger på Hjem-skjerm. Reserve: aho-puben.aho-puben-app.workers.dev |
+| Domenet ahopuben.no | Domeneshop (domene.shop) | AHO PUB FORENINGEN | Registreringen ligger hos Domeneshop. Navnetjenerne peker til Cloudflare (isabel og jeremy.ns.cloudflare.com), DNSSEC er av |
+| Gammel app | aho-puben.georgferdinandnilsen.workers.dev | Georg | Den første versjonen, før flyttingen. Tas ned når alle har byttet |
 | GitHub-repo | github.com/georgferdinandnilsen/AHOPUBEN | Georg | Koden, med historikk |
 | Notion-integrasjon «AHO PUBEN APP» | notion.so/profile/integrations | Opprettet av Ferdinand i AHO PUB-arbeidsområdet | Nøkkelen appen bruker mot Notion |
 | DeepL Developer | deepl.com | Georg | Engelsk oversetting, gratis |

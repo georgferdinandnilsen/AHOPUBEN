@@ -73,7 +73,7 @@ Nederst i varselmenyen logger medlemmer inn med telefonnummer. Nummeret sjekkes 
 **Tall for styret:** «Se tall for appen» i varselmenyen (styre) eller «SE TALL» under Send melding. `GET /api/board/stats` teller fra KV-metadata: besøk som unike enheter siste døgn/7/30 dager og andel PC (`dev:`, hver nettleser melder seg via `POST /api/ping` én gang om dagen med en tilfeldig id), innloggede personer og enheter (`sess:`), telefoner med varsler på (`sub:`) og telefoner som har åpnet appen fra Hjem-skjerm (`dev:` med `s`). Ingen navn, numre eller IP-adresser. Én KV-skriving per enhet per dag.
 
 **Glemt styrekode:** trykk «Nullstill kode» i appen. Lederen åpner KV-lageret i Cloudflare og leser nøkkelen `reset:<styre-id>`, som inneholder en midlertidig kode. Styremedlemmet skriver den inn sammen med en ny kode.
-KV-lageret: https://dash.cloudflare.com/77c55d6b057cc69a033738170492d88b/workers/kv/namespaces/0bfeddb59d4e4152984b31df88491a13
+KV-lageret (Puben@aho.no-kontoen): https://dash.cloudflare.com/77f20e19b9bd7a3edce234492a671146/workers/kv/namespaces/dca6ff3b0c344bac9e0a011740273863
 
 Styremedlemmers navn hentes fra Person-feltet i Styremedlemmer. Det krever at integrasjonen har rettigheten «Read user information without email» (notion.so/profile/integrations → integrasjonen → Capabilities). Uten den vises rollen som navn.
 
