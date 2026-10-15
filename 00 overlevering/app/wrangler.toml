@@ -1,5 +1,12 @@
 name = "aho-puben"
 main = "src/index.js"
+account_id = "77f20e19b9bd7a3edce234492a671146" # Puben@aho.no sin Cloudflare-konto
+# Appen svarer på pubens eget domene. Cloudflare lager DNS og sertifikat selv.
+routes = [
+  { pattern = "ahopuben.no", custom_domain = true },
+  { pattern = "www.ahopuben.no", custom_domain = true },
+]
+workers_dev = true # reserveadresse: aho-puben.aho-puben-app.workers.dev
 compatibility_date = "2026-10-01"
 
 # Appen (public/) serveres av samme Worker som API-et: én deploy, samme opprinnelse.
@@ -10,11 +17,12 @@ binding = "ASSETS"
 # Lager KV-navnerom med: npx wrangler kv namespace create KV  → lim inn id under.
 [[kv_namespaces]]
 binding = "KV"
-id = "0bfeddb59d4e4152984b31df88491a13"
+id = "dca6ff3b0c344bac9e0a011740273863"
 
 # Kjører hver hele time. Worker-en regner selv ut Oslo-tid.
 [triggers]
-crons = ["0 * * * *"]
+# MIDLERTIDIG AV under flyttingen: den gamle appen på Georgs konto sender fortsatt varsler. Settes tilbake til ["0 * * * *"] når den er stoppet.
+crons = []
 
 [vars]
 VAPID_SUBJECT = "https://github.com/georgferdinandnilsen/AHOPUBEN"

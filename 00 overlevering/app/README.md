@@ -27,7 +27,7 @@ npm run dev
    - **Arrangementer** (datakilden med datofeltet «Når»). Et arrangement vises i appen hvis det har en dato i «Når» fra i dag og utover, som visningen «Kommende».
      - **Type:** feltet «Type arrangement» (Aktivitet, DJ og så videre). Typen «Rolig Pub» regnes som vanlig pub uten program.
      - **Bilde:** feltet «Bilde til APP». Uten bilde brukes et fast bilde av puben (`public/fallback.jpg`).
-     - **Musikk:** feltet «Artist link APP». En Spotify- eller SoundCloud-lenke gir den offisielle spilleren rett på plakaten, med etiketten «Hør DJ-en» (type DJ), «Hør bandet» (Band) eller «Hør artisten» (alt annet) over. Ett trykk på deres play starter låta; iPhone lar ikke en egen knapp starte lyd inne i spilleren. Tittel, artist og cover hentes fra lenkens oEmbed og hurtigbufres i en uke (KV `oembed:`). Andre lenker blir en knapp som åpnes i ny fane. Spilleren lastes sammen med siden når arrangementet har musikk.
+     - **Musikk:** feltet «Artist link APP». En Spotify- eller SoundCloud-lenke gir en hvit, minimalistisk knapp på plakaten: «Hør DJ-en» (type DJ), «Hør bandet» (Band) eller «Hør artisten» (alt annet). Knappen åpner et ark (på PC en dialog) med cover, tittel og den offisielle spilleren. På iPhone må man trykke play i spilleren, fordi Safari ikke lar en egen knapp starte lyd inne i den; på PC prøver den å starte selv. Tittel, artist og cover hentes fra lenkens oEmbed og hurtigbufres i en uke (KV `oembed:`). Andre lenker åpnes fra arket i ny fane. Spilleren lastes først når noen trykker på knappen, og fjernes når arket lukkes.
      - **Info:** feltet «Info til APP». Er feltene tomme, leses bildet og teksten fra selve siden i stedet.
    - **Forslag** fra appen opprettes i samme datakilde som arrangementene: forslaget som tittel (feltet «Kommende»), «Bestemt» satt til Nei, uten dato og uten type, og «fortell mer» og navn som tekst inne på siden. De vises dermed i visningen «Ideer» og ikke i appen, siden appen krever dato i «Når». Datakilden «New data source» (Name, beskrivelse, nummer, potensiell dato?) brukes ikke av appen.
    Notion-integrasjonen må være koblet til siden som inneholder databasen (Connections), ellers svarer Notion 404.
@@ -73,7 +73,7 @@ Nederst i varselmenyen logger medlemmer inn med telefonnummer. Nummeret sjekkes 
 **Tall for styret:** «Se tall for appen» i varselmenyen (styre) eller «SE TALL» under Send melding. `GET /api/board/stats` teller fra KV-metadata: besøk som unike enheter siste døgn/7/30 dager og andel PC (`dev:`, hver nettleser melder seg via `POST /api/ping` én gang om dagen med en tilfeldig id), innloggede personer og enheter (`sess:`), telefoner med varsler på (`sub:`) og telefoner som har åpnet appen fra Hjem-skjerm (`dev:` med `s`). Ingen navn, numre eller IP-adresser. Én KV-skriving per enhet per dag.
 
 **Glemt styrekode:** trykk «Nullstill kode» i appen. Lederen åpner KV-lageret i Cloudflare og leser nøkkelen `reset:<styre-id>`, som inneholder en midlertidig kode. Styremedlemmet skriver den inn sammen med en ny kode.
-KV-lageret: https://dash.cloudflare.com/77c55d6b057cc69a033738170492d88b/workers/kv/namespaces/0bfeddb59d4e4152984b31df88491a13
+KV-lageret (Puben@aho.no-kontoen): https://dash.cloudflare.com/77f20e19b9bd7a3edce234492a671146/workers/kv/namespaces/dca6ff3b0c344bac9e0a011740273863
 
 Styremedlemmers navn hentes fra Person-feltet i Styremedlemmer. Det krever at integrasjonen har rettigheten «Read user information without email» (notion.so/profile/integrations → integrasjonen → Capabilities). Uten den vises rollen som navn.
 

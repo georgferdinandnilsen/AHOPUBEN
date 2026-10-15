@@ -12,7 +12,10 @@ Skrevet 14. oktober 2026 av Georg Ferdinand Nilsen (med hjelp av Claude), sist o
 Appen er også pubens nettside: den er laget for både telefon og PC, og skal ligge rett på ahopuben.no.
 </p>
 <p>
-Adressen til appen i dag: <a href="https://aho-puben.georgferdinandnilsen.workers.dev">https://aho-puben.georgferdinandnilsen.workers.dev</a>
+Adressen til appen: <a href="https://ahopuben.no">https://ahopuben.no</a> (og www.ahopuben.no). Reserveadresse: <a href="https://aho-puben.aho-puben-app.workers.dev">https://aho-puben.aho-puben-app.workers.dev</a>
+</p>
+<p>
+<b>Status 15. oktober 2026:</b> appen er flyttet til pubens egen Cloudflare-konto (Puben@aho.no), med alle data og nøkler, og koblet til ahopuben.no. Stegene i kapittel 4 er derfor allerede gjort én gang. De står der for neste gang noe må settes opp på nytt.
 </p>
 <hr>
 <h2>1. Hva appen er</h2>
@@ -52,7 +55,7 @@ I tillegg ligger <b>koden på GitHub</b> som sikkerhetskopi med historikk, og <b
 </p>
 <hr>
 <h2>3. Hvem eier hva i dag</h2>
-<table><tr><th>Hva</th><th>Hvor</th><th>Eies av</th><th>Hva det brukes til</th></tr><tr><td>Cloudflare-konto</td><td>dash.cloudflare.com</td><td>Georg (georgferdinandnilsen@gmail.com)</td><td>Kjører Worker-en «aho-puben», lagret KV, alle hemmeligheter</td></tr><tr><td>Adressen</td><td>aho-puben.georgferdinandnilsen.workers.dev</td><td>Følger Cloudflare-kontoen</td><td>Det folk har lagt på Hjem-skjerm. Blir ahopuben.no etter flyttingen</td></tr><tr><td>Domenet ahopuben.no</td><td>Der domenet er registrert</td><td>Puben</td><td>Peker i dag på en Google Sites-side. Skal peke på appen</td></tr><tr><td>GitHub-repo</td><td>github.com/georgferdinandnilsen/AHOPUBEN</td><td>Georg</td><td>Koden, med historikk</td></tr><tr><td>Notion-integrasjon «AHO PUBEN APP»</td><td>notion.so/profile/integrations</td><td>Opprettet av Ferdinand i AHO PUB-arbeidsområdet</td><td>Nøkkelen appen bruker mot Notion</td></tr><tr><td>DeepL Developer</td><td>deepl.com</td><td>Georg</td><td>Engelsk oversetting, gratis</td></tr><tr><td>Push-nøkler (VAPID)</td><td>Lagret i Cloudflare</td><td>Laget av Georg</td><td>Gjør at akkurat denne appen får sende push</td></tr><tr><td>Figma-fil «FERDINAND»</td><td>figma.com</td><td>Georg</td><td>Designet, tre utkast og den valgte versjonen</td></tr></table>
+<table><tr><th>Hva</th><th>Hvor</th><th>Eies av</th><th>Hva det brukes til</th></tr><tr><td>Cloudflare-konto</td><td>dash.cloudflare.com</td><td>Puben (puben@aho.no), fra 15.10.2026</td><td>Kjører Worker-en «aho-puben», lagret KV, alle hemmeligheter, og DNS for ahopuben.no</td></tr><tr><td>Adressen</td><td>ahopuben.no og www.ahopuben.no</td><td>Puben</td><td>Det folk legger på Hjem-skjerm. Reserve: aho-puben.aho-puben-app.workers.dev</td></tr><tr><td>Domenet ahopuben.no</td><td>Domeneshop (domene.shop)</td><td>AHO PUB FORENINGEN</td><td>Registreringen ligger hos Domeneshop. Navnetjenerne peker til Cloudflare (isabel og jeremy.ns.cloudflare.com), DNSSEC er av</td></tr><tr><td>Gammel app</td><td>aho-puben.georgferdinandnilsen.workers.dev</td><td>Georg</td><td>Den første versjonen, før flyttingen. Tas ned når alle har byttet</td></tr><tr><td>GitHub-repo</td><td>github.com/georgferdinandnilsen/AHOPUBEN</td><td>Georg</td><td>Koden, med historikk</td></tr><tr><td>Notion-integrasjon «AHO PUBEN APP»</td><td>notion.so/profile/integrations</td><td>Opprettet av Ferdinand i AHO PUB-arbeidsområdet</td><td>Nøkkelen appen bruker mot Notion</td></tr><tr><td>DeepL Developer</td><td>deepl.com</td><td>Georg</td><td>Engelsk oversetting, gratis</td></tr><tr><td>Push-nøkler (VAPID)</td><td>Lagret i Cloudflare</td><td>Laget av Georg</td><td>Gjør at akkurat denne appen får sende push</td></tr><tr><td>Figma-fil «FERDINAND»</td><td>figma.com</td><td>Georg</td><td>Designet, tre utkast og den valgte versjonen</td></tr></table>
 <p>
 <b>Hva skjer når Georg slutter?</b> Alt fortsetter å virke så lenge kontoene hans finnes. Men ingen i styret kan rette feil, bytte nøkler eller endre noe. Derfor må appen flyttes, eller styret må få tilgang. Begge veier står under.
 </p>
@@ -203,7 +206,7 @@ Appen følger disse reglene. Ingen kode trengs.
 <li><b>Type arrangement</b> blir etiketten (Aktivitet, DJ og så videre). Typen «Rolig Pub» betyr vanlig pub uten program.</li>
 <li><b>Info til APP</b> er teksten som vises under datoen. Oversettes automatisk til engelsk.</li>
 <li><b>Bilde til APP</b> blir bildet øverst. Uten bilde vises et fast bilde av puben (filen <code>public/fallback.jpg</code>). Vil dere bytte det, bytt filen og kjør <code>npm run deploy</code>.</li>
-<li><b>Artist link APP</b>: lim inn en lenke fra DJ-en eller artisten, til en låt, et album eller en spilleliste på Spotify, eller en låt på SoundCloud. Da ligger Spotifys eller SoundClouds egen spiller rett på plakaten. Over den står «Hør DJ-en» (type DJ), «Hør bandet» (Band) eller «Hør artisten» (Artist og alle andre typer). Ett trykk på play i spilleren starter låta. Arrangementet får også en liten note i Kommende. Andre lenker, som YouTube eller Bandcamp, blir en knapp som åpnes i ny fane. Spotify spiller bare 30 sekunder for dem som ikke er logget inn på Spotify, SoundCloud spiller hele låta.</li>
+<li><b>Artist link APP</b>: lim inn en lenke fra DJ-en eller artisten, til en låt, et album eller en spilleliste på Spotify, eller en låt på SoundCloud. Da får plakaten en hvit knapp: «Hør DJ-en» (type DJ), «Hør bandet» (Band) eller «Hør artisten» (Artist og alle andre typer). Knappen åpner et ark med cover, tittel og Spotifys eller SoundClouds egen spiller. På iPhone trykker man play i spilleren for å starte låta. Arrangementet får også en liten note i Kommende. Andre lenker, som YouTube eller Bandcamp, åpnes fra arket i ny fane. Spotify spiller bare 30 sekunder for dem som ikke er logget inn på Spotify, SoundCloud spiller hele låta.</li>
 <li>Endringer vises i appen innen ti minutter.</li>
 <li>Torsdager uten rad i Notion vises automatisk som «Rolig pub, kl 19-01».</li>
 </ul>
