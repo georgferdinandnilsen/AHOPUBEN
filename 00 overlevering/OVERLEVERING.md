@@ -323,4 +323,12 @@ Manuset til promovideoen for Instagram ligger i `app/docs/promo/manus-instagram.
 
 ## 10. Få hjelp av en AI
 
-Dere trenger ikke kunne dette selv. Åpne `AI-PROMPT.md`, lim inn teksten i en AI-assistent (ChatGPT, Claude, Gemini) og legg ved filene fra `app/` hvis den kan lese filer. Så ber dere den ta ett steg om gangen. Regelen er: **lim aldri nøkler eller passord inn i chatten.** AI-en trenger ikke dem. Den trenger bare å vite hvor de skal.
+Dette er den vanlige måten å endre eller fikse appen på. Dere trenger ikke kunne kode selv.
+
+1. **Hent koden.** Pakk ut denne zip-filen og bruk mappen `app/`. Har dere fått GitHub-repoet, last ned den nyeste koden derfra i stedet, så dere ikke jobber på en gammel kopi.
+2. **Åpne en AI-assistent** (ChatGPT, Claude, Gemini eller en kode-assistent som kan lese filer). Lim inn teksten fra `AI-PROMPT.md`, skriv hva dere vil ha endret under «Det jeg vil», og legg ved filene fra `app/` og dette dokumentet.
+3. **La AI-en ta ett steg om gangen.** Den hjelper dere å installere Node.js, logge inn med `npx wrangler login` på kontoen puben@aho.no, gjøre endringen, teste lokalt og publisere med `npm run deploy`.
+4. **Sjekk at det er riktig konto før dere publiserer.** `npx wrangler whoami` skal vise puben@aho.no. Endringen havner da rett på ahopuben.no, fordi kontoen og domenet står i `wrangler.toml`.
+5. **Ta vare på endringen.** Lag en ny zip av `app/`-mappen (eller last opp til GitHub), så neste styre har den nyeste koden.
+
+Regelen er: **lim aldri nøkler eller passord inn i chatten.** AI-en trenger dem ikke. Alle nøklene ligger allerede i Cloudflare og skal ikke lages på nytt.
