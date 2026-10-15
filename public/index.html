@@ -34,6 +34,9 @@ function applyTheme() {
   if (window.tintTop) window.tintTop(); // i nettleseren: fargen fra plakaten i stedet for svart
 }
 applyTheme();
+// I nettleseren (ikke Hjem-skjerm) skal topplinjen ikke være festet: Safari i iOS 26 maler statuslinjen svart når et
+// gjennomsiktig element er festet øverst. Uten festet element viser Safari plakaten under klokka, som VG Live.
+document.documentElement.classList.toggle('inbrowser', !(matchMedia('(display-mode: standalone)').matches || navigator.standalone === true));
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,7 +53,8 @@ body{background:var(--bg);color:var(--fg);font:16px/1.45 "Space Grotesk",system-
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 button:active{transform:scale(.97)}
 h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
-.wrap{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;background:var(--bg)} /* innholdet har egen bakgrunn, så body kan farge toppen i Safari */
+.wrap{max-width:480px;margin:0 auto;min-height:100dvh;position:relative}
+@media (max-width:899px){.inbrowser .chrome{position:absolute}} /* telefon i nettleseren: topplinjen scroller bort, plakaten går helt opp */
 /* chrome */
 .chrome{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:5;background:var(--chrome);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);padding:calc(env(safe-area-inset-top) + 8px) 20px 12px;display:flex;justify-content:space-between;align-items:center;transition:background .3s}
 .brand{display:flex;align-items:center;gap:10px}
@@ -469,19 +473,17 @@ const ICON_PLAY = '<svg viewBox="0 0 11 12" aria-hidden="true"><path d="M0 0L11 
 const ICON_NOTE = '<svg class="mnote" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h9v5h-7v8.5a3.5 3.5 0 1 1-2-3.16z"/></svg>'; // arrangementet har musikk
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); // tekst fra Spotify/SoundCloud er tredjepart
 const FALLBACK_IMG = '/fallback.jpg';
-// Toppen av skjermen i nettleseren (ikke appen på Hjem-skjerm, der bildet går helt opp): Safari farger statuslinjen etter
-// bakgrunnsfargen til den faste topplinjen (iOS 26) eller theme-color (eldre iOS, Android). Vi henter fargen fra toppen av
-// plakatbildet, så toppen glir over i bildet i stedet for å være svart. Når plakaten er scrollet forbi, blir den vanlig igjen.
+// Statuslinjen i nettleseren: iOS 26 Safari viser plakaten under klokka så lenge ingen topplinje er festet (se .inbrowser i CSS).
+// Eldre iOS og Android farger statuslinjen etter theme-color, så den får fargen fra toppen av plakatbildet til plakaten er scrollet forbi.
 const STANDALONE = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 let topRGB = null, topSrc = '', heroUnder = true;
 function tintTop() {
   if (STANDALONE) return;
   const ch = document.querySelector('.chrome'), meta = document.querySelector('meta[name=theme-color]'); if (!ch || !meta) return;
   const dark = document.documentElement.dataset.theme === 'dark';
-  const page = [document.documentElement, document.body]; // Safari i iOS 26 farger statuslinjen etter sidens bakgrunn (html/body)
-  if (!topRGB || !heroUnder || !matchMedia('(max-width:480px)').matches || !document.getElementById('home').classList.contains('on')) { ch.style.backgroundColor = ''; page.forEach(el => el.style.backgroundColor = ''); meta.content = dark ? '#000000' : '#ffffff'; return; }
+  if (!topRGB || !heroUnder || PC() || !document.getElementById('home').classList.contains('on')) { meta.content = dark ? '#000000' : '#ffffff'; return; }
   const base = dark ? 0 : 255, a = dark ? .35 : .55, c = topRGB.map(v => Math.round(v * (1 - a) + base * a)).join(',');
-  ch.style.backgroundColor = `rgba(${c},.72)`; page.forEach(el => el.style.backgroundColor = `rgb(${c})`); meta.content = `rgb(${c})`;
+  meta.content = `rgb(${c})`; // eldre iOS og Android farger statuslinjen etter theme-color
 }
 window.tintTop = tintTop;
 function sampleTop(src) {
