@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import { parseMusic } from '../src/music.js';
+const s = parseMusic('https://open.spotify.com/intl-no/track/4uLU6hMCjMI75M1A2tKUQC?si=abc');
+assert.equal(s.provider, 'spotify');
+assert.equal(s.url, 'https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC', 'språkdel og sporing fjernes');
+assert.equal(s.embed, 'https://open.spotify.com/embed/track/4uLU6hMCjMI75M1A2tKUQC?utm_source=aho-puben&theme=0');
+assert.equal(s.height, 80, 'låt: kompakt');
+assert.equal(parseMusic('https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M').height, 152, 'spilleliste: litt høyere');
+const sc = parseMusic('https://soundcloud.com/some-dj/live-set-2026/?utm_source=x');
+assert.equal(sc.provider, 'soundcloud');
+assert.equal(sc.url, 'https://soundcloud.com/some-dj/live-set-2026');
+assert.ok(sc.embed.startsWith('https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fsome-dj%2Flive-set-2026&'));
+assert.equal(parseMusic('https://www.youtube.com/watch?v=x').provider, 'link', 'andre lenker åpnes i ny fane');
+assert.equal(parseMusic('ikke en lenke'), null);
+assert.equal(parseMusic('javascript:alert(1)'), null, 'bare http og https');
+assert.equal(parseMusic(''), null);
+console.log('ok: musikklenker');

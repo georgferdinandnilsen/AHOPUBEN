@@ -198,6 +198,7 @@ Appen følger disse reglene. Ingen kode trengs.
 - **Type arrangement** blir etiketten (Aktivitet, DJ og så videre). Typen «Rolig Pub» betyr vanlig pub uten program.
 - **Info til APP** er teksten som vises under datoen. Oversettes automatisk til engelsk.
 - **Bilde til APP** blir bildet øverst. Uten bilde vises et fast bilde av puben (filen `public/fallback.jpg`). Vil dere bytte det, bytt filen og kjør `npm run deploy`.
+- **Artist link APP**: lim inn en lenke fra DJ-en eller artisten, til en låt, et album eller en spilleliste på Spotify, eller en låt på SoundCloud. Da får plakaten en hvit knapp, «Hør DJ-en» (når typen er DJ) eller «Hør artisten». Knappen åpner et ark med cover, tittel og avspilleren, og arrangementet får en liten note i Kommende. Andre lenker, som YouTube eller Bandcamp, får knappen, men åpnes i ny fane. Spotify spiller bare 30 sekunder for dem som ikke er logget inn på Spotify, SoundCloud spiller hele låta.
 - Endringer vises i appen innen ti minutter.
 - Torsdager uten rad i Notion vises automatisk som «Rolig pub, kl 19-01».
 

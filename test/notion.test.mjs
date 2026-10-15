@@ -7,7 +7,11 @@ const page = (tags, date = '2026-10-29') => ({ id: '3f7fc4bc-274d-8050-8d75-caeb
   'Ansvarlig for arrangement': { type: 'people', people: [] }, 'Når': { type: 'date', date: date && { start: date + 'T19:00:00.000+01:00' } }, Vakt: { type: 'relation' },
   'PUB': { type: 'number', number: 11 } } });
 let e = fromNotion(page(['Aktivitet']));
-assert.deepEqual(e, { id: '3f7fc4bc274d80508d75caeb60aef7c9', date: '2026-10-29', time: '19:00', title: 'test', type: 'Aktivitet', plain: false, image: '', desc: '', pub: 11 });
+assert.deepEqual(e, { id: '3f7fc4bc274d80508d75caeb60aef7c9', date: '2026-10-29', time: '19:00', title: 'test', type: 'Aktivitet', plain: false, image: '', desc: '', pub: 11, musicUrl: '' });
+const withMusic = page(['DJ']); withMusic.properties['Artist link APP'] = { type: 'url', url: 'https://open.spotify.com/track/abc' };
+assert.equal(fromNotion(withMusic).musicUrl, 'https://open.spotify.com/track/abc', 'musikklenke som lenke-felt');
+const musicText = page(['DJ']); musicText.properties['Artist link APP'] = { type: 'rich_text', rich_text: [{ plain_text: 'hør her', href: 'https://soundcloud.com/x/y' }] };
+assert.equal(fromNotion(musicText).musicUrl, 'https://soundcloud.com/x/y', 'musikklenke som tekst med lenke');
 assert.equal(fromNotion(page(['Rolig Pub'])).plain, true, 'Rolig Pub = vanlig pub');
 assert.equal(fromNotion(page(['Forslag???'])).type, '', 'forslag er ikke en type');
 assert.equal(fromNotion(page(['Forslag???'])).date, '2026-10-29', 'forslag med dato vises, som i Kommende');
