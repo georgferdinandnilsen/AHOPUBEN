@@ -13,6 +13,8 @@ export function fromNotion(p) {
   const imgProp = P.find(([n, v]) => ['files', 'url'].includes(v.type) && /bilde|image/i.test(n))?.[1];
   const file = imgProp?.type === 'url' ? { external: { url: imgProp.url } } : imgProp?.files?.[0];
   const info = P.find(([n, v]) => v.type === 'rich_text' && /info|beskriv/i.test(n))?.[1];
+  const art = P.find(([n, v]) => /artist|musikk|music/i.test(n) && ['url', 'rich_text', 'files'].includes(v.type))?.[1]; // «Artist link APP»: Spotify, SoundCloud eller annen lenke
+  const musicUrl = !art ? '' : art.type === 'url' ? (art.url || '') : art.type === 'files' ? (art.files?.[0]?.external?.url || '') : ((art.rich_text || []).map(x => x.href || '').find(Boolean) || rt(art.rich_text).trim());
   return {
     id: p.id.replace(/-/g, ''),
     date: dateProp?.date?.start?.slice(0, 10) || '',
@@ -23,6 +25,7 @@ export function fromNotion(p) {
     image: file?.file?.url || file?.external?.url || '',
     desc: rt(info?.rich_text).trim(),
     pub: (pubProp && (pubProp.type === 'number' ? pubProp.number : pubProp.formula.number)) ?? null,
+    musicUrl,
   };
 }
 

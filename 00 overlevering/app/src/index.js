@@ -2,6 +2,7 @@
 // Notion → arrangementer, DeepL → engelsk, Web Push → varsler, Notion → forslag.
 import { buildPushPayload } from '@block65/webcrypto-web-push';
 import { fromNotion, pickBody } from './notion.js';
+import { parseMusic } from './music.js';
 import { normOffsets, when } from './notify.js';
 import { memberRoute, shiftTick, shiftMessage } from './memberRoutes.js';
 
@@ -124,11 +125,30 @@ async function refresh(env, c) {
       for (const e of items) {
         if (!e.image || !e.desc) { const b = pickBody(await blocksOf(env, e.id)); e.image ||= b.image; e.desc ||= b.desc; } // ponytail: Notion-bilde-URL-er utløper etter 1 t, cache er 10 min. Proxy via Worker hvis bilder forsvinner.
         e.titleEn = await translate(env, e.title); e.descEn = await translate(env, e.desc); e.typeEn = TYPES[e.type] || await translate(env, e.type);
+        e.music = e.musicUrl ? await musicInfo(env, e.musicUrl) : null; delete e.musicUrl;
       }
     } catch (err) { console.error('Notion-henting feilet:', err.message); if (c) return c.items; throw err; }
   }
   await env.KV.put('events', JSON.stringify({ t: Date.now(), items }), { expirationTtl: 86400 });
   return items;
+}
+// Musikklenke → avspiller, med tittel, artist og cover fra lenkens oEmbed (ingen nøkkel trengs). Hurtigbufres i 7 dager.
+async function musicInfo(env, raw) {
+  let m = parseMusic(raw); if (!m) return null;
+  if (m.provider === 'link' && /^(spotify\.link|spoti\.fi|on\.soundcloud\.com)$/.test(new URL(m.url).hostname)) { // korte delelenker: følg videresendingen
+    try { const r = await fetch(m.url, { redirect: 'follow' }); const m2 = parseMusic(r.url); if (m2 && m2.provider !== 'link') m = m2; } catch (e) {}
+  }
+  if (m.provider === 'link') return { ...m, title: '', artist: '', thumb: '' };
+  const k = 'oembed:' + await id(m.url), c = await env.KV.get(k, 'json');
+  if (c) return { ...m, ...c };
+  let info = { title: '', artist: '', thumb: '' };
+  try {
+    const r = await fetch(m.provider === 'spotify' ? `https://open.spotify.com/oembed?url=${encodeURIComponent(m.url)}` : `https://soundcloud.com/oembed?format=json&url=${encodeURIComponent(m.url)}`);
+    if (r.ok) { const j = await r.json(); const artist = String(j.author_name || ''); let title = String(j.title || ''); if (artist && title.endsWith(' by ' + artist)) title = title.slice(0, -(' by ' + artist).length);
+      info = { title: title.slice(0, 120), artist: artist.slice(0, 80), thumb: /^https:\/\//.test(j.thumbnail_url || '') ? j.thumbnail_url : '' }; }
+  } catch (e) { console.error('oEmbed feilet:', m.url, e.message); }
+  if (info.title) await env.KV.put(k, JSON.stringify(info), { expirationTtl: 7 * 86400 });
+  return { ...m, ...info };
 }
 async function translate(env, text) {
   if (!text || !env.DEEPL_KEY) return '';

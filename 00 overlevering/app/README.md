@@ -26,7 +26,8 @@ npm run dev
    Database-id er de 32 tegnene i URL-en: `306fc4bc274d803fbcaac5b17542df12`. Databasen har to datakilder, og appen velger dem selv:
    - **Arrangementer** (datakilden med datofeltet «Når»). Et arrangement vises i appen hvis det har en dato i «Når» fra i dag og utover, som visningen «Kommende».
      - **Type:** feltet «Type arrangement» (Aktivitet, DJ og så videre). Typen «Rolig Pub» regnes som vanlig pub uten program.
-     - **Bilde:** feltet «Bilde til APP». Uten bilde brukes et generisk bilde med logoen.
+     - **Bilde:** feltet «Bilde til APP». Uten bilde brukes et fast bilde av puben (`public/fallback.jpg`).
+     - **Musikk:** feltet «Artist link APP». En Spotify- eller SoundCloud-lenke gir en «Hør DJ-en»-knapp (eller «Hør artisten») på plakaten, som åpner et ark med cover og den offisielle avspilleren. Tittel, artist og cover hentes fra lenkens oEmbed og hurtigbufres i en uke (KV `oembed:`). Andre lenker får knappen, men åpnes i ny fane. Avspilleren lastes først når noen trykker, og fjernes når arket lukkes.
      - **Info:** feltet «Info til APP». Er feltene tomme, leses bildet og teksten fra selve siden i stedet.
    - **Forslag** fra appen opprettes i samme datakilde som arrangementene: forslaget som tittel (feltet «Kommende»), «Bestemt» satt til Nei, uten dato og uten type, og «fortell mer» og navn som tekst inne på siden. De vises dermed i visningen «Ideer» og ikke i appen, siden appen krever dato i «Når». Datakilden «New data source» (Name, beskrivelse, nummer, potensiell dato?) brukes ikke av appen.
    Notion-integrasjonen må være koblet til siden som inneholder databasen (Connections), ellers svarer Notion 404.
