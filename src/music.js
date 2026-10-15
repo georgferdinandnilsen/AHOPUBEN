@@ -13,7 +13,7 @@ export function parseMusic(raw) {
     const path = u.pathname.replace(/\/+$/, '');
     if (path.split('/').filter(Boolean).length < 1) return null;
     const clean = 'https://soundcloud.com' + path;
-    return { provider: 'soundcloud', url: clean, embed: `https://w.soundcloud.com/player/?url=${encodeURIComponent(clean)}&color=%230000ff&auto_play=false&hide_related=true&show_comments=false&show_reposts=false&show_teaser=false&visual=false`, height: 166 };
+    return { provider: 'soundcloud', url: clean, embed: `https://w.soundcloud.com/player/?url=${encodeURIComponent(clean)}&color=%230000ff&auto_play=true&hide_related=true&show_comments=false&show_reposts=false&show_teaser=false&visual=false`, height: 166 };
   }
   return { provider: 'link', url: u.href, embed: '', height: 0 };
 }

@@ -52,7 +52,7 @@ Kryss av etter hvert. Rekkefølgen er viktig. Alt er gratis.
 - [ ] Logget inn som medlem, egne vakter vises
 - [ ] Logget inn som styremedlem, valgt styrekode, sendt testmelding
 - [ ] Byttet til engelsk: tekstene er oversatt
-- [ ] Et arrangement med Spotify- eller SoundCloud-lenke i «Artist link APP» viser spilleren på plakaten, og den spiller
+- [ ] Et arrangement med Spotify- eller SoundCloud-lenke i «Artist link APP» viser «Hør DJ-en» på plakaten, og spilleren i arket spiller
 - [ ] På PC: topplinje med bred logo og åpningstider, kalender til venstre, kommende til høyre, kontaktinfo i bunnen
 - [ ] Som styre: avkryssingen «Vis Bli medlem på nettsiden» virker begge veier, og «Se tall for appen» viser tall
 
