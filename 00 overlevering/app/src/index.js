@@ -7,7 +7,7 @@ import { normOffsets, when } from './notify.js';
 import { memberRoute, shiftTick, shiftMessage } from './memberRoutes.js';
 
 const OSLO = 'Europe/Oslo';
-const TYPES = { Aktivitet: 'Activity', DJ: 'DJ', Konsert: 'Concert', Quiz: 'Quiz', Fest: 'Party' };
+const TYPES = { Aktivitet: 'Activity', DJ: 'DJ', Artist: 'Artist', Band: 'Band', Konsert: 'Concert', Quiz: 'Quiz', Fest: 'Party' };
 const SAMPLE = [ // ponytail: eksempeldata til Notion-nøkkelen er på plass
   { id: 's1', date: '2026-10-29', title: 'Halloween', titleEn: 'Halloween', type: 'Aktivitet', typeEn: 'Activity', desc: 'Kostymekonkurranse, DJ og skummel drinkmeny. Beste kostyme vinner bar-tab. Dørene åpner 19, kåringen er kl 23.', descEn: 'Costume contest, DJ and a spooky drinks menu. Best costume wins a bar tab. Doors at 7pm, judging at 11pm.', image: '/sample-halloween.jpg', pub: 11 },
   { id: 's2', date: '2026-11-05', title: 'DJ: Dave Van Zon', titleEn: 'DJ: Dave Van Zon', type: 'DJ', typeEn: 'DJ', desc: 'DJ-kveld. Fri inngang, dørene åpner 19.', descEn: 'DJ night. Free entry, doors at 7pm.', image: '', pub: 12 },
