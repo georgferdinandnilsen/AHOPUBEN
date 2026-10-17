@@ -701,8 +701,8 @@ msheet.addEventListener('pointercancel', () => { msheet.classList.remove('drag')
 function calLinks(e) {
   const d2 = iso(new Date(parse(e.date).getTime() + 864e5)), st = e.time || '19:00';
   const title = label(e), details = e.plain ? `${t('noProgram')}, ${t('open')}` : desc(e), loc = 'AHO Puben, ' + ADDRESS, q = encodeURIComponent;
-  return { g: `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${q(title)}&dates=${e.date.replace(/-/g, '')}T${st.replace(':', '')}00/${d2.replace(/-/g, '')}T010000&ctz=Europe/Oslo&details=${q(details)}&location=${q(loc)}`,
-    o: `https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&subject=${q(title)}&startdt=${e.date}T${st}:00&enddt=${d2}T01:00:00&body=${q(details)}&location=${q(loc)}`,
+  return { g: `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${q(title)}&dates=${e.date.replace(/-/g, '')}T${st.replace(':', '')}00/${d2.replace(/-/g, '')}T000000&ctz=Europe/Oslo&details=${q(details)}&location=${q(loc)}`,
+    o: `https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&subject=${q(title)}&startdt=${e.date}T${st}:00&enddt=${d2}T00:00:00&body=${q(details)}&location=${q(loc)}`,
     w: `webcal://${location.host}/api/events.ics`, i: `${API}/api/ics/${e.id}` };
 }
 function openCalMenu(e, anchor) {

@@ -188,11 +188,12 @@ async function suggest(req, env) {
 }
 
 // ---------- kalenderfil ----------
+// Arrangementer slutter kl 24 (00:00 neste dag) i kalenderen, så de vises på én dag. Nettsiden viser fortsatt 19-01.
 function vevent(e) {
   const esc = s => String(s || '').replace(/[\;,]/g, m => '\\' + m).replace(/\n/g, '\\n');
   const d = e.date.replace(/-/g, ''), d2 = addDays(e.date, 1).replace(/-/g, '');
   return ['BEGIN:VEVENT', `UID:${e.id}@ahopuben`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`,
-    `DTSTART;TZID=${OSLO}:${d}T${(e.time || '19:00').replace(':', '')}00`, `DTEND;TZID=${OSLO}:${d2}T010000`, `SUMMARY:${esc(e.title)}`, `DESCRIPTION:${esc(e.desc)}`, 'LOCATION:AHO Puben', 'END:VEVENT'];
+    `DTSTART;TZID=${OSLO}:${d}T${(e.time || '19:00').replace(':', '')}00`, `DTEND;TZID=${OSLO}:${d2}T000000`, `SUMMARY:${esc(e.title)}`, `DESCRIPTION:${esc(e.desc)}`, 'LOCATION:AHO Puben', 'END:VEVENT'];
 }
 function ics(e) { return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AHO Puben//NO', ...vevent(e), 'END:VCALENDAR'].join('\r\n'); }
 // Abonnement (webcal) på alle kommende arrangementer: Kalender på Mac og Outlook holder seg oppdatert selv.
