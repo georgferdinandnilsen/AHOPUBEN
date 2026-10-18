@@ -61,7 +61,7 @@ npm run dev
 Nederst i varselmenyen logger medlemmer inn med telefonnummer. Nummeret sjekkes mot MEDLEMMER i Notion, og medlemskapet må ikke være utløpt (feltet «How long do you want to be a member?»). Innloggede får en pille nederst på forsiden som åpner arket:
 
 - **Vakter:** egne vakter fra VAKTPLAN (Åpnevakt 19-22, Stengevakt 22-01), med ansvarlig styremedlem og kolleger med ring-knapp. «Legg alle vakter i kalender» er et kalenderabonnement som følger Notion. Varsel om vakt kl 19 dagen før og én time før.
-- **Manualer:** barnesidene under overskriften HOW-TO på infosiden, vist i appen og oppdatert innen ti minutter.
+- **Manualer (bar-rutiner):** undersidene på Notion-siden «HOW-TO / BAR RUTINER» (`NOTION_INFO_PAGE`), gruppert av skillelinjene, vist i appen og oppdatert innen ti minutter. Har siden en overskrift med HOW-TO, brukes bare undersidene etter den.
 - **Meldinger:** meldinger fra styret. Siste melding vises øverst i Vakter-fanen i 48 timer. Under aktiv vakt vises «Obs for kvelden» i stedet.
 
 **Feil lagret nummer:** etter tre mislykkede forsøk vises «Rett det med e-posten din» under feilmeldingen. Lenken åpner en popup med e-post og nytt nummer. E-posten slås opp i MEDLEMMER, og det nye nummeret skrives inn i Phone-feltet på medlemskortet og logger en inn. Et nummer som allerede tilhører et annet medlem avvises. Begrenset til ti forsøk i timen per IP.
@@ -77,7 +77,7 @@ KV-lageret (Puben@aho.no-kontoen): https://dash.cloudflare.com/77f20e19b9bd7a3ed
 
 Styremedlemmers navn hentes fra Person-feltet i Styremedlemmer. Det krever at integrasjonen har rettigheten «Read user information without email» (notion.so/profile/integrations → integrasjonen → Capabilities). Uten den vises rollen som navn.
 
-Datakilde-id-ene for medlemsdelen står i `wrangler.toml` under `[vars]`. Integrasjonen må være koblet til MEDLEMMER, STYREMEDLEMMER, VAKTPLAN og infosiden.
+Datakilde-id-ene for medlemsdelen står i `wrangler.toml` under `[vars]`. Integrasjonen må være koblet til MEDLEMMER, STYREMEDLEMMER, VAKTPLAN og siden «HOW-TO / BAR RUTINER».
 
 ## På PC
 

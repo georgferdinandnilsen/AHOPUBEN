@@ -30,7 +30,7 @@ VAPID_SUBJECT = "https://github.com/georgferdinandnilsen/AHOPUBEN"
 NOTION_MEMBERS_DS = "306fc4bc-274d-805a-ac7b-000be7246563"
 NOTION_BOARD_DS = "306fc4bc-274d-8016-89e6-000b2ed287c9"
 NOTION_SHIFTS_DS = "306fc4bc-274d-8027-b822-000b6d1128c8"
-NOTION_INFO_PAGE = "306fc4bc274d800493aaf22d1526a320"
+NOTION_INFO_PAGE = "306fc4bc274d800493aaf22d1526a320" # siden «HOW-TO / BAR RUTINER»: undersidene blir manualene i appen
 
 # Hemmeligheter settes med: npx wrangler secret put NAVN
 #   NOTION_TOKEN, NOTION_DB_ID, NOTION_SUGGEST_DB_ID, DEEPL_KEY, VAPID_PUBLIC, VAPID_PRIVATE

@@ -53,11 +53,14 @@ export function recipients(to, members, shifts, today) {
 // Vaktvarsler: kl 19 dagen før, og én time før start.
 export const shiftAlerts = s => [[1, 19], [0, ROLE[s.role].start - 1]];
 
-// Manualene: barnesidene etter overskriften HOW-TO, gruppert av skillelinjer. Alt annet på infosiden hoppes over.
+// Manualene (bar-rutinene): undersidene på siden «HOW-TO / BAR RUTINER», gruppert av skillelinjer.
+// Har siden en overskrift med HOW-TO, brukes bare undersidene etter den (det gamle oppsettet med en større infoside).
 export function manualsFrom(blocks) {
-  let on = false, group = 0; const out = [];
+  const isHead = b => b.type === 'heading_2' || b.type === 'heading_1', howTo = b => /how.?to/i.test(rt(b[b.type]?.rich_text));
+  const headed = blocks.some(b => isHead(b) && howTo(b));
+  let on = !headed, group = 0; const out = [];
   for (const b of blocks) {
-    if (b.type === 'heading_2' || b.type === 'heading_1') { on = /how.?to/i.test(rt(b[b.type]?.rich_text)); continue; }
+    if (isHead(b)) { if (headed) on = howTo(b); continue; }
     if (!on) continue;
     if (b.type === 'divider') group++;
     else if (b.type === 'child_page') out.push({ id: b.id.replace(/-/g, ''), title: b.child_page.title, group });
