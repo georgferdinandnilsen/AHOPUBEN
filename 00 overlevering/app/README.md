@@ -66,7 +66,7 @@ Nederst i varselmenyen logger medlemmer inn med telefonnummer. Nummeret sjekkes 
 
 **Feil lagret nummer:** etter tre mislykkede forsøk vises «Rett det med e-posten din» under feilmeldingen. Lenken åpner en popup med e-post og nytt nummer. E-posten slås opp i MEDLEMMER, og det nye nummeret skrives inn i Phone-feltet på medlemskortet og logger en inn. Et nummer som allerede tilhører et annet medlem avvises. Begrenset til ti forsøk i timen per IP.
 
-**Styret:** nummer i STYREMEDLEMMER gir «Send melding» i varselmenyen. Første gang velger man en firesifret styrekode. Meldingen går som push til innloggede medlemmer med varsler på, og ligger i appen for alle innloggede. Loggen viser hvem som sendte hva og hvor mange som har sett.
+**Styret:** nummer i STYREMEDLEMMER gir «Send melding» i varselmenyen. Første gang velger man en firesifret styrekode. Meldingen går som push til de valgte mottakerne som er innlogget med varsler på, og alltid også til alle i styret som er innlogget med varsler på. Den ligger i appen for alle innloggede ut måneden den ble sendt, og forsvinner fra appen ved månedsskiftet (den ligger fortsatt i KV). Loggen viser hvem som sendte hva og hvor mange som har sett.
 
 **Skjule «Bli medlem»:** styremedlemmer har en avkryssing i varselmenyen, «Vis «Bli medlem» på nettsiden». Den gjelder for alle som åpner appen, lagres i KV (`settings:join`) og trenger ikke styrekode. Slå av når opptaket er stengt.
 
