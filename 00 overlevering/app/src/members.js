@@ -50,6 +50,8 @@ export function recipients(to, members, shifts, today) {
   const next = shifts.map(s => s.date).filter(d => d >= today).sort()[0];
   return next ? active.filter(m => onDate(next).has(m.id)).map(m => m.id) : [];
 }
+// Styremeldinger: mottakerne som er valgt får push, og i tillegg alle i styret som er innlogget med varsler på, uansett valg.
+export const wantsMsg = (s, rec, boardUserIds) => !!s && ((!!s.memberId && rec.has(s.memberId)) || (!!s.boardUserId && boardUserIds.has(s.boardUserId)));
 // Vaktvarsler: kl 19 dagen før, og én time før start.
 export const shiftAlerts = s => [[1, 19], [0, ROLE[s.role].start - 1]];
 

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { normPhone, splitPhone, countryCodes, memberFrom, isActive, boardFrom, shiftFrom, myShifts, recipients, shiftAlerts, manualsFrom, blockHtml, pageHtml, shiftsIcs, SAMPLE } from '../src/members.js';
+import { normPhone, splitPhone, countryCodes, memberFrom, isActive, boardFrom, shiftFrom, myShifts, recipients, shiftAlerts, wantsMsg, manualsFrom, blockHtml, pageHtml, shiftsIcs, SAMPLE } from '../src/members.js';
 const t = s => [{ plain_text: s }];
 assert.equal(normPhone('+47 900 00 000'), '90000000'); assert.equal(normPhone('004790000000'), '90000000'); assert.equal(normPhone('90000000'), '90000000'); assert.equal(normPhone('+46 70 123 45 67'), '46701234567'); assert.equal(normPhone('+46 (0)70-123 45 67'), '46701234567', 'innledende null etter landskode'); assert.equal(normPhone('0046 70 123 45 67'), '46701234567'); assert.equal(normPhone('+47 90 00 00 00'), '90000000'); assert.equal(normPhone('900 00 000'), '90000000'); assert.equal(normPhone('+1 (212) 555-0100'), '12125550100'); assert.equal(normPhone('+358 40 123 4567'), '358401234567');
 assert.deepEqual(splitPhone('+45 12 34 56 78'), { cc: '45', national: '12345678' }); assert.deepEqual(splitPhone('90000000'), { cc: '47', national: '90000000' });
@@ -31,3 +31,13 @@ const html = pageHtml([{ html: blockHtml({ type: 'heading_2', heading_2: { rich_
 assert.equal(html, '<h3>Kasse</h3><ul><li><b>Tell &lt;penger&gt;</b></li><li>Skriv i boka</li></ul><hr>');
 const ics = shiftsIcs(mine); assert.ok(ics.includes('X-WR-CALNAME:AHO Pub vakter')); assert.ok(ics.includes('DTSTART;TZID=Europe/Oslo:' + D.shifts[0].date.replace(/-/g, '') + 'T190000')); assert.ok(ics.includes('T010000'), 'stengevakt slutter 01 neste dag'); assert.equal((ics.match(/BEGIN:VEVENT/g) || []).length, 3);
 console.log('ok: medlemsdelen');
+
+// Styret får alle styremeldinger når de er innlogget med varsler på, uansett hvilke mottakere som er valgt.
+{ const rec = new Set(['m1']), boardIds = new Set(['u-styre']);
+  assert.equal(wantsMsg({ memberId: 'm1' }, rec, boardIds), true, 'valgt mottaker');
+  assert.equal(wantsMsg({ memberId: 'm2' }, rec, boardIds), false, 'ikke valgt medlem');
+  assert.equal(wantsMsg({ memberId: '', boardUserId: 'u-styre' }, rec, boardIds), true, 'styret får uansett');
+  assert.equal(wantsMsg({ memberId: 'm2', boardUserId: 'u-styre' }, rec, boardIds), true, 'styremedlem som også er medlem');
+  assert.equal(wantsMsg({ memberId: '', boardUserId: 'u-gammel' }, rec, boardIds), false, 'tidligere styremedlem');
+  assert.equal(wantsMsg({ memberId: '', boardUserId: '' }, rec, boardIds), false, 'ikke innlogget'); }
+console.log('wantsMsg ok');

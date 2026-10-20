@@ -1,5 +1,5 @@
 // HTTP-delen av medlemsdelen. Innlogging med telefonnummer, mine vakter, manualer, kalender, styremeldinger og styrekode.
-import { normPhone, isActive, myShifts, recipients, loadAll, manualHtml, shiftsIcs, countryCodes } from './members.js';
+import { normPhone, isActive, myShifts, recipients, wantsMsg, loadAll, manualHtml, shiftsIcs, countryCodes } from './members.js';
 import { normOffsets } from './notify.js';
 
 async function notionPatch(env, notion, pageId, properties) {
@@ -140,11 +140,11 @@ export async function memberRoute(req, url, env, ctx, D) {
     if (await codeHash(env, String(body.code || ''), sess.boardId) !== stored) return D.json({ error: 'wrong_code' }, 403);
     const text = String(body.text || '').trim().slice(0, 300); const to = ['all', 'upcoming', 'active'].includes(body.to) ? body.to : 'all';
     if (!text) return D.json({ error: 'empty' }, 400);
-    const { members, shifts } = await data(); const rec = new Set(recipients(to, members, shifts, today));
+    const { members, shifts, board } = await data(); const rec = new Set(recipients(to, members, shifts, today)), boardIds = new Set(board.map(b => b.userId).filter(Boolean));
     const msg = { id: Date.now().toString(36) + rand().slice(0, 4), text, to, count: rec.size, sender: sess.name, t: Date.now() };
     await env.KV.put('msg:' + msg.id, JSON.stringify(msg));
     let pushed = 0;
-    for (const k of await listAll(env, 'sub:')) { const s = await env.KV.get(k.name, 'json'); if (s?.memberId && rec.has(s.memberId) && await D.push(env, s.subscription, { title: s.prefs?.lang === 'en' ? 'Message from the board' : 'Melding fra styret', body: text, url: '/#medlem', tag: 'msg' + msg.id })) pushed++; }
+    for (const k of await listAll(env, 'sub:')) { const s = await env.KV.get(k.name, 'json'); if (wantsMsg(s, rec, boardIds) && await D.push(env, s.subscription, { title: s.prefs?.lang === 'en' ? 'Message from the board' : 'Melding fra styret', body: text, url: '/#medlem', tag: 'msg' + msg.id })) pushed++; }
     return D.json({ ok: true, id: msg.id, count: rec.size, pushed });
   }
   return D.json({ error: 'not found' }, 404);
