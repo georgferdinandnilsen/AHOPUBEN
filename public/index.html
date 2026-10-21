@@ -34,8 +34,8 @@ function applyTheme() {
   if (window.tintTop) window.tintTop(); // i nettleseren: fargen fra plakaten i stedet for svart
 }
 applyTheme();
-// I nettleseren (ikke Hjem-skjerm) er topplinjen festet og flat (ikke glass). Safari 26 fyller statuslinjen med én flat farge fra et festet,
-// ugjennomsiktig element øverst, så klokka og topplinjen får samme farge. Bildet vises aldri bak klokka. Se rapporten «Safari 26 topplinje og statusfelt».
+// I nettleseren (ikke Hjem-skjerm) er topplinjen festet glass som i appen. Safari 26 viser bare én flat farge bak klokka (sidens html-bakgrunn),
+// så glasset starter i den fargen øverst og går over i glass nedover. Bildet vises aldri bak klokka. Se rapporten «Safari 26 topplinje og statusfelt».
 document.documentElement.classList.toggle('inbrowser', !(matchMedia('(display-mode: standalone)').matches || navigator.standalone === true));
 // Fargen fra forrige besøk settes før første tegning, siden Safari kan lese sidens bakgrunnsfarge bare når siden lastes.
 try { var tt = JSON.parse(localStorage.getItem('topTint') || 'null'); if (tt && tt.rgb && document.documentElement.classList.contains('inbrowser') && innerWidth <= 480) { var dk = document.documentElement.dataset.theme === 'dark', ba = dk ? 0 : 255, al = dk ? .35 : .55; var tc = tt.rgb.map(function (v) { return Math.round(v * (1 - al) + ba * al); }).join(','); document.documentElement.style.backgroundColor = 'rgb(' + tc + ')'; document.documentElement.style.setProperty('--toptint', tc); document.documentElement.classList.add('tinted', 'attop'); } } catch (e) {}
@@ -57,11 +57,13 @@ button:active{transform:scale(.97)}
 h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 .wrap{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;background:var(--bg)} /* innholdet er alltid svart/hvitt, så sidebakgrunnen kan farge toppen */
 @media (max-width:899px){
-/* Safari 26 viser alltid én flat farge bak statuslinjen (fra en festet, ugjennomsiktig topplinje, ellers sidens html-bakgrunn), aldri bildet.
-   Derfor er topplinjen i nettleseren festet og flat: plakatens farge mens plakaten ligger under den, ellers sidens farge.
-   Safari bruker den samme fargen bak klokka, så statuslinje og topplinje blir én flate med skarp kant mot innholdet, som i appen. */
-.inbrowser .chrome{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none}
-.inbrowser.tinted.attop .chrome{background:rgb(var(--toptint))}}
+/* Safari 26 viser aldri siden bak klokka, bare én flat farge: sidens html-bakgrunn (glass med backdrop-filter teller ikke).
+   Derfor er glass-topplinjen i nettleseren festet som i appen, men starter øverst i nøyaktig klokkefargen og går over i glass
+   nedover, så det ikke blir en kant mellom klokka og glasset. Nederst har den samme skarpe kant som i appen.
+   Klokkefargen er plakatens farge (--toptint) mens plakaten ligger under topplinjen (klassen attop), ellers sidens farge. */
+.inbrowser{--bartop:var(--bg)}
+.inbrowser.tinted.attop{--bartop:rgb(var(--toptint))}
+.inbrowser .chrome{background:linear-gradient(to bottom,var(--bartop) 0%,color-mix(in srgb,var(--bartop) 70%,transparent) 30%,color-mix(in srgb,var(--bartop) 25%,transparent) 70%,transparent 100%),var(--chrome)}}
 /* chrome */
 .chrome{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:5;background:var(--chrome);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);padding:calc(env(safe-area-inset-top) + 8px) 20px 12px;display:flex;justify-content:space-between;align-items:center;transition:background .3s}
 .brand{display:flex;align-items:center;gap:10px}
