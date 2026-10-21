@@ -37,6 +37,10 @@ applyTheme();
 // I nettleseren (ikke Hjem-skjerm) er topplinjen ikke festet. Safari 26 fyller statuslinjen med én flat farge: fra et festet element
 // øverst, ellers sidens html-bakgrunn. Bildet vises aldri der når siden står øverst. Se rapporten «Safari 26 topplinje og statusfelt».
 document.documentElement.classList.toggle('inbrowser', !(matchMedia('(display-mode: standalone)').matches || navigator.standalone === true));
+// FORSØK «glass helt opp» (scroll runway): siden starter 80 px nedscrollet, så ekte innhold (glass-topplinjen over plakaten) ligger bak klokka.
+// Slås på med ?topp=glass og av med ?topp=flat. Uten bryteren er topplinjen flat i statuslinjens farge.
+try { if (/[?&]topp=glass/.test(location.search)) localStorage.setItem('topp', 'glass'); if (/[?&]topp=flat/.test(location.search)) localStorage.removeItem('topp');
+  if (localStorage.getItem('topp') === 'glass' && document.documentElement.classList.contains('inbrowser') && innerWidth <= 480 && !location.hash) document.documentElement.classList.add('runway'); } catch (e) {}
 // Fargen fra forrige besøk settes før første tegning, siden Safari kan lese sidens bakgrunnsfarge bare når siden lastes.
 try { var tt = JSON.parse(localStorage.getItem('topTint') || 'null'); if (tt && tt.rgb && document.documentElement.classList.contains('inbrowser') && innerWidth <= 480) { var dk = document.documentElement.dataset.theme === 'dark', ba = dk ? 0 : 255, al = dk ? .35 : .55; var tc = tt.rgb.map(function (v) { return Math.round(v * (1 - al) + ba * al); }).join(','); document.documentElement.style.backgroundColor = 'rgb(' + tc + ')'; document.documentElement.style.setProperty('--toptint', tc); document.documentElement.classList.add('tinted'); } } catch (e) {}
 </script>
@@ -57,10 +61,15 @@ button:active{transform:scale(.97)}
 h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 .wrap{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;background:var(--bg)} /* innholdet er alltid svart/hvitt, så sidebakgrunnen kan farge toppen */
 @media (max-width:899px){.inbrowser .chrome{position:absolute} /* telefon i nettleseren: topplinjen scroller bort, plakaten går helt opp */
-/* Safari 26 viser alltid én flat farge bak statuslinjen når siden står øverst (sidens bakgrunnsfarge), aldri bildet.
-   Derfor: ingen uskarp topplinje i nettleseren, og plakaten starter i nøyaktig samme farge og glir over i bildet, så det ikke blir en kant. */
-.inbrowser.tinted .chrome{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
-.inbrowser.tinted .hero::before{content:"";position:absolute;left:0;right:0;top:0;height:220px;z-index:1;pointer-events:none;background:linear-gradient(to bottom,rgb(var(--toptint)) 0,rgb(var(--toptint)) 18px,rgba(var(--toptint),.9) 50px,rgba(var(--toptint),.68) 92px,rgba(var(--toptint),.4) 140px,rgba(var(--toptint),.15) 185px,rgba(var(--toptint),0) 220px)}}
+/* Safari 26 viser alltid én flat farge bak statuslinjen når siden står øverst (sidens html-bakgrunn), aldri bildet.
+   Derfor får topplinjen nøyaktig samme flate farge, så statuslinje og topplinje blir én linje med skarp kant mot bildet, som i appen.
+   Fargen er toppen av plakaten med samme mørke slør som appens topplinje (--chrome), satt i hodeskriptet og i tintTop. */
+.inbrowser.tinted .chrome{background:rgb(var(--toptint));-webkit-backdrop-filter:none;backdrop-filter:none}
+/* FORSØK: glass-topplinjen strekkes 80 px opp, plakaten like mye, og siden scrolles dit ved lasting. Et snappunkt holder den der. */
+.runway{--rw:80px;scroll-snap-type:y proximity}
+.inbrowser.runway .chrome,.inbrowser.tinted.runway .chrome{padding-top:calc(var(--rw) + 8px);background:var(--chrome);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px)}
+.runway .hero{height:calc(72vh + var(--rw));min-height:calc(520px + var(--rw));max-height:calc(640px + var(--rw))}
+.runway #rwsnap{position:absolute;top:var(--rw);left:0;width:1px;height:1px;scroll-snap-align:start;pointer-events:none}}
 /* chrome */
 .chrome{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:5;background:var(--chrome);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);padding:calc(env(safe-area-inset-top) + 8px) 20px 12px;display:flex;justify-content:space-between;align-items:center;transition:background .3s}
 .brand{display:flex;align-items:center;gap:10px}
@@ -918,6 +927,11 @@ $('#statsLink').onclick = () => { openPanel(false); openSheet(true, { type:'stat
   try { const r = await fetch(API + '/api/events'); if (!r.ok) throw 0; S.events = await r.json(); } catch { S.events = location.hostname === 'localhost' ? SAMPLE : []; }
   S.sel = items()[0]?.date || null; if (S.sel) { const sd = parse(S.sel); S.ym = { y: sd.getFullYear(), m: sd.getMonth() }; }
   renderAll(); route(); renderPill(); if (S.member) { loadHome(); pullPrefs(); } else loadCountries();
+  if (document.documentElement.classList.contains('runway')) { // FORSØK «glass helt opp», se hodeskriptet
+    if (!document.getElementById('rwsnap')) $('.wrap').insertAdjacentHTML('afterbegin', '<div id="rwsnap" aria-hidden="true"></div>');
+    const rw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rw')) || 80;
+    requestAnimationFrame(() => { if (scrollY < 2) scrollTo({ top: rw, behavior: 'instant' }); });
+  }
   if ('serviceWorker' in navigator) { sw().then(async reg => { const s = await reg.pushManager.getSubscription(); if (S.prefs.on && !s) { S.prefs.on = false; ls('prefs', S.prefs); renderPanel(); } }); }
 })();
 </script>
