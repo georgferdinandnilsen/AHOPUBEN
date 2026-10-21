@@ -557,8 +557,10 @@ function fitTitle() {
   const room = el.parentElement.clientWidth; // h1 krymper ikke selv i flex-boksen, så mål mot boksens bredde
   while (px > 20 && (el.scrollWidth > room + 1 || el.offsetHeight > px * lh * 3 + 2)) { px -= 1; el.style.fontSize = px + 'px'; }
 }
-addEventListener('resize', () => { clearTimeout(fitTitle.t); fitTitle.t = setTimeout(fitTitle, 120); });
-document.fonts?.ready.then(fitTitle);
+const refit = () => { clearTimeout(fitTitle.t); fitTitle.t = setTimeout(fitTitle, 60); };
+addEventListener('resize', refit);
+document.fonts?.ready.then(fitTitle); document.fonts?.addEventListener?.('loadingdone', refit); // Archivo Black er bredere enn reserveskriften, så mål på nytt når den er lastet
+const fitObs = window.ResizeObserver ? new ResizeObserver(refit) : null; // fanger også sene skrifter og bilder som endrer bredden
 function renderHero() {
   const all = items(); const e = all[0]; const h = $('#hero');
   if (!e) { h.className = 'hero'; h.innerHTML = `<img src="${FALLBACK_IMG}" alt=""><div class="tx"><h1>AHO PUB</h1><div class="meta">${t('footHours')}</div></div>`; sampleTop(FALLBACK_IMG); return; }
@@ -568,7 +570,7 @@ function renderHero() {
   const teaser = n ? `<button class="teaser" data-d="${n.date}">${t('nextEvent')}: ${title(n)}, ${fmt(n.date, { day:'numeric', month:'short' })} →</button>` : '';
   h.className = 'hero';
   h.innerHTML = `<img src="${e.image || FALLBACK_IMG}" alt=""><div class="tx"><span class="chip">${chip}</span><h1>${label(e)}</h1><div class="meta">${fmt(d, { weekday:'long', day:'numeric', month:'long' })}, ${t('open')}</div>${hearBtn(e)}${desc(e) ? `<p class="info">${desc(e)}</p>` : ''}${teaser}</div>`;
-  fitTitle();
+  fitTitle(); fitObs?.disconnect(); const th = $('#hero .tx h1'); if (th) fitObs?.observe(th);
   $('#hear')?.addEventListener('click', () => openMusic(e));
   sampleTop(e.image || FALLBACK_IMG);
   $('#desc').textContent = ''; $('#desc').hidden = true; // infoen står i hero-feltet
