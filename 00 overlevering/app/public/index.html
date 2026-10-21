@@ -37,6 +37,10 @@ applyTheme();
 // I nettleseren (ikke Hjem-skjerm) er topplinjen festet glass som i appen. Safari 26 viser bare én flat farge bak klokka (sidens html-bakgrunn),
 // så glasset starter i den fargen øverst og går over i glass nedover. Bildet vises aldri bak klokka. Se rapporten «Safari 26 topplinje og statusfelt».
 document.documentElement.classList.toggle('inbrowser', !(matchMedia('(display-mode: standalone)').matches || navigator.standalone === true));
+// FORSØK «triks»: topplinjen er ikke festet, men flyttes like langt som man scroller (scroll-animasjon), så Safari kan vise innholdet bak klokka.
+// Slås på med ?topp=triks og av med ?topp=vanlig. Uten bryteren er topplinjen festet glass.
+try { if (/[?&]topp=triks/.test(location.search)) localStorage.setItem('topp', 'triks'); if (/[?&]topp=vanlig/.test(location.search)) localStorage.removeItem('topp');
+  if (localStorage.getItem('topp') === 'triks' && document.documentElement.classList.contains('inbrowser') && innerWidth <= 480 && window.CSS && CSS.supports('animation-timeline: scroll()')) document.documentElement.classList.add('triks'); } catch (e) {}
 // Fargen fra forrige besøk settes før første tegning, siden Safari kan lese sidens bakgrunnsfarge bare når siden lastes.
 try { var tt = JSON.parse(localStorage.getItem('topTint') || 'null'); if (tt && tt.rgb && document.documentElement.classList.contains('inbrowser') && innerWidth <= 480) { var dk = document.documentElement.dataset.theme === 'dark', ba = dk ? 0 : 255, al = dk ? .35 : .55; var tc = tt.rgb.map(function (v) { return Math.round(v * (1 - al) + ba * al); }).join(','); document.documentElement.style.backgroundColor = 'rgb(' + tc + ')'; document.documentElement.style.setProperty('--toptint', tc); document.documentElement.classList.add('tinted', 'attop'); } } catch (e) {}
 </script>
@@ -63,7 +67,13 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
    Klokkefargen er plakatens farge (--toptint) mens plakaten ligger under topplinjen (klassen attop), ellers sidens farge. */
 .inbrowser{--bartop:var(--bg)}
 .inbrowser.tinted.attop{--bartop:rgb(var(--toptint))}
-.inbrowser .chrome{background:linear-gradient(to bottom,var(--bartop) 0%,color-mix(in srgb,var(--bartop) 70%,transparent) 30%,color-mix(in srgb,var(--bartop) 25%,transparent) 70%,transparent 100%),var(--chrome)}}
+.inbrowser .chrome{background:linear-gradient(to bottom,var(--bartop) 0%,color-mix(in srgb,var(--bartop) 70%,transparent) 30%,color-mix(in srgb,var(--bartop) 25%,transparent) 70%,transparent 100%),var(--chrome)}
+/* FORSØK «triks»: topplinjen ligger på siden (absolute) og flyttes 1:1 med scrollingen, så Safari ikke ser den som festet og viser innholdet
+   uskarpt bak klokka. Fargen øverst blekner bort de første 48 px, siden klokkefeltet da viser innhold i stedet for flat farge. */
+.inbrowser.triks .chrome{position:absolute;background:var(--chrome);animation:chromefollow linear both;animation-timeline:scroll(root block);animation-range:0px 100000px}
+.inbrowser.triks .chrome::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,var(--bartop) 0%,color-mix(in srgb,var(--bartop) 70%,transparent) 30%,color-mix(in srgb,var(--bartop) 25%,transparent) 70%,transparent 100%);animation:barfade linear both;animation-timeline:scroll(root block);animation-range:0px 48px}
+@keyframes chromefollow{from{transform:translate(-50%,0)}to{transform:translate(-50%,100000px)}}
+@keyframes barfade{from{opacity:1}to{opacity:0}}}
 /* chrome */
 .chrome{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:5;background:var(--chrome);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);padding:calc(env(safe-area-inset-top) + 8px) 20px 12px;display:flex;justify-content:space-between;align-items:center;transition:background .3s}
 .brand{display:flex;align-items:center;gap:10px}
