@@ -34,8 +34,8 @@ function applyTheme() {
   if (window.tintTop) window.tintTop(); // i nettleseren: fargen fra plakaten i stedet for svart
 }
 applyTheme();
-// I nettleseren (ikke Hjem-skjerm) skal topplinjen ikke være festet: Safari i iOS 26 maler statuslinjen svart når et
-// gjennomsiktig element er festet øverst. Uten festet element viser Safari plakaten under klokka, som VG Live.
+// I nettleseren (ikke Hjem-skjerm) er topplinjen ikke festet. Safari 26 fyller statuslinjen med én flat farge: fra et festet element
+// øverst, ellers sidens html-bakgrunn. Bildet vises aldri der når siden står øverst. Se rapporten «Safari 26 topplinje og statusfelt».
 document.documentElement.classList.toggle('inbrowser', !(matchMedia('(display-mode: standalone)').matches || navigator.standalone === true));
 // Fargen fra forrige besøk settes før første tegning, siden Safari kan lese sidens bakgrunnsfarge bare når siden lastes.
 try { var tt = JSON.parse(localStorage.getItem('topTint') || 'null'); if (tt && tt.rgb && document.documentElement.classList.contains('inbrowser') && innerWidth <= 480) { var dk = document.documentElement.dataset.theme === 'dark', ba = dk ? 0 : 255, al = dk ? .35 : .55; var tc = tt.rgb.map(function (v) { return Math.round(v * (1 - al) + ba * al); }).join(','); document.documentElement.style.backgroundColor = 'rgb(' + tc + ')'; document.documentElement.style.setProperty('--toptint', tc); document.documentElement.classList.add('tinted'); } } catch (e) {}
@@ -46,11 +46,11 @@ try { var tt = JSON.parse(localStorage.getItem('topTint') || 'null'); if (tt && 
 <style>
 :root{--bg:#fff;--fg:#000;--muted:#6b6b6b;--line:#e6e6e6;--chip:#cfcfcf;--blue:#0000ff;--blue-soft:#0000ff;--btn-bg:#000;--btn-fg:#fff;--credit:#c4c4c4;--panel:#fff;--scrim:rgba(0,0,0,.3);--grad:255,255,255;--chrome:rgba(255,255,255,.55);--past:#b0b0b0;--outside:#d0d0d0;--field:#cfcfcf;--ph:#8a8a8a}
 [data-theme=dark]{--bg:#000;--fg:#fff;--muted:#8a8a8a;--line:#2a2a2a;--chip:#555;--blue-soft:#6b6bff;--btn-bg:#fff;--btn-fg:#000;--credit:#3a3a3a;--panel:#0d0d0d;--scrim:rgba(0,0,0,.6);--grad:0,0,0;--chrome:rgba(0,0,0,.35);--past:#555;--outside:#333;--field:#555;--ph:#7a7a7a}
-html{background:var(--bg);color-scheme:light}
+html{background:var(--bg);color-scheme:light;transition:background-color .3s} /* bare html har sidefarge: Safari 26 farger statuslinjen med body over html */
 :root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{background:var(--bg);color:var(--fg);font:16px/1.45 "Space Grotesk",system-ui,sans-serif;transition:background .3s,color .3s;overscroll-behavior-y:none}
+body{color:var(--fg);font:16px/1.45 "Space Grotesk",system-ui,sans-serif;transition:color .3s;overscroll-behavior-y:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 button:active{transform:scale(.97)}
@@ -138,9 +138,11 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 .cta b{display:block;font-family:"Archivo Black";font-weight:400;font-size:18px;line-height:1.1;margin-bottom:4px}
 .cta span{font-weight:500;font-size:14px;opacity:.85}
 /* panel */
-.scrim{position:fixed;inset:0;background:var(--scrim);z-index:10;opacity:0;pointer-events:none;transition:opacity .3s}
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:10;opacity:0;pointer-events:none;transition:opacity .3s,display .3s allow-discrete}
+.scrim:not(.open),.sscrim:not(.open),.panel:not(.open){display:none} /* lukket = borte for Safari, ellers kan statuslinjen beholde fargen */
+@starting-style{.scrim.open,.sscrim.open{opacity:0}.panel.open{transform:translateX(100%)}}
 .scrim.open{opacity:1;pointer-events:auto}
-.panel{position:fixed;top:0;right:0;bottom:0;width:min(300px,85vw);background:var(--panel);border-left:2px solid var(--blue);z-index:11;transform:translateX(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);overflow-y:auto;overscroll-behavior:contain;padding:calc(env(safe-area-inset-top) + 52px) 22px 24px;display:flex;flex-direction:column;gap:14px;touch-action:pan-y}
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(300px,85vw);background:var(--panel);border-left:2px solid var(--blue);z-index:11;transform:translateX(100%);transition:transform .32s cubic-bezier(.32,.72,0,1),display .32s allow-discrete;overflow-y:auto;overscroll-behavior:contain;padding:calc(env(safe-area-inset-top) + 52px) 22px 24px;display:flex;flex-direction:column;gap:14px;touch-action:pan-y}
 .panel.open{transform:none}
 .panel.drag{transition:none}
 .ph{display:flex;justify-content:space-between;align-items:center}
@@ -207,7 +209,7 @@ body.member .content{padding-bottom:120px}
 .pill .av{width:38px;height:38px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-family:"Archivo Black";font-size:16px;flex:none}
 .pill .pt{text-align:left;min-width:0}.pill .pt b{display:block;font-family:"Archivo Black";font-weight:400;font-size:12px;letter-spacing:.02em}.pill .pt small{display:block;font-size:12px;color:#c8c8c8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pill .arr{font-weight:700}
-.sscrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:12;opacity:0;pointer-events:none;transition:opacity .3s}
+.sscrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:12;opacity:0;pointer-events:none;transition:opacity .3s,display .3s allow-discrete}
 .sscrim.open{opacity:1;pointer-events:auto}
 .sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;max-height:92dvh;--sx:-50%;transform:translate(var(--sx),100%);background:var(--panel);border-radius:28px 28px 0 0;z-index:13;transition:transform .34s cubic-bezier(.32,.72,0,1);display:flex;flex-direction:column;touch-action:pan-y}
 .sheet.open{transform:translate(var(--sx),0)}
@@ -479,15 +481,17 @@ const ICON_PLAY = '<svg viewBox="0 0 11 12" aria-hidden="true"><path d="M0 0L11 
 const ICON_NOTE = '<svg class="mnote" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h9v5h-7v8.5a3.5 3.5 0 1 1-2-3.16z"/></svg>'; // arrangementet har musikk
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); // tekst fra Spotify/SoundCloud er tredjepart
 const FALLBACK_IMG = '/fallback.jpg';
-// Statuslinjen i nettleseren: iOS 26 Safari viser plakaten under klokka så lenge ingen topplinje er festet (se .inbrowser i CSS).
+// Statuslinjen i nettleseren: Safari 26 viser aldri plakaten under klokka når siden står øverst, bare én flat farge (sidens html-bakgrunn).
+// Derfor settes html til fargen fra toppen av plakaten, og plakaten starter i samme farge (.tinted, --toptint) så det ikke blir en kant.
 // Eldre iOS og Android farger statuslinjen etter theme-color, så den får fargen fra toppen av plakatbildet til plakaten er scrollet forbi.
 const STANDALONE = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-let topRGB = null, topSrc = '', heroUnder = true;
+const imgKey = s => String(s || '').split('?')[0]; // Notion gir bildet en ny signert adresse hver time
+let topRGB = (() => { try { return JSON.parse(localStorage.getItem('topTint')).rgb || null; } catch (e) { return null; } })(), topSrc = '', heroUnder = true; // forrige farge brukes til den nye er målt
 function tintTop() {
   if (STANDALONE) return;
   const ch = document.querySelector('.chrome'), meta = document.querySelector('meta[name=theme-color]'); if (!ch || !meta) return;
   const dark = document.documentElement.dataset.theme === 'dark';
-  const page = [document.documentElement, document.body]; // iOS 26 Safari: sidens bakgrunn vises over plakaten når man er helt øverst
+  const page = [document.documentElement]; // Safari 26 fyller statuslinjen med sidens bakgrunnsfarge (body over html, og body er gjennomsiktig)
   if (!topRGB || !heroUnder || !matchMedia('(max-width:480px)').matches || !document.getElementById('home').classList.contains('on')) { page.forEach(el => el.style.backgroundColor = ''); meta.content = dark ? '#000000' : '#ffffff'; if (!topRGB) document.documentElement.classList.remove('tinted'); return; }
   const base = dark ? 0 : 255, a = dark ? .35 : .55, c = topRGB.map(v => Math.round(v * (1 - a) + base * a)).join(',');
   page.forEach(el => el.style.backgroundColor = `rgb(${c})`); meta.content = `rgb(${c})`; // theme-color: eldre iOS og Android
@@ -495,9 +499,10 @@ function tintTop() {
 }
 window.tintTop = tintTop;
 function sampleTop(src) {
-  if (STANDALONE || !src) return; if (src === topSrc) return tintTop();
+  if (STANDALONE || !src) return; if (imgKey(src) === imgKey(topSrc)) return tintTop();
   topSrc = src; let cached = null; try { cached = JSON.parse(localStorage.getItem('topTint') || 'null'); } catch (e) {}
-  topRGB = cached && cached.src === src ? cached.rgb : null; tintTop(); if (topRGB) return; // samme bilde som sist: fargen er kjent
+  const hit = cached && imgKey(cached.src) === imgKey(src); if (hit) topRGB = cached.rgb; tintTop(); if (hit) return; // samme bilde som sist: fargen er kjent
+  const fail = () => { if (topSrc === src) { topRGB = null; tintTop(); } }; // fikk ikke lest bildet: vanlig svart/hvit topp
   const im = new Image(); im.crossOrigin = 'anonymous'; // egen kopi for å lese fargen; selve plakaten lastes som før
   im.onload = () => { try {
     const h = document.getElementById('hero'), W = 40, H = Math.max(8, Math.round(W * h.offsetHeight / Math.max(1, h.offsetWidth)));
@@ -506,8 +511,8 @@ function sampleTop(src) {
     const d = x.getImageData(0, 0, W, Math.max(2, Math.round(H * .12))).data; let r = 0, g = 0, b = 0, n = 0;
     for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
     if (topSrc === src) { topRGB = [r / n, g / n, b / n]; tintTop(); try { localStorage.setItem('topTint', JSON.stringify({ src, rgb: topRGB.map(Math.round) })); } catch (e) {} }
-  } catch (e) {} };
-  im.src = src;
+  } catch (e) { fail(); } };
+  im.onerror = fail; im.src = src;
 } // bilde av puben, brukes når «Bilde til APP» mangler i Notion
 const PC = () => matchMedia('(min-width:900px)').matches;
 matchMedia('(min-width:900px)').addEventListener('change', () => { renderPanel(); tintTop(); });
