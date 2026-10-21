@@ -38,7 +38,7 @@ applyTheme();
 // gjennomsiktig element er festet øverst. Uten festet element viser Safari plakaten under klokka, som VG Live.
 document.documentElement.classList.toggle('inbrowser', !(matchMedia('(display-mode: standalone)').matches || navigator.standalone === true));
 // Fargen fra forrige besøk settes før første tegning, siden Safari kan lese sidens bakgrunnsfarge bare når siden lastes.
-try { var tt = JSON.parse(localStorage.getItem('topTint') || 'null'); if (tt && tt.rgb && document.documentElement.classList.contains('inbrowser') && innerWidth <= 480) { var dk = document.documentElement.dataset.theme === 'dark', ba = dk ? 0 : 255, al = dk ? .35 : .55; document.documentElement.style.backgroundColor = 'rgb(' + tt.rgb.map(function (v) { return Math.round(v * (1 - al) + ba * al); }).join(',') + ')'; } } catch (e) {}
+try { var tt = JSON.parse(localStorage.getItem('topTint') || 'null'); if (tt && tt.rgb && document.documentElement.classList.contains('inbrowser') && innerWidth <= 480) { var dk = document.documentElement.dataset.theme === 'dark', ba = dk ? 0 : 255, al = dk ? .35 : .55; var tc = tt.rgb.map(function (v) { return Math.round(v * (1 - al) + ba * al); }).join(','); document.documentElement.style.backgroundColor = 'rgb(' + tc + ')'; document.documentElement.style.setProperty('--toptint', tc); document.documentElement.classList.add('tinted'); } } catch (e) {}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,7 +56,11 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webki
 button:active{transform:scale(.97)}
 h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 .wrap{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;background:var(--bg)} /* innholdet er alltid svart/hvitt, så sidebakgrunnen kan farge toppen */
-@media (max-width:899px){.inbrowser .chrome{position:absolute}} /* telefon i nettleseren: topplinjen scroller bort, plakaten går helt opp */
+@media (max-width:899px){.inbrowser .chrome{position:absolute} /* telefon i nettleseren: topplinjen scroller bort, plakaten går helt opp */
+/* Safari 26 viser alltid én flat farge bak statuslinjen når siden står øverst (sidens bakgrunnsfarge), aldri bildet.
+   Derfor: ingen uskarp topplinje i nettleseren, og plakaten starter i nøyaktig samme farge og glir over i bildet, så det ikke blir en kant. */
+.inbrowser.tinted .chrome{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+.inbrowser.tinted .hero::before{content:"";position:absolute;left:0;right:0;top:0;height:220px;z-index:1;pointer-events:none;background:linear-gradient(to bottom,rgb(var(--toptint)) 0,rgb(var(--toptint)) 18px,rgba(var(--toptint),.9) 50px,rgba(var(--toptint),.68) 92px,rgba(var(--toptint),.4) 140px,rgba(var(--toptint),.15) 185px,rgba(var(--toptint),0) 220px)}}
 /* chrome */
 .chrome{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:5;background:var(--chrome);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);padding:calc(env(safe-area-inset-top) + 8px) 20px 12px;display:flex;justify-content:space-between;align-items:center;transition:background .3s}
 .brand{display:flex;align-items:center;gap:10px}
@@ -484,9 +488,10 @@ function tintTop() {
   const ch = document.querySelector('.chrome'), meta = document.querySelector('meta[name=theme-color]'); if (!ch || !meta) return;
   const dark = document.documentElement.dataset.theme === 'dark';
   const page = [document.documentElement, document.body]; // iOS 26 Safari: sidens bakgrunn vises over plakaten når man er helt øverst
-  if (!topRGB || !heroUnder || !matchMedia('(max-width:480px)').matches || !document.getElementById('home').classList.contains('on')) { page.forEach(el => el.style.backgroundColor = ''); meta.content = dark ? '#000000' : '#ffffff'; return; }
+  if (!topRGB || !heroUnder || !matchMedia('(max-width:480px)').matches || !document.getElementById('home').classList.contains('on')) { page.forEach(el => el.style.backgroundColor = ''); meta.content = dark ? '#000000' : '#ffffff'; if (!topRGB) document.documentElement.classList.remove('tinted'); return; }
   const base = dark ? 0 : 255, a = dark ? .35 : .55, c = topRGB.map(v => Math.round(v * (1 - a) + base * a)).join(',');
   page.forEach(el => el.style.backgroundColor = `rgb(${c})`); meta.content = `rgb(${c})`; // theme-color: eldre iOS og Android
+  document.documentElement.style.setProperty('--toptint', c); document.documentElement.classList.add('tinted'); // samme farge øverst på plakaten, så den glir sømløst fra statuslinjen
 }
 window.tintTop = tintTop;
 function sampleTop(src) {
