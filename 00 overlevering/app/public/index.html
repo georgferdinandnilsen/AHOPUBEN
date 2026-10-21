@@ -58,6 +58,8 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
    Derfor er klokkefeltet alltid sidens farge (svart, hvit i lyst tema), og den festede glass-topplinjen starter øverst i nøyaktig samme farge
    og går over i glass nedover. Da blir det ingen kant mellom klokka og glasset, verken øverst eller når man scroller. Skarp kant nederst som i appen. */
 .inbrowser{--bartop:var(--bg)}
+/* Mørkt tema: like tett glass som det lyse, så topplinjen leses som mørk og ikke grå over plakaten (Georg 21.10.2026). Lyst tema er uendret. */
+.inbrowser[data-theme=dark] .chrome{background:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.92) 35%,rgba(0,0,0,.78) 100%)}
 .inbrowser .chrome{background:linear-gradient(to bottom,var(--bartop) 0%,color-mix(in srgb,var(--bartop) 70%,transparent) 30%,color-mix(in srgb,var(--bartop) 25%,transparent) 70%,transparent 100%),var(--chrome)}}
 /* chrome */
 .chrome{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:5;background:var(--chrome);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);padding:calc(env(safe-area-inset-top) + 8px) 20px 12px;display:flex;justify-content:space-between;align-items:center;transition:background .3s}
