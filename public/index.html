@@ -37,10 +37,6 @@ applyTheme();
 // I nettleseren (ikke Hjem-skjerm) er topplinjen festet glass som i appen. Safari 26 viser bare én flat farge bak klokka (sidens html-bakgrunn),
 // så glasset starter i den fargen øverst og går over i glass nedover. Bildet vises aldri bak klokka. Se rapporten «Safari 26 topplinje og statusfelt».
 document.documentElement.classList.toggle('inbrowser', !(matchMedia('(display-mode: standalone)').matches || navigator.standalone === true));
-// FORSØK «triks»: topplinjen er ikke festet, men flyttes like langt som man scroller (scroll-animasjon), så Safari kan vise innholdet bak klokka.
-// Slås på med ?topp=triks og av med ?topp=vanlig. Uten bryteren er topplinjen festet glass.
-try { if (/[?&]topp=triks/.test(location.search)) localStorage.setItem('topp', 'triks'); if (/[?&]topp=vanlig/.test(location.search)) localStorage.removeItem('topp');
-  if (localStorage.getItem('topp') === 'triks' && document.documentElement.classList.contains('inbrowser') && innerWidth <= 480 && window.CSS && CSS.supports('animation-timeline: scroll()')) document.documentElement.classList.add('triks'); } catch (e) {}
 // Fargen fra forrige besøk settes før første tegning, siden Safari kan lese sidens bakgrunnsfarge bare når siden lastes.
 try { var tt = JSON.parse(localStorage.getItem('topTint') || 'null'); if (tt && tt.rgb && document.documentElement.classList.contains('inbrowser') && innerWidth <= 480) { var dk = document.documentElement.dataset.theme === 'dark', ba = dk ? 0 : 255, al = dk ? .35 : .55; var tc = tt.rgb.map(function (v) { return Math.round(v * (1 - al) + ba * al); }).join(','); document.documentElement.style.backgroundColor = 'rgb(' + tc + ')'; document.documentElement.style.setProperty('--toptint', tc); document.documentElement.classList.add('tinted', 'attop'); } } catch (e) {}
 </script>
@@ -50,7 +46,7 @@ try { var tt = JSON.parse(localStorage.getItem('topTint') || 'null'); if (tt && 
 <style>
 :root{--bg:#fff;--fg:#000;--muted:#6b6b6b;--line:#e6e6e6;--chip:#cfcfcf;--blue:#0000ff;--blue-soft:#0000ff;--btn-bg:#000;--btn-fg:#fff;--credit:#c4c4c4;--panel:#fff;--scrim:rgba(0,0,0,.3);--grad:255,255,255;--chrome:rgba(255,255,255,.55);--past:#b0b0b0;--outside:#d0d0d0;--field:#cfcfcf;--ph:#8a8a8a}
 [data-theme=dark]{--bg:#000;--fg:#fff;--muted:#8a8a8a;--line:#2a2a2a;--chip:#555;--blue-soft:#6b6bff;--btn-bg:#fff;--btn-fg:#000;--credit:#3a3a3a;--panel:#0d0d0d;--scrim:rgba(0,0,0,.6);--grad:0,0,0;--chrome:rgba(0,0,0,.35);--past:#555;--outside:#333;--field:#555;--ph:#7a7a7a}
-html{background:var(--bg);color-scheme:light;transition:background-color .3s} /* bare html har sidefarge: Safari 26 farger statuslinjen med body over html */
+html{background:var(--bg);color-scheme:light} /* bare html har sidefarge: Safari 26 farger statuslinjen med body over html. Ingen overgang, fargen følger scrollingen */
 :root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
@@ -67,13 +63,7 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
    Klokkefargen er plakatens farge (--toptint) mens plakaten ligger under topplinjen (klassen attop), ellers sidens farge. */
 .inbrowser{--bartop:var(--bg)}
 .inbrowser.tinted.attop{--bartop:rgb(var(--toptint))}
-.inbrowser .chrome{background:linear-gradient(to bottom,var(--bartop) 0%,color-mix(in srgb,var(--bartop) 70%,transparent) 30%,color-mix(in srgb,var(--bartop) 25%,transparent) 70%,transparent 100%),var(--chrome)}
-/* FORSØK «triks»: topplinjen ligger på siden (absolute) og flyttes 1:1 med scrollingen, så Safari ikke ser den som festet og viser innholdet
-   uskarpt bak klokka. Fargen øverst blekner bort de første 48 px, siden klokkefeltet da viser innhold i stedet for flat farge. */
-.inbrowser.triks .chrome{position:absolute;background:var(--chrome);animation:chromefollow linear both;animation-timeline:scroll(root block);animation-range:0px 100000px}
-.inbrowser.triks .chrome::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,var(--bartop) 0%,color-mix(in srgb,var(--bartop) 70%,transparent) 30%,color-mix(in srgb,var(--bartop) 25%,transparent) 70%,transparent 100%);animation:barfade linear both;animation-timeline:scroll(root block);animation-range:0px 48px}
-@keyframes chromefollow{from{transform:translate(-50%,0)}to{transform:translate(-50%,100000px)}}
-@keyframes barfade{from{opacity:1}to{opacity:0}}}
+.inbrowser .chrome{background:linear-gradient(to bottom,var(--bartop) 0%,color-mix(in srgb,var(--bartop) 70%,transparent) 30%,color-mix(in srgb,var(--bartop) 25%,transparent) 70%,transparent 100%),var(--chrome)}}
 /* chrome */
 .chrome{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:5;background:var(--chrome);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);padding:calc(env(safe-area-inset-top) + 8px) 20px 12px;display:flex;justify-content:space-between;align-items:center;transition:background .3s}
 .brand{display:flex;align-items:center;gap:10px}
@@ -506,11 +496,17 @@ function tintTop() {
   const dark = document.documentElement.dataset.theme === 'dark';
   const page = [document.documentElement]; // Safari 26 fyller statuslinjen med sidens bakgrunnsfarge (body over html, og body er gjennomsiktig)
   if (!topRGB || !heroUnder || !matchMedia('(max-width:480px)').matches || !document.getElementById('home').classList.contains('on')) { page.forEach(el => el.style.backgroundColor = ''); meta.content = dark ? '#000000' : '#ffffff'; document.documentElement.classList.remove('attop'); if (!topRGB) document.documentElement.classList.remove('tinted'); return; }
-  const base = dark ? 0 : 255, a = dark ? .35 : .55, c = topRGB.map(v => Math.round(v * (1 - a) + base * a)).join(',');
+  const base = dark ? 0 : 255, a = dark ? .35 : .55;
+  // Hvor langt plakaten er scrollet ut under topplinjen. Plakaten har et mørkt slør som øker nedover (.hero::after: 5 % øverst, 12 % midt, 97 % nederst),
+  // så fargen bak klokka og øverst i glasset mørkner i samme takt og er helt sidens farge når plakaten er borte. Da blir det ingen brå overgang.
+  const hr = document.getElementById('hero').getBoundingClientRect(), f = Math.min(1, Math.max(0, (-hr.top + ch.offsetHeight / 2) / Math.max(1, hr.height)));
+  const veil = f < .5 ? .05 + .14 * f : .12 + 1.7 * (f - .5), w = hr.bottom <= ch.offsetHeight ? 1 : Math.min(1, Math.max(0, (veil - .05) / .92));
+  const c = topRGB.map(v => Math.round((v * (1 - a) + base * a) * (1 - w) + base * w)).join(',');
   page.forEach(el => el.style.backgroundColor = `rgb(${c})`); meta.content = `rgb(${c})`; // theme-color: eldre iOS og Android
   document.documentElement.style.setProperty('--toptint', c); document.documentElement.classList.add('tinted', 'attop'); // samme farge øverst på plakaten, så den glir sømløst fra statuslinjen
 }
 window.tintTop = tintTop;
+addEventListener('scroll', () => { if (!tintTop.raf) tintTop.raf = requestAnimationFrame(() => { tintTop.raf = 0; tintTop(); }); }, { passive: true }); // fargen følger scrollingen
 function sampleTop(src) {
   if (STANDALONE || !src) return; if (imgKey(src) === imgKey(topSrc)) return tintTop();
   topSrc = src; let cached = null; try { cached = JSON.parse(localStorage.getItem('topTint') || 'null'); } catch (e) {}
