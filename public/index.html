@@ -289,6 +289,28 @@ body.member .content{padding-bottom:120px}
 .martist{font-weight:500;font-size:14px;color:var(--muted);text-align:center;margin-top:-6px}
 .membed{border-radius:12px;overflow:hidden;background:var(--line)}
 .membed iframe{display:block;width:100%;border:0}
+/* Arrangementsarket (forslag A «Bunnark», Georg 27.10.2026): trykk på kortet for valgt dag. Samme ark som musikken, med plakaten øverst. */
+.sheet.event>.grip{display:none}
+.sheet.event .sbody{padding:0;gap:0}
+.poster{position:relative;flex:none;aspect-ratio:2/1;overflow:hidden;background:radial-gradient(110% 130% at 0% 120%,rgba(0,0,255,.5) 0%,rgba(0,0,255,0) 58%),linear-gradient(160deg,#1d1d1d 0%,#050505 72%)}
+.poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.poster::after{content:"";position:absolute;inset:0 0 auto;height:72px;background:linear-gradient(rgba(0,0,0,.42),rgba(0,0,0,0));pointer-events:none}
+.poster .grip{position:absolute;top:0;left:0;right:0;z-index:1}
+.poster .grip i{background:rgba(255,255,255,.8)}
+.ex{position:absolute;top:10px;right:10px;z-index:1;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center}
+.etx{padding:18px 20px 0;display:flex;flex-direction:column;gap:8px}
+.etx .d{font-weight:700;font-size:12px;letter-spacing:.06em;color:var(--blue-soft);text-transform:uppercase}
+.etx h2{font-size:34px;line-height:.92;letter-spacing:-.01em;text-transform:uppercase;overflow-wrap:anywhere}
+.etx .ty{font-weight:500;font-size:14px;color:var(--muted);margin-top:-2px}
+.etx .info{font-size:15px;line-height:1.45;opacity:.85;white-space:pre-line;margin-top:6px}
+.emusic{padding:20px 20px 0;display:flex;flex-direction:column;gap:10px}
+.emh{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.emh .lbl2{font-size:11px}
+.emh .linkbtn{font-size:12px}
+.efoot{position:sticky;bottom:0;display:flex;gap:10px;padding:18px 20px calc(env(safe-area-inset-bottom) + 16px);background:var(--panel)}
+.sheet.event .efoot .btn.primary{flex:1}
+.selcard[data-open]{cursor:pointer}
+.selcard .go{margin-left:auto;align-self:center;color:var(--blue-soft);font-size:24px;line-height:1;flex:none}
 .cbrow{display:flex;gap:12px;align-items:flex-start;cursor:pointer;text-align:left}
 .cbrow input{width:20px;height:20px;accent-color:var(--blue);margin-top:1px;flex:none}
 .cbrow b{display:block;font-weight:700;font-size:14px}
@@ -560,7 +582,7 @@ function renderCal() {
     if (i >= 34 && (i + 1) % 7 === 0 && new Date(y, m, 1 - start + i + 1).getMonth() !== m) break;
   }
   const e = S.events.find(x => x.date === S.sel); const sd = S.sel ? parse(S.sel) : null;
-  const card = !S.sel ? '' : e && (!e.plain || S.sel >= tod) ? `<div class="selcard"><img src="${e.image || FALLBACK_IMG}" alt=""><div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${label(e)}${e.music ? ICON_NOTE : ''}</h3><p>${e.plain ? t('noProgram') : sub(e)}</p></div></div>`
+  const card = !S.sel ? '' : e && (!e.plain || S.sel >= tod) ? `<div class="selcard"${e.plain ? '' : ` data-open="${esc(e.id)}" role="button" tabindex="0" aria-label="${esc(label(e))}"`}><img src="${e.image || FALLBACK_IMG}" alt=""><div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${label(e)}${e.music ? ICON_NOTE : ''}</h3><p>${e.plain ? t('noProgram') : sub(e)}</p></div>${e.plain ? '' : '<span class="go" aria-hidden="true">›</span>'}</div>`
     : `<div class="selcard empty">${t('closed')}</div>`;
   $('#cal').innerHTML = `<div class="cal-head"><h2>${fmt(first, { month:'long', year:'numeric' })}</h2><div class="cal-nav"><button data-nav="-1" aria-label="Forrige">←</button><button data-nav="1" aria-label="Neste" style="color:var(--fg)">→</button></div></div><div class="grid">${t('wd').map((w, i) => `<div class="wd${i === 3 ? ' thu' : ''}">${w}</div>`).join('')}${cells}</div>${card}`;
 }
@@ -640,9 +662,11 @@ $('#chips').onclick = e => { const b = e.target.closest('button'); if (!b) retur
 $('#test').onclick = testPush;
 document.querySelectorAll('[data-th]').forEach(b => b.onclick = () => { S.theme = b.dataset.th; ls('theme', S.theme); applyTheme(); renderPanel(); });
 document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { S.lang = b.dataset.lang; ls('lang', S.lang); renderAll(); savePrefs(); });
-$('#cal').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+$('#cal').addEventListener('click', e => { const sc = e.target.closest('.selcard[data-open]'); if (sc) { const ev = items().find(x => x.id === sc.dataset.open); if (ev) openEvent(ev); return; }
+  const b = e.target.closest('button'); if (!b) return;
   if (b.dataset.nav) { const m = S.ym.m + Number(b.dataset.nav); S.ym = { y: S.ym.y + Math.floor(m / 12), m: (m + 12) % 12 }; renderCal(); }
   else if (b.dataset.d) { S.sel = b.dataset.d; renderCal(); } });
+$('#cal').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.selcard[data-open]')) { e.preventDefault(); e.target.click(); } });
 let sx = null; $('#cal').addEventListener('pointerdown', e => sx = e.clientX); $('#cal').addEventListener('pointerup', e => { if (sx !== null && Math.abs(e.clientX - sx) > 60) $('#cal').querySelector(`[data-nav="${e.clientX < sx ? 1 : -1}"]`).click(); sx = null; });
 function selectDate(k) { const d = parse(k); S.sel = k; S.ym = { y: d.getFullYear(), m: d.getMonth() }; renderCal(); $('#cal').scrollIntoView({ behavior:'smooth', block:'start' }); }
 $('#list').addEventListener('click', e => { const b = e.target.closest('.sel'); if (b) selectDate(b.dataset.d); });
@@ -652,8 +676,22 @@ $('#cta').onclick = () => { location.hash = 'forslag'; };
 const hearLabel = e => { const tg = [e.type, ...(e.tags || [])].join(' '); return /\bdj\b/i.test(tg) ? t('hearDj') : /\bband/i.test(tg) ? t('hearBand') : t('hearArtist'); }; // DJ, Band, ellers (også Artist) artisten
 const hearBtn = e => e.music ? `<button class="hear" id="hear"><i>${ICON_PLAY}</i>${hearLabel(e)}</button>` : '';
 const msheet = $('#msheet'), mscrim = $('#mscrim');
+// Arrangementsarket: plakat, dato, tittel, type, info, avspiller (Spotify/SoundCloud sin egen, man trykker play selv) og knappene.
+function openEvent(e) {
+  const sd = parse(e.date), m = e.music, prov = m?.provider === 'spotify' ? 'Spotify' : m?.provider === 'soundcloud' ? 'SoundCloud' : '';
+  const info = e.plain ? '' : desc(e), h = Number(m?.height) || 152;
+  const player = !m ? '' : `<div class="emusic"><div class="emh"><span class="lbl2">${hearLabel(e)}</span><a class="linkbtn" href="${esc(m.url)}" target="_blank" rel="noopener">${prov ? t('openIn') + ' ' + prov : t('openLink')} →</a></div>`
+    + (m.embed ? `<div class="membed" style="height:${h}px"><iframe src="${esc(m.embed.replace('auto_play=true', 'auto_play=false'))}" height="${h}" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" title="${esc(prov)}"></iframe></div>` : '') + '</div>';
+  $('#mbody').innerHTML = `<div class="poster"><img src="${esc(e.image || FALLBACK_IMG)}" alt=""><div class="grip"><i></i></div><button class="ex" data-mclose aria-label="Lukk">×</button></div>`
+    + `<div class="etx"><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h2>${esc(label(e))}</h2><div class="ty">${e.plain ? t('noProgram') : esc(typ(e))}</div>${info ? `<p class="info">${esc(info)}</p>` : ''}</div>`
+    + player
+    + `<div class="efoot"><a class="btn primary" href="${API}/api/ics/${encodeURIComponent(e.id)}">${t('addCal')}</a>${navigator.share ? `<button class="btn ghost" data-eshare>${t('share')}</button>` : ''}</div>`;
+  $('#mbody').scrollTop = 0; msheet.classList.add('event', 'open'); mscrim.classList.add('open');
+  if (!history.state?.esheet) history.pushState({ esheet: 1 }, ''); // tilbake-gesten (iOS og Android) lukker arket i stedet for å forlate siden
+  const sh = $('#mbody [data-eshare]'); if (sh) sh.onclick = () => navigator.share({ title: label(e), text: `${label(e)}, ${fmt(sd, { weekday:'long', day:'numeric', month:'long' })} ${t('open')}`, url: location.origin }).catch(() => {});
+}
 function openMusic(e) {
-  const m = e.music; if (!m) return;
+  const m = e.music; if (!m) return; msheet.classList.remove('event');
   const prov = m.provider === 'spotify' ? 'Spotify' : m.provider === 'soundcloud' ? 'SoundCloud' : '';
   $('#mbody').innerHTML = `<div class="shead"><span class="lbl2" style="flex:1">${t('musicFor')} ${fmt(e.date, { weekday:'long' }).toUpperCase()}</span><button class="x" data-mclose aria-label="Lukk">×</button></div>`
     + `<img class="mcover" src="${esc(m.thumb || e.image || FALLBACK_IMG)}" alt=""><div class="mtitle">${esc(m.title || label(e))}</div><div class="martist">${esc(m.artist || (m.title ? label(e) : ''))}</div>`
@@ -671,8 +709,9 @@ let spotifyCtl = null, spotifyP = null;
 function spotifyApi() { // Spotifys offisielle iFrame API: lar oss starte låta med en gang. Lastes først når noen trykker «Hør».
   return spotifyP ||= new Promise((ok, fail) => { window.onSpotifyIframeApiReady = ok; const s = document.createElement('script'); s.src = 'https://open.spotify.com/embed/iframe-api/v1'; s.async = true; s.onerror = () => { spotifyP = null; fail(); }; document.head.appendChild(s); });
 }
-function closeMusic() { try { spotifyCtl?.destroy(); } catch (e) {} spotifyCtl = null; msheet.classList.remove('open'); mscrim.classList.remove('open'); setTimeout(() => { if (!msheet.classList.contains('open')) $('#mbody').innerHTML = ''; }, 350); } // avspilleren fjernes, så musikken stopper
-mscrim.onclick = closeMusic;
+addEventListener('popstate', () => { if (msheet.classList.contains('open')) closeMusic(true); });
+function closeMusic(fromBack) { if (!fromBack && history.state?.esheet) { history.back(); return; } try { spotifyCtl?.destroy(); } catch (e) {} spotifyCtl = null; msheet.classList.remove('open'); mscrim.classList.remove('open'); setTimeout(() => { if (!msheet.classList.contains('open')) { $('#mbody').innerHTML = ''; msheet.classList.remove('event'); } }, 350); } // avspilleren fjernes, så musikken stopper
+mscrim.onclick = () => closeMusic();
 $('#mbody').addEventListener('click', ev => { if (ev.target.closest('[data-mclose]')) closeMusic(); });
 let mdrag = null; // dra ned for å lukke, som Mine vakter-arket
 msheet.addEventListener('pointerdown', ev => { if (PC() || ev.target.closest('button,a,iframe') || $('#mbody').scrollTop > 0) return; mdrag = { y: ev.clientY, t: performance.now(), dy: 0, vy: 0 }; msheet.setPointerCapture(ev.pointerId); });
