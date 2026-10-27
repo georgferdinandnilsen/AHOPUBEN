@@ -111,7 +111,7 @@ async function cached(env, key, fn, ctx) {
   if (c && Date.now() - c.t < 10 * 60e3) return c.v;
   const put = v => env.KV.put(key, JSON.stringify({ t: Date.now(), v }), { expirationTtl: 86400 }).then(() => v);
   if (c && ctx) { ctx.waitUntil(fn().then(put).catch(() => {})); return c.v; }
-  return put(await fn());
+  try { return await put(await fn()); } catch (e) { if (c) return c.v; throw e; } // Notion svarer ikke akkurat nå: bruk forrige lagrede versjon
 }
 async function queryAll(env, notion, ds, body) { let out = [], cursor; do { const r = await notion(env, `/data_sources/${ds}/query`, { page_size: 100, ...body, ...(cursor ? { start_cursor: cursor } : {}) }); out = out.concat(r.results); cursor = r.has_more ? r.next_cursor : null; } while (cursor); return out; }
 async function children(env, notion, id) { let out = [], cursor; do { const r = await notion(env, `/blocks/${id}/children?page_size=100${cursor ? '&start_cursor=' + cursor : ''}`); out = out.concat(r.results); cursor = r.has_more ? r.next_cursor : null; } while (cursor); return out; }
@@ -125,6 +125,16 @@ export async function renderPage(env, notion, id, depth = 0) {
   }
   return { html: pageHtml(items), links };
 }
+// Vakter fra VAKTPLAN fra i går og fremover (samme spørring og cache for medlemsdelen og for kveldene med vakt under).
+const loadShifts = (env, notion, ctx, today) => cached(env, 'cache:shifts', async () => (await queryAll(env, notion, env.NOTION_SHIFTS_DS, { filter: { property: 'Dato', date: { on_or_after: addDays(today, -1) } }, sorts: [{ property: 'Dato', direction: 'ascending' }] })).map(shiftFrom), ctx);
+// Kvelder med vakt: datoer der noen står på åpnevakt, stengevakt eller som ansvarlig. Bare datoer, aldri navn, så de kan vises offentlig.
+// Uten arrangement blir en slik kveld «Normal pub» i appen. Uten vakt og uten arrangement vises ingenting (Georg 27.10.2026).
+export const hasCrew = s => !!(s && s.date && (s.open?.length || s.close?.length || s.responsible));
+export const crewDates = shifts => [...new Set((shifts || []).filter(hasCrew).map(s => s.date))].sort();
+export async function shiftNights(env, notion, ctx, today) {
+  if (!env.NOTION_TOKEN) return crewDates(SAMPLE(today).shifts);
+  return crewDates(await loadShifts(env, notion, ctx, today));
+}
 export async function loadAll(env, notion, ctx, today) {
   if (!env.NOTION_TOKEN) return SAMPLE(today);
   const [members, board, shifts, manuals] = await Promise.all([
@@ -132,7 +142,7 @@ export async function loadAll(env, notion, ctx, today) {
     cached(env, 'cache:board', async () => { const rows = (await queryAll(env, notion, env.NOTION_BOARD_DS, {})).map(boardFrom);
       for (const b of rows) if (b.userId && !b.name) { try { b.name = (await notion(env, `/users/${b.userId}`)).name || ''; } catch (e) { break; } } // krever «lese brukerinformasjon» på integrasjonen, ellers brukes rollen som navn
       return rows; }, ctx),
-    cached(env, 'cache:shifts', async () => (await queryAll(env, notion, env.NOTION_SHIFTS_DS, { filter: { property: 'Dato', date: { on_or_after: addDays(today, -1) } }, sorts: [{ property: 'Dato', direction: 'ascending' }] })).map(shiftFrom), ctx),
+    loadShifts(env, notion, ctx, today),
     cached(env, 'cache:manuals', async () => manualsFrom(await flat(env, notion, env.NOTION_INFO_PAGE)), ctx),
   ]);
   return { members, board, shifts, manuals };

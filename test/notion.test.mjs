@@ -13,6 +13,7 @@ assert.equal(fromNotion(withMusic).musicUrl, 'https://open.spotify.com/track/abc
 const musicText = page(['DJ']); musicText.properties['Artist link APP'] = { type: 'rich_text', rich_text: [{ plain_text: 'hør her', href: 'https://soundcloud.com/x/y' }] };
 assert.equal(fromNotion(musicText).musicUrl, 'https://soundcloud.com/x/y', 'musikklenke som tekst med lenke');
 assert.equal(fromNotion(page(['Rolig Pub'])).plain, true, 'Rolig Pub = vanlig pub');
+assert.equal(fromNotion(page(['Normal Pub'])).plain, true, 'Normal Pub = vanlig pub');
 assert.equal(fromNotion(page(['Forslag???'])).type, '', 'forslag er ikke en type');
 assert.equal(fromNotion(page(['Forslag???'])).date, '2026-10-29', 'forslag med dato vises, som i Kommende');
 assert.equal(fromNotion(page([], null)).date, '', 'uten dato');

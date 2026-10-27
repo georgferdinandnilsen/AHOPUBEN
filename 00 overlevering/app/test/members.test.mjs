@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { normPhone, splitPhone, countryCodes, memberFrom, isActive, boardFrom, shiftFrom, myShifts, recipients, shiftAlerts, wantsMsg, manualsFrom, blockHtml, pageHtml, shiftsIcs, SAMPLE } from '../src/members.js';
+import { normPhone, splitPhone, countryCodes, memberFrom, isActive, boardFrom, shiftFrom, myShifts, recipients, shiftAlerts, wantsMsg, hasCrew, crewDates, manualsFrom, blockHtml, pageHtml, shiftsIcs, SAMPLE } from '../src/members.js';
 const t = s => [{ plain_text: s }];
 assert.equal(normPhone('+47 900 00 000'), '90000000'); assert.equal(normPhone('004790000000'), '90000000'); assert.equal(normPhone('90000000'), '90000000'); assert.equal(normPhone('+46 70 123 45 67'), '46701234567'); assert.equal(normPhone('+46 (0)70-123 45 67'), '46701234567', 'innledende null etter landskode'); assert.equal(normPhone('0046 70 123 45 67'), '46701234567'); assert.equal(normPhone('+47 90 00 00 00'), '90000000'); assert.equal(normPhone('900 00 000'), '90000000'); assert.equal(normPhone('+1 (212) 555-0100'), '12125550100'); assert.equal(normPhone('+358 40 123 4567'), '358401234567');
 assert.deepEqual(splitPhone('+45 12 34 56 78'), { cc: '45', national: '12345678' }); assert.deepEqual(splitPhone('90000000'), { cc: '47', national: '90000000' });
@@ -41,3 +41,9 @@ console.log('ok: medlemsdelen');
   assert.equal(wantsMsg({ memberId: '', boardUserId: 'u-gammel' }, rec, boardIds), false, 'tidligere styremedlem');
   assert.equal(wantsMsg({ memberId: '', boardUserId: '' }, rec, boardIds), false, 'ikke innlogget'); }
 console.log('wantsMsg ok');
+
+// Kvelder med vakt: bare rader der noen står på vakt teller, og bare datoene kommer ut (offentlig, uten navn).
+{ const rows = [{ date: '2026-11-05', open: ['m1'], close: [] }, { date: '2026-11-06', open: [], close: [], responsible: null }, { date: '2026-11-07', open: [], close: [], responsible: { userId: 'u1' } }, { date: '2026-11-05', open: [], close: ['m2'] }, { date: '', open: ['m3'] }];
+  assert.equal(hasCrew(rows[1]), false, 'tom rad er ingen vakt');
+  assert.deepEqual(crewDates(rows), ['2026-11-05', '2026-11-07']); }
+console.log('crewDates ok');

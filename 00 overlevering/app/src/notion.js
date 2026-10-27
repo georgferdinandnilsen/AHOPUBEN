@@ -22,7 +22,7 @@ export function fromNotion(p) {
     title: rt(P.find(([, v]) => v.type === 'title')?.[1].title).trim(),
     type: tags.find(t => !/^forslag/i.test(t)) || '',
     tags, // alle typene, så appen kan velge «Hør DJ-en», «Hør bandet» eller «Hør artisten»
-    plain: tags.some(t => /^rolig/i.test(t)), // «Rolig Pub»-rader er vanlig pub, ikke et program
+    plain: tags.some(t => /^(rolig|normal)/i.test(t)), // «Rolig Pub»/«Normal Pub»-rader er vanlig pub, ikke et program
     image: file?.file?.url || file?.external?.url || '',
     desc: rt(info?.rich_text).trim(),
     pub: (pubProp && (pubProp.type === 'number' ? pubProp.number : pubProp.formula.number)) ?? null,

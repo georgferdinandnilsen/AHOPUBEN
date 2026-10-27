@@ -25,7 +25,8 @@ npm run dev
    Åpne databasen «Arrangementer» i Notion → `…` → Connections → legg til integrasjonen. Gjør det samme med forslag-databasen.
    Database-id er de 32 tegnene i URL-en: `306fc4bc274d803fbcaac5b17542df12`. Databasen har to datakilder, og appen velger dem selv:
    - **Arrangementer** (datakilden med datofeltet «Når»). Et arrangement vises i appen hvis det har en dato i «Når» fra i dag og utover, som visningen «Kommende».
-     - **Type:** feltet «Type arrangement» (Aktivitet, DJ og så videre). Typen «Rolig Pub» regnes som vanlig pub uten program.
+     - **Type:** feltet «Type arrangement» (Aktivitet, DJ og så videre). Typen «Rolig Pub» eller «Normal Pub» regnes som vanlig pub uten program, og vises bare når noen står på vakt den dagen.
+     - **«Normal pub»:** en dag med vakt i VAKTPLAN (noen på åpnevakt, stengevakt eller som ansvarlig), men uten arrangement, vises som «Normal pub» på begge språk. En dag uten vakt og uten arrangement vises ikke i det hele tatt. Arrangementer vises alltid, også før vakten er satt opp. Bare datoene fra VAKTPLAN brukes offentlig, aldri navn (`shiftNights` i src/members.js, `withNights` i src/index.js).
      - **Bilde:** feltet «Bilde til APP». Uten bilde brukes et fast bilde av puben (`public/fallback.jpg`).
      - **Musikk:** feltet «Artist link APP». En Spotify- eller SoundCloud-lenke gir en hvit, minimalistisk knapp på plakaten: «Hør DJ-en» (type DJ), «Hør bandet» (Band) eller «Hør artisten» (alt annet). Knappen åpner et ark (på PC en dialog) med cover, tittel og den offisielle spilleren. På iPhone må man trykke play i spilleren, fordi Safari ikke lar en egen knapp starte lyd inne i den; på PC prøver den å starte selv. Tittel, artist og cover hentes fra lenkens oEmbed og hurtigbufres i en uke (KV `oembed:`). Andre lenker åpnes fra arket i ny fane. Spilleren lastes først når noen trykker på knappen, og fjernes når arket lukkes.
      - **Info:** feltet «Info til APP». Er feltene tomme, leses bildet og teksten fra selve siden i stedet.
@@ -90,7 +91,7 @@ Push på iPhone virker bare fra Hjem-skjerm (iOS 16.4 eller nyere). «Send testv
 
 ## Hvordan varslene sendes
 
-Cron kjører hver hele time. Worker-en regner ut Oslo-tid, går gjennom alle abonnenter og sender til de som har valgt akkurat denne timen og dagen relativt til et arrangement (samme dag kl 16 eller dagen før kl 12; starter arrangementet før kl 19, kommer samme-dag-varselet tre timer før start). Torsdager uten arrangement teller som «Rolig pub» hvis abonnenten har det på.
+Cron kjører hver hele time. Worker-en regner ut Oslo-tid, går gjennom alle abonnenter og sender til de som har valgt akkurat denne timen og dagen relativt til et arrangement (samme dag kl 16 eller dagen før kl 12; starter arrangementet før kl 19, kommer samme-dag-varselet tre timer før start). Kvelder med vakt uten arrangement teller som «Normal pub» hvis abonnenten har «Også på Normal pub-kvelder» på. Dager uten vakt gir ingen varsel.
 
 ## Overlevering til styret
 

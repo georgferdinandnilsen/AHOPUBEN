@@ -5,6 +5,7 @@ import { fromNotion, pickBody } from './notion.js';
 import { parseMusic } from './music.js';
 import { normOffsets, when } from './notify.js';
 import { memberRoute, shiftTick, shiftMessage } from './memberRoutes.js';
+import { shiftNights } from './members.js';
 
 const OSLO = 'Europe/Oslo';
 const TYPES = { Aktivitet: 'Activity', DJ: 'DJ', Artist: 'Artist', Band: 'Band', Konsert: 'Concert', Quiz: 'Quiz', Fest: 'Party' };
@@ -42,7 +43,7 @@ export default {
 async function route(req, url, env, ctx) {
   const p = url.pathname, m = req.method;
   if (p.startsWith('/api/member/') || p.startsWith('/api/board/')) return memberRoute(req, url, env, ctx, { notion, json, push, osloNow, addDays });
-  if (p === '/api/events' && m === 'GET') return json(await events(env, ctx));
+  if (p === '/api/events' && m === 'GET') return json(await withNights(env, ctx, await events(env, ctx))); // arrangementer + «Normal pub» på kvelder med vakt
   if (p === '/api/vapid') return json({ key: env.VAPID_PUBLIC || '' });
   if (p === '/api/ping' && m === 'POST') { // telefoner melder seg én gang om dagen: lagt på Hjem-skjerm eller ikke. Ingen navn, bare en tilfeldig id.
     const { id: did, standalone, pc } = await req.json().catch(() => ({}));
@@ -71,10 +72,11 @@ async function route(req, url, env, ctx) {
     return json({ ok }, ok ? 200 : 502);
   }
   if (p === '/api/suggest' && m === 'POST') return suggest(req, env);
-  if (p === '/api/events.ics' && m === 'GET') return new Response(icsAll(await events(env, ctx)), { headers: { 'content-type': 'text/calendar; charset=utf-8', 'cache-control': 'public, max-age=600' } });
+  if (p === '/api/events.ics' && m === 'GET') return new Response(icsAll((await withNights(env, ctx, await events(env, ctx))).filter(e => e.title)), { headers: { 'content-type': 'text/calendar; charset=utf-8', 'cache-control': 'public, max-age=600' } }); // abonnementet: arrangementer, ikke de genererte «Normal pub»-kveldene
   if (p.startsWith('/api/ics/') && m === 'GET') {
     const id = p.slice(9), day = /^p\d{4}-\d\d-\d\d$/.test(id) ? id.slice(1) : '';
-    const e = (await events(env, ctx)).find(x => x.id === id) || (day && weekday(day) === 4 ? { id, date: day, title: 'Rolig pub', desc: 'Ingen program. Åpent 19-01.' } : null);
+    const hit = (await withNights(env, ctx, await events(env, ctx))).find(x => x.id === id); // bare det appen viser: arrangementer og kvelder med vakt
+    const e = hit && (hit.title ? hit : { id, date: hit.date, title: 'Normal pub', desc: 'Ingen program. Åpent 19-01.' });
     if (!e) return new Response('Not found', { status: 404 });
     return new Response(ics(e), { headers: { 'content-type': 'text/calendar; charset=utf-8', 'content-disposition': `inline; filename="aho-pub-${e.date}.ics"` } });
   }
@@ -100,6 +102,16 @@ async function sources(env, dbId) {
 const hasDate = x => Object.entries(x.props).some(([n, v]) => v.type === 'date' && /når/i.test(n));
 
 // Server utdatert liste umiddelbart og oppdater i bakgrunnen: første besøkende etter utløp venter aldri på Notion og DeepL.
+// Kvelder med vakt (bare datoer, fra VAKTPLAN). Feiler Notion helt, blir det ingen «Normal pub», men arrangementene vises som før.
+async function nights(env, ctx) { try { return await shiftNights(env, notion, ctx, osloNow().date); } catch (e) { console.error('vaktplan feilet:', e.message); return []; } }
+// Arrangementer + «Normal pub» for hver kveld med vakt som ikke har arrangement. Uten vakt og uten arrangement: ingenting.
+// Rader i Arrangementer med typen «Rolig Pub»/«Normal Pub» er vanlig pub, og teller også bare når noen har vakt den dagen.
+const withCrew = (real, night) => real.filter(e => !e.plain || night.has(e.date));
+async function withNights(env, ctx, real) {
+  const list = await nights(env, ctx), night = new Set(list), today = osloNow().date, kept = withCrew(real, night), has = new Set(kept.map(e => e.date));
+  const extra = list.filter(d => d >= today && !has.has(d)).map(d => ({ id: 'p' + d, date: d, plain: true }));
+  return [...kept, ...extra].sort((a, b) => a.date.localeCompare(b.date));
+}
 async function events(env, ctx) {
   const c = await env.KV.get('events', 'json');
   if (c && Date.now() - c.t < 10 * 60e3) return c.items;
@@ -209,7 +221,7 @@ async function push(env, subscription, data) {
 }
 function message(e, key, lang) {
   const en = lang === 'en';
-  const name = e.plain ? (en ? 'Pub night' : 'Rolig pub') : (en && e.titleEn) || e.title;
+  const name = e.plain ? 'Normal pub' : (en && e.titleEn) || e.title; // «Normal pub» er navnet på begge språk
   const hours = en ? '7pm-1am' : 'Kl 19-01';
   const day = key === 'same' ? (en ? 'tonight' : 'i kveld') : key === 'day' ? (en ? 'tomorrow' : 'i morgen') : longDate(e.date, lang);
   const first = ((en && e.descEn) || e.desc || '').split(/(?<=[.!?])\s/)[0];
@@ -217,10 +229,11 @@ function message(e, key, lang) {
 }
 async function tick(env) {
   const { date, hour } = osloNow();
-  const real = await events(env);
+  const nightList = await nights(env), night = new Set(nightList);
+  const real = withCrew(await events(env), night);
   const has = new Set(real.map(e => e.date));
   const all = real.map(e => ({ plain: false, ...e }));
-  for (let i = 0; i < 56; i++) { const d = addDays(date, i); if (weekday(d) === 4 && !has.has(d)) all.push({ date: d, plain: true }); }
+  for (const d of nightList) if (d >= date && !has.has(d)) all.push({ date: d, plain: true }); // «Normal pub» bare på kvelder med vakt
   const list = await env.KV.list({ prefix: 'sub:' }); // ponytail: maks 1000 abonnenter per side, mer har ikke en studentpub
   const subs = [];
   for (const k of list.keys) {
