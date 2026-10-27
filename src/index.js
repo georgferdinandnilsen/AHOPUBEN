@@ -5,7 +5,7 @@ import { fromNotion, pickBody } from './notion.js';
 import { parseMusic } from './music.js';
 import { normOffsets, when } from './notify.js';
 import { memberRoute, shiftTick, shiftMessage } from './memberRoutes.js';
-import { shiftNights } from './members.js';
+import { shiftNights, eventLinks } from './members.js';
 
 const OSLO = 'Europe/Oslo';
 const TYPES = { Aktivitet: 'Activity', DJ: 'DJ', Artist: 'Artist', Band: 'Band', Konsert: 'Concert', Quiz: 'Quiz', Fest: 'Party' };
@@ -133,7 +133,15 @@ async function refresh(env, c) {
     try {
       const ev = (await sources(env, env.NOTION_DB_ID)).find(hasDate); if (!ev) throw new Error('fant ingen datakilde med datofeltet «Når»');
       const r = await notion(env, `/data_sources/${ev.id}/query`, { page_size: 100, filter: { property: 'Når', date: { on_or_after: osloNow().date } }, sorts: [{ property: 'Når', direction: 'ascending' }] }); // samme som visningen «Kommende»
-      items = r.results.map(fromNotion).filter(e => e.date && e.title).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 30);
+      // Vakten styrer datoen: et arrangement koblet til en vakt får vaktens dato, også uten «Når» (Georg 27.10.2026).
+      let links = new Map(); try { links = await eventLinks(env, notion, undefined, osloNow().date); } catch (e) { console.error('vaktplan feilet:', e.message); }
+      const found = r.results.map(fromNotion), have = new Set(found.map(e => e.id));
+      for (const pid of links.keys()) if (!have.has(pid)) { // koblet til en vakt, men uten dato fra i dag: hent siden direkte
+        try { const pg = await notion(env, `/pages/${pid}`); if (!pg.archived && !pg.in_trash) found.push(fromNotion(pg)); } catch (e) { console.error('arrangement fra vakt feilet:', pid, e.message); }
+      }
+      for (const e of found) if (links.has(e.id)) e.date = links.get(e.id);
+      const today = osloNow().date;
+      items = found.filter(e => e.date && e.date >= today && e.title).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 30);
       for (const e of items) {
         if (!e.image || !e.desc) { const b = pickBody(await blocksOf(env, e.id)); e.image ||= b.image; e.desc ||= b.desc; } // ponytail: Notion-bilde-URL-er utløper etter 1 t, cache er 10 min. Proxy via Worker hvis bilder forsvinner.
         e.titleEn = await translate(env, e.title); e.descEn = await translate(env, e.desc); e.typeEn = TYPES[e.type] || await translate(env, e.type);

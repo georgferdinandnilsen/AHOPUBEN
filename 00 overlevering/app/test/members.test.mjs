@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { normPhone, splitPhone, countryCodes, memberFrom, isActive, boardFrom, shiftFrom, myShifts, recipients, shiftAlerts, wantsMsg, hasCrew, crewDates, manualsFrom, blockHtml, pageHtml, shiftsIcs, SAMPLE } from '../src/members.js';
+import { normPhone, splitPhone, countryCodes, memberFrom, isActive, boardFrom, shiftFrom, myShifts, recipients, shiftAlerts, wantsMsg, hasCrew, crewDates, linkDates, manualsFrom, blockHtml, pageHtml, shiftsIcs, SAMPLE } from '../src/members.js';
 const t = s => [{ plain_text: s }];
 assert.equal(normPhone('+47 900 00 000'), '90000000'); assert.equal(normPhone('004790000000'), '90000000'); assert.equal(normPhone('90000000'), '90000000'); assert.equal(normPhone('+46 70 123 45 67'), '46701234567'); assert.equal(normPhone('+46 (0)70-123 45 67'), '46701234567', 'innledende null etter landskode'); assert.equal(normPhone('0046 70 123 45 67'), '46701234567'); assert.equal(normPhone('+47 90 00 00 00'), '90000000'); assert.equal(normPhone('900 00 000'), '90000000'); assert.equal(normPhone('+1 (212) 555-0100'), '12125550100'); assert.equal(normPhone('+358 40 123 4567'), '358401234567');
 assert.deepEqual(splitPhone('+45 12 34 56 78'), { cc: '45', national: '12345678' }); assert.deepEqual(splitPhone('90000000'), { cc: '47', national: '90000000' });
@@ -47,3 +47,8 @@ console.log('wantsMsg ok');
   assert.equal(hasCrew(rows[1]), false, 'tom rad er ingen vakt');
   assert.deepEqual(crewDates(rows), ['2026-11-05', '2026-11-07']); }
 console.log('crewDates ok');
+
+// Vakten styrer datoen til arrangementer som er koblet til den. Bare fra i dag, tidligste vakt vinner.
+{ const m = linkDates([{ eventId: 'e1', date: '2026-11-19' }, { eventId: 'e2', date: '2026-10-20' }, { eventId: 'e3', date: '2026-12-10' }, { eventId: 'e3', date: '2026-12-03' }, { eventId: '', date: '2026-11-12' }], '2026-10-27');
+  assert.equal(m.get('e1'), '2026-11-19'); assert.equal(m.has('e2'), false, 'passert vakt'); assert.equal(m.get('e3'), '2026-12-03', 'tidligste'); assert.equal(m.size, 2); }
+console.log('linkDates ok');

@@ -131,6 +131,13 @@ const loadShifts = (env, notion, ctx, today) => cached(env, 'cache:shifts', asyn
 // Uten arrangement blir en slik kveld «Normal pub» i appen. Uten vakt og uten arrangement vises ingenting (Georg 27.10.2026).
 export const hasCrew = s => !!(s && s.date && (s.open?.length || s.close?.length || s.responsible));
 export const crewDates = shifts => [...new Set((shifts || []).filter(hasCrew).map(s => s.date))].sort();
+// Arrangementer koblet til en vakt (feltet «Arrangement» i VAKTPLAN): vaktens dato styrer, også når arrangementet mangler eller har en annen
+// dato i «Når» (Georg 27.10.2026). Bare vakter fra i dag og fremover; er et arrangement koblet til flere, brukes den tidligste.
+export const linkDates = (shifts, today) => { const m = new Map(); for (const s of shifts || []) if (s.eventId && s.date && s.date >= today && !(m.get(s.eventId) <= s.date)) m.set(s.eventId, s.date); return m; };
+export async function eventLinks(env, notion, ctx, today) {
+  if (!env.NOTION_TOKEN) return new Map();
+  return linkDates(await loadShifts(env, notion, ctx, today), today);
+}
 export async function shiftNights(env, notion, ctx, today) {
   if (!env.NOTION_TOKEN) return crewDates(SAMPLE(today).shifts);
   return crewDates(await loadShifts(env, notion, ctx, today));
