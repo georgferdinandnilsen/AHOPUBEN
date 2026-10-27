@@ -128,18 +128,19 @@ async function blocksOf(env, id, depth = 0) {
   return out;
 }
 async function refresh(env, c) {
-  let items = SAMPLE;
+  let items = SAMPLE, degraded = false; // degraded: vaktkoblingen kunne ikke leses helt, så resultatet lagres ikke som ferskt
   if (env.NOTION_TOKEN && env.NOTION_DB_ID) {
     try {
       const ev = (await sources(env, env.NOTION_DB_ID)).find(hasDate); if (!ev) throw new Error('fant ingen datakilde med datofeltet «Når»');
       const r = await notion(env, `/data_sources/${ev.id}/query`, { page_size: 100, filter: { property: 'Når', date: { on_or_after: osloNow().date } }, sorts: [{ property: 'Når', direction: 'ascending' }] }); // samme som visningen «Kommende»
       // Vakten styrer datoen: et arrangement koblet til en vakt får vaktens dato, også uten «Når» (Georg 27.10.2026).
-      let links = new Map(); try { links = await eventLinks(env, notion, undefined, osloNow().date); } catch (e) { console.error('vaktplan feilet:', e.message); }
+      let links = new Map(), linksOk = true; try { links = await eventLinks(env, notion, undefined, osloNow().date); } catch (e) { linksOk = false; degraded = true; console.error('vaktplan feilet:', e.message); }
       const found = r.results.map(fromNotion), have = new Set(found.map(e => e.id));
       for (const pid of links.keys()) if (!have.has(pid)) { // koblet til en vakt, men uten dato fra i dag: hent siden direkte
-        try { const pg = await notion(env, `/pages/${pid}`); if (!pg.archived && !pg.in_trash) found.push(fromNotion(pg)); } catch (e) { console.error('arrangement fra vakt feilet:', pid, e.message); }
+        try { const pg = await notion(env, `/pages/${pid}`); if (!pg.archived && !pg.in_trash) found.push(fromNotion(pg)); } catch (e) { if (!/^Notion 404/.test(e.message)) degraded = true; console.error('arrangement fra vakt feilet:', pid, e.message); }
       }
-      for (const e of found) if (links.has(e.id)) e.date = links.get(e.id);
+      // Koblet til vakter som alle er passert: arrangementet er holdt og vises ikke, selv om «Når» er senere.
+      for (const e of found) { if (links.has(e.id)) e.date = links.get(e.id); else if (linksOk && e.shiftIds?.length) e.date = ''; delete e.shiftIds; }
       const today = osloNow().date;
       items = found.filter(e => e.date && e.date >= today && e.title).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 30);
       for (const e of items) {
@@ -149,7 +150,8 @@ async function refresh(env, c) {
       }
     } catch (err) { console.error('Notion-henting feilet:', err.message); if (c) return c.items; throw err; }
   }
-  await env.KV.put('events', JSON.stringify({ t: Date.now(), items }), { expirationTtl: 86400 });
+  if (degraded && c) return c.items; // behold forrige gode liste; neste forespørsel prøver igjen
+  await env.KV.put('events', JSON.stringify({ t: degraded ? 0 : Date.now(), items }), { expirationTtl: 86400 });
   return items;
 }
 // Musikklenke → avspiller, med tittel, artist og cover fra lenkens oEmbed (ingen nøkkel trengs). Hurtigbufres i 7 dager.

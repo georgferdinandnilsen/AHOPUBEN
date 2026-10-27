@@ -7,7 +7,7 @@ const page = (tags, date = '2026-10-29') => ({ id: '3f7fc4bc-274d-8050-8d75-caeb
   'Ansvarlig for arrangement': { type: 'people', people: [] }, 'Når': { type: 'date', date: date && { start: date + 'T19:00:00.000+01:00' } }, Vakt: { type: 'relation' },
   'PUB': { type: 'number', number: 11 } } });
 let e = fromNotion(page(['Aktivitet']));
-assert.deepEqual(e, { id: '3f7fc4bc274d80508d75caeb60aef7c9', date: '2026-10-29', time: '19:00', title: 'test', type: 'Aktivitet', tags: ['Aktivitet'], plain: false, image: '', desc: '', pub: 11, musicUrl: '' });
+assert.deepEqual(e, { id: '3f7fc4bc274d80508d75caeb60aef7c9', date: '2026-10-29', time: '19:00', title: 'test', type: 'Aktivitet', tags: ['Aktivitet'], plain: false, image: '', desc: '', pub: 11, musicUrl: '', shiftIds: [] });
 const withMusic = page(['DJ']); withMusic.properties['Artist link APP'] = { type: 'url', url: 'https://open.spotify.com/track/abc' };
 assert.equal(fromNotion(withMusic).musicUrl, 'https://open.spotify.com/track/abc', 'musikklenke som lenke-felt');
 const musicText = page(['DJ']); musicText.properties['Artist link APP'] = { type: 'rich_text', rich_text: [{ plain_text: 'hør her', href: 'https://soundcloud.com/x/y' }] };
@@ -37,3 +37,6 @@ e = fromNotion(withProps); assert.equal(e.image, 'https://s3/p.png'); assert.equ
 const renamed = [{ type: 'heading_3', heading_3: { rich_text: t('Bilde til APP') } }, { type: 'image', image: { type: 'external', external: { url: 'https://x/y.jpg' } } }, { type: 'heading_3', heading_3: { rich_text: t('Info til APP') } }, { type: 'paragraph', paragraph: { rich_text: t('Linje 1') } }, { type: 'bulleted_list_item', bulleted_list_item: { rich_text: t('Linje 2') } }];
 assert.deepEqual(pickBody(renamed), { image: 'https://x/y.jpg', desc: 'Linje 1\n\nLinje 2' });
 console.log('ok: notion-tolking');
+
+const linked = page(['DJ']); linked.properties.Vakt = { type: 'relation', relation: [{ id: 'v-1' }] }; assert.deepEqual(fromNotion(linked).shiftIds, ['v1'], 'vaktkobling fra arrangementet');
+console.log('shiftIds ok');

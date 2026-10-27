@@ -26,7 +26,7 @@ export const isActive = (m, today) => !!m.name && (!m.until || m.until >= today)
 export function boardFrom(p) { const P = p.properties; const u = P.Person?.people?.[0]; return { id: p.id.replace(/-/g, ''), role: rt(P.Rolle?.title).trim(), phone: normPhone(P.Telefon?.phone_number), cc: splitPhone(P.Telefon?.phone_number).cc, userId: u?.id || '', name: (u?.name || '').trim() }; }
 export function shiftFrom(p) {
   const P = p.properties; const u = P['Ansvarlig styremedlem']?.people?.[0];
-  return { id: p.id.replace(/-/g, ''), date: (P.Dato?.date?.start || '').slice(0, 10), pub: rt(P['PUB NR']?.title).trim(), obs: rt(P['Noe å være obs på for kvelden']?.rich_text).trim(), event: P.Event?.formula?.string || '', eventId: ids(P.Arrangement?.relation)[0] || '', responsible: u ? { userId: u.id, name: u.name || '' } : null, open: ids(P['Åpnevakt (medlemsliste)']?.relation), close: ids(P['Stengevakt (medlemsliste)']?.relation) };
+  return { id: p.id.replace(/-/g, ''), date: (P.Dato?.date?.start || '').slice(0, 10), pub: rt(P['PUB NR']?.title).trim(), obs: rt(P['Noe å være obs på for kvelden']?.rich_text).trim(), event: P.Event?.formula?.string || '', eventId: ids(P.Arrangement?.relation)[0] || '', eventIds: ids(P.Arrangement?.relation), responsible: u ? { userId: u.id, name: u.name || '' } : null, open: ids(P['Åpnevakt (medlemsliste)']?.relation), close: ids(P['Stengevakt (medlemsliste)']?.relation) };
 }
 
 // Mine vakter. Telefonnumre bare for folk på samme kveld og ansvarlig styremedlem. Styremedlemmer får også kveldene de er ansvarlige for.
@@ -133,7 +133,7 @@ export const hasCrew = s => !!(s && s.date && (s.open?.length || s.close?.length
 export const crewDates = shifts => [...new Set((shifts || []).filter(hasCrew).map(s => s.date))].sort();
 // Arrangementer koblet til en vakt (feltet «Arrangement» i VAKTPLAN): vaktens dato styrer, også når arrangementet mangler eller har en annen
 // dato i «Når» (Georg 27.10.2026). Bare vakter fra i dag og fremover; er et arrangement koblet til flere, brukes den tidligste.
-export const linkDates = (shifts, today) => { const m = new Map(); for (const s of shifts || []) if (s.eventId && s.date && s.date >= today && !(m.get(s.eventId) <= s.date)) m.set(s.eventId, s.date); return m; };
+export const linkDates = (shifts, today) => { const m = new Map(); for (const s of shifts || []) if (s.date && s.date >= today) for (const id of s.eventIds || (s.eventId ? [s.eventId] : [])) if (!(m.get(id) <= s.date)) m.set(id, s.date); return m; }; // eventIds mangler i gamle cache-oppføringer
 export async function eventLinks(env, notion, ctx, today) {
   if (!env.NOTION_TOKEN) return new Map();
   return linkDates(await loadShifts(env, notion, ctx, today), today);

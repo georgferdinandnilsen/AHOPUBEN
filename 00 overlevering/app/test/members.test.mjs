@@ -9,7 +9,7 @@ assert.deepEqual(m, { id: 'aabb', name: 'Kari', phone: '90000001', cc: '47', ema
 assert.equal(isActive(m, '2026-10-14'), true); assert.equal(isActive(m, '2027-07-01'), false); assert.equal(isActive({ name: 'x', until: '' }, '2026-10-14'), true, 'uten dato = aktiv');
 assert.deepEqual(boardFrom({ id: 'b-1', properties: { Rolle: { title: t('Leder') }, Telefon: { phone_number: '90000000' }, Person: { people: [{ id: 'u1', name: 'Ferdinand' }] } } }), { id: 'b1', role: 'Leder', phone: '90000000', cc: '47', userId: 'u1', name: 'Ferdinand' });
 const s = shiftFrom({ id: 's-1', properties: { Dato: { date: { start: '2026-10-15' } }, 'PUB NR': { title: t('PUB: 9') }, 'Noe å være obs på for kvelden': { rich_text: t('Ny keg') }, Event: { formula: { type: 'string', string: 'Rolig Pub' } }, Arrangement: { relation: [{ id: 'e-1' }] }, 'Ansvarlig styremedlem': { people: [{ id: 'u2', name: 'Einar' }] }, 'Åpnevakt (medlemsliste)': { relation: [{ id: 'm-1' }, { id: 'm-2' }] }, 'Stengevakt (medlemsliste)': { relation: [{ id: 'm-4' }] } } });
-assert.deepEqual(s, { id: 's1', date: '2026-10-15', pub: 'PUB: 9', obs: 'Ny keg', event: 'Rolig Pub', eventId: 'e1', responsible: { userId: 'u2', name: 'Einar' }, open: ['m1', 'm2'], close: ['m4'] });
+assert.deepEqual(s, { id: 's1', date: '2026-10-15', pub: 'PUB: 9', obs: 'Ny keg', event: 'Rolig Pub', eventId: 'e1', eventIds: ['e1'], responsible: { userId: 'u2', name: 'Einar' }, open: ['m1', 'm2'], close: ['m4'] });
 const D = SAMPLE('2026-10-14');
 const mine = myShifts('m1', D.shifts, D.members, D.board);
 assert.equal(mine.length, 3); assert.equal(mine[0].role, 'open'); assert.equal(mine[0].time, '19-22');
@@ -52,3 +52,7 @@ console.log('crewDates ok');
 { const m = linkDates([{ eventId: 'e1', date: '2026-11-19' }, { eventId: 'e2', date: '2026-10-20' }, { eventId: 'e3', date: '2026-12-10' }, { eventId: 'e3', date: '2026-12-03' }, { eventId: '', date: '2026-11-12' }], '2026-10-27');
   assert.equal(m.get('e1'), '2026-11-19'); assert.equal(m.has('e2'), false, 'passert vakt'); assert.equal(m.get('e3'), '2026-12-03', 'tidligste'); assert.equal(m.size, 2); }
 console.log('linkDates ok');
+
+// Flere arrangementer på samme vakt får alle vaktens dato.
+{ const m = linkDates([{ eventIds: ['a', 'b'], eventId: 'a', date: '2026-11-19' }], '2026-10-27'); assert.equal(m.get('a'), '2026-11-19'); assert.equal(m.get('b'), '2026-11-19'); }
+console.log('flere arrangementer ok');

@@ -13,6 +13,7 @@ export function fromNotion(p) {
   const imgProp = P.find(([n, v]) => ['files', 'url'].includes(v.type) && /bilde|image/i.test(n))?.[1];
   const file = imgProp?.type === 'url' ? { external: { url: imgProp.url } } : imgProp?.files?.[0];
   const info = P.find(([n, v]) => v.type === 'rich_text' && /info|beskriv/i.test(n))?.[1];
+  const vakt = P.find(([n, v]) => /^vakt/i.test(n) && v.type === 'relation')?.[1]; // «Vakt»: hvilke vakter arrangementet er koblet til
   const art = P.find(([n, v]) => /artist|musikk|music/i.test(n) && ['url', 'rich_text', 'files'].includes(v.type))?.[1]; // «Artist link APP»: Spotify, SoundCloud eller annen lenke
   const musicUrl = !art ? '' : art.type === 'url' ? (art.url || '') : art.type === 'files' ? (art.files?.[0]?.external?.url || '') : ((art.rich_text || []).map(x => x.href || '').find(Boolean) || rt(art.rich_text).trim());
   return {
@@ -27,6 +28,7 @@ export function fromNotion(p) {
     desc: rt(info?.rich_text).trim(),
     pub: (pubProp && (pubProp.type === 'number' ? pubProp.number : pubProp.formula.number)) ?? null,
     musicUrl,
+    shiftIds: (vakt?.relation || []).map(x => x.id.replace(/-/g, '')), // brukes av Worker-en, sendes ikke ut
   };
 }
 
