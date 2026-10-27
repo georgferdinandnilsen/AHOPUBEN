@@ -116,15 +116,10 @@ h1,h2,h3,.ab{font-family:"Archivo Black",sans-serif;font-weight:400}
 .day.ev.past{border-color:transparent;color:var(--blue-soft);opacity:.6}
 .day.today{border-color:var(--fg)}
 .day.sel{background:var(--blue);color:#fff;border-color:var(--blue)}
-.selcard{display:flex;gap:14px;align-items:center;padding:14px;border:1.5px solid var(--blue)}
-.selcard img,.selcard .ph{width:56px;height:56px;object-fit:cover;background:var(--blue);flex:none}
-.selcard .d{font-weight:500;font-size:11px;letter-spacing:.04em;color:var(--blue-soft);text-transform:uppercase}
-.selcard h3{font-size:18px;text-transform:uppercase}
-.selcard p{font-size:13px;color:var(--muted)}
-.selcard.empty{border-color:var(--line);color:var(--muted);font-size:14px}
 /* list */
 .list h2{font-size:16px;text-transform:uppercase}
-.item{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);width:100%}
+.item{position:relative;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);width:100%;scroll-margin:96px 0 24px}
+.item.hl::before{content:'';position:absolute;inset:-1px -12px 0;border:1.5px solid var(--blue);pointer-events:none} /* dagen som er valgt i kalenderen */
 .item .sel{flex:1;display:flex;gap:16px;align-items:center;padding:16px 0;text-align:left;min-width:0}
 .item .d{width:62px;flex:none;font-weight:700;font-size:12px;letter-spacing:.02em;color:var(--blue-soft);text-transform:uppercase}
 .item .t{flex:1}
@@ -309,8 +304,6 @@ body.member .content{padding-bottom:120px}
 .emh .linkbtn{font-size:12px}
 .efoot{position:sticky;bottom:0;display:flex;gap:10px;padding:18px 20px calc(env(safe-area-inset-bottom) + 16px);background:var(--panel)}
 .sheet.event .efoot .btn.primary{flex:1}
-.selcard[data-open]{cursor:pointer}
-.selcard .go{margin-left:auto;align-self:center;color:var(--blue-soft);font-size:24px;line-height:1;flex:none}
 .cbrow{display:flex;gap:12px;align-items:flex-start;cursor:pointer;text-align:left}
 .cbrow input{width:20px;height:20px;accent-color:var(--blue);margin-top:1px;flex:none}
 .cbrow b{display:block;font-weight:700;font-size:14px}
@@ -340,7 +333,6 @@ body.member .content{padding-bottom:120px}
 #actions{grid-column:2;grid-row:1;justify-self:end}
 #actions:empty{display:none}
 .cal{grid-column:1;grid-row:2/4;align-self:stretch}
-.cal .selcard{margin-top:auto;min-height:92px;box-sizing:border-box} /* kortet og forslagsknappen: lik høyde, bunnkant på samme linje */
 .list{grid-column:2;grid-row:2}
 .cta{grid-column:2;grid-row:3;align-self:end;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:16px 20px;min-height:92px;box-sizing:border-box} /* bare i høyre spalte, nederst i flukt med kalenderen */
 .cta b{font-size:15px;margin:0}
@@ -561,7 +553,7 @@ function renderHero() {
   const d = parse(e.date); const diff = (d - today()) / 864e5;
   const chip = diff === 0 ? t('tonight') : (d.getDay() === 4 && diff < 7 ? t('thisThu') : t('next'));
   const n = e.plain ? all.find(x => !x.plain) : null;
-  const teaser = n ? `<button class="teaser" data-d="${n.date}">${t('nextEvent')}: ${title(n)}, ${fmt(n.date, { day:'numeric', month:'short' })} →</button>` : '';
+  const teaser = n ? `<button class="teaser" data-open="${esc(n.id)}">${t('nextEvent')}: ${title(n)}, ${fmt(n.date, { day:'numeric', month:'short' })} →</button>` : '';
   h.className = 'hero';
   h.innerHTML = `<img src="${e.image || FALLBACK_IMG}" alt=""><div class="tx"><span class="chip">${chip}</span><h1>${label(e)}</h1><div class="meta">${fmt(d, { weekday:'long', day:'numeric', month:'long' })}, ${t('open')}</div>${hearBtn(e)}${desc(e) ? `<p class="info">${desc(e)}</p>` : ''}${teaser}</div>`;
   fitTitle(); fitObs?.disconnect(); const th = $('#hero .tx h1'); if (th) fitObs?.observe(th);
@@ -581,15 +573,14 @@ function renderCal() {
     cells += `<button class="${cls}" data-d="${k}">${d.getDate()}</button>`;
     if (i >= 34 && (i + 1) % 7 === 0 && new Date(y, m, 1 - start + i + 1).getMonth() !== m) break;
   }
-  const e = S.events.find(x => x.date === S.sel); const sd = S.sel ? parse(S.sel) : null;
-  const card = !S.sel ? '' : e && (!e.plain || S.sel >= tod) ? `<div class="selcard"${e.plain ? '' : ` data-open="${esc(e.id)}" role="button" tabindex="0" aria-label="${esc(label(e))}"`}><img src="${e.image || FALLBACK_IMG}" alt=""><div><div class="d">${fmt(sd, { weekday:'short', day:'numeric', month:'short' })}, ${t('open')}</div><h3>${label(e)}${e.music ? ICON_NOTE : ''}</h3><p>${e.plain ? t('noProgram') : sub(e)}</p></div>${e.plain ? '' : '<span class="go" aria-hidden="true">›</span>'}</div>`
-    : `<div class="selcard empty">${t('closed')}</div>`;
-  $('#cal').innerHTML = `<div class="cal-head"><h2>${fmt(first, { month:'long', year:'numeric' })}</h2><div class="cal-nav"><button data-nav="-1" aria-label="Forrige">←</button><button data-nav="1" aria-label="Neste" style="color:var(--fg)">→</button></div></div><div class="grid">${t('wd').map((w, i) => `<div class="wd${i === 3 ? ' thu' : ''}">${w}</div>`).join('')}${cells}</div>${card}`;
+  $('#cal').innerHTML = `<div class="cal-head"><h2>${fmt(first, { month:'long', year:'numeric' })}</h2><div class="cal-nav"><button data-nav="-1" aria-label="Forrige">←</button><button data-nav="1" aria-label="Neste" style="color:var(--fg)">→</button></div></div><div class="grid">${t('wd').map((w, i) => `<div class="wd${i === 3 ? ' thu' : ''}">${w}</div>`).join('')}${cells}</div>`;
 }
 
 function renderList() {
-  const all = items().slice(1, 6);
-  $('#list').innerHTML = !all.length ? '' : `<h2>${t('upcoming')}</h2>` + all.map(e => `<div class="item"><button class="sel" data-d="${e.date}"><span class="d">${fmt(e.date, { day:'numeric', month:'short' })}</span><span class="t"><b>${label(e)}${e.music ? ICON_NOTE : ''}</b><span>${sub(e)}</span></span></button><a class="plus" href="${API}/api/ics/${e.id}" aria-label="${t('addCal')}">+</a></div>`).join('');
+  const up = items(), at = up.findIndex(e => e.date === S.sel), all = up.slice(1, Math.max(6, at + 1)); // første arrangement står på plakaten
+  $('#list').innerHTML = !all.length ? '' : `<h2>${t('upcoming')}</h2>` + all.map(e => `<div class="item${e.date === S.sel ? ' hl' : ''}"><button class="sel" data-open="${esc(e.id)}"${e.date === S.sel ? ' aria-current="date"' : ''}><span class="d">${fmt(e.date, { day:'numeric', month:'short' })}</span><span class="t"><b>${label(e)}${e.music ? ICON_NOTE : ''}</b><span>${sub(e)}</span></span></button><a class="plus" href="${API}/api/ics/${e.id}" aria-label="${t('addCal')}">+</a></div>`).join('');
+}
+function renderFoot() {
   $('#cta').innerHTML = `<b>${t('idea')}</b><span>${t('ideaSub')}</span>`;
   $('#foot').innerHTML = `<div><b>AHO PUBEN</b>${t('footAbout')}</div><div><b>${t('footOpen')}</b>${t('footHours')}</div><div><b>${t('footAddr')}</b>${ADDRESS}</div><div><b>${t('footMail')}</b><a href="mailto:${MAIL}">${MAIL}</a></div><div><b>${t('footFollow')}</b><a href="${IG_URL}" target="_blank" rel="noopener">Instagram</a></div>`;
 }
@@ -610,7 +601,7 @@ function renderPanel() {
   renderMemberPanel();
 }
 
-function renderAll() { document.documentElement.lang = S.lang === 'no' ? 'nb' : 'en'; renderHero(); renderCal(); renderList(); renderPanel(); }
+function renderAll() { document.documentElement.lang = S.lang === 'no' ? 'nb' : 'en'; renderHero(); renderCal(); renderList(); renderFoot(); renderPanel(); }
 
 // ---- tema ----
 setInterval(applyTheme, 60e3);
@@ -662,15 +653,14 @@ $('#chips').onclick = e => { const b = e.target.closest('button'); if (!b) retur
 $('#test').onclick = testPush;
 document.querySelectorAll('[data-th]').forEach(b => b.onclick = () => { S.theme = b.dataset.th; ls('theme', S.theme); applyTheme(); renderPanel(); });
 document.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { S.lang = b.dataset.lang; ls('lang', S.lang); renderAll(); savePrefs(); });
-$('#cal').addEventListener('click', e => { const sc = e.target.closest('.selcard[data-open]'); if (sc) { const ev = items().find(x => x.id === sc.dataset.open); if (ev) openEvent(ev); return; }
-  const b = e.target.closest('button'); if (!b) return;
+$('#cal').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
   if (b.dataset.nav) { const m = S.ym.m + Number(b.dataset.nav); S.ym = { y: S.ym.y + Math.floor(m / 12), m: (m + 12) % 12 }; renderCal(); }
-  else if (b.dataset.d) { S.sel = b.dataset.d; renderCal(); } });
-$('#cal').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.selcard[data-open]')) { e.preventDefault(); e.target.click(); } });
+  else if (b.dataset.d) { S.sel = b.dataset.d; renderCal(); renderList(); $('#list .item.hl')?.scrollIntoView({ block:'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } }); // vis rammen hvis den er utenfor skjermen
 let sx = null; $('#cal').addEventListener('pointerdown', e => sx = e.clientX); $('#cal').addEventListener('pointerup', e => { if (sx !== null && Math.abs(e.clientX - sx) > 60) $('#cal').querySelector(`[data-nav="${e.clientX < sx ? 1 : -1}"]`).click(); sx = null; });
-function selectDate(k) { const d = parse(k); S.sel = k; S.ym = { y: d.getFullYear(), m: d.getMonth() }; renderCal(); $('#cal').scrollIntoView({ behavior:'smooth', block:'start' }); }
-$('#list').addEventListener('click', e => { const b = e.target.closest('.sel'); if (b) selectDate(b.dataset.d); });
-$('#hero').addEventListener('click', e => { const b = e.target.closest('.teaser'); if (b) selectDate(b.dataset.d); });
+// Trykk på et arrangement i listen (eller «Neste arrangement» på plakaten) åpner arket, og dagen blir valgt i kalenderen bak.
+function showEvent(id) { const ev = items().find(x => x.id === id); if (!ev) return; const d = parse(ev.date); S.sel = ev.date; S.ym = { y: d.getFullYear(), m: d.getMonth() }; renderCal(); renderList(); openEvent(ev); }
+$('#list').addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) showEvent(b.dataset.open); });
+$('#hero').addEventListener('click', e => { const b = e.target.closest('.teaser'); if (b) showEvent(b.dataset.open); });
 $('#cta').onclick = () => { location.hash = 'forslag'; };
 // ---- musikk fra DJ-en («Artist link APP» i Notion): knapp på plakaten åpner et ark med cover og avspiller ----
 const hearLabel = e => { const tg = [e.type, ...(e.tags || [])].join(' '); return /\bdj\b/i.test(tg) ? t('hearDj') : /\bband/i.test(tg) ? t('hearBand') : t('hearArtist'); }; // DJ, Band, ellers (også Artist) artisten
